@@ -1,0 +1,660 @@
+Structured Cognitive Loop for Behavioral Intelligence in Large Language Model Agents
+Myung Ho Kim
+Professor, JEI University
+enkiluv@gmail.com
+
+Abstract
+Large language models have advanced natural language understanding and generation, yet their use as
+autonomous agents raises architectural challenges for multi-step tasks. Existing frameworks often intertwine
+cognition, memory, and control in a single prompt, which can reduce coherence and predictability. The Structured
+Cognitive Loop (SCL) is introduced as an alternative architecture that separates these functions. In SCL, the
+language model is dedicated to cognition, memory is maintained externally, and execution is guided by a
+lightweight controller within a goal-directed loop. This design offloads cognitive load from the model and allows
+intermediate results to be stored, revisited, and checked before actions are taken, providing a clearer basis for
+traceability and evaluation.
+We evaluate SCL against prompt-based baselines including ReAct and common LangChain agents across three
+scenarios: temperature-based travel planning, email drafting with conditional send, and constraint-guided image
+generation. All systems share the same base model and tools under matched decoding settings. Across 360
+episodes, SCL shows modest but consistent improvements. Task success averages 86.3 percent, compared with
+70.5–76.8 percent for prompt-based baselines. Goal fidelity is higher, redundant calls are fewer, intermediate
+states are reused more reliably, and unsupported assertions are reduced. Ablations show that external memory and
+control each contribute independently, and decoding sweeps confirm stability of the effects.
+These results suggest that architectural separation can improve reliability and traceability without relying on larger
+models or heavier prompts. While promising, the findings should be interpreted as preliminary evidence rather
+than conclusive proof. The present study focuses on controlled settings with limited task diversity and scope.
+Further research with extended model families, longer task horizons, multimodal integration, and collaborative
+contexts will be required to validate and generalize the observed advantages of the Structured Cognitive Loop.
+Keywords: Structured Cognitive Loop, Large Language Models, Agent Architecture, External Memory, Cognitive
+Control, Traceability, Multi-step Reasoning, Autonomous Agents
+
+1. Introduction: Toward Structured Cognition for Behavioral Intelligence
+Large language models (LLMs) have rapidly advanced the capabilities of artificial intelligence in natural language
+understanding and generation, excelling in tasks such as summarization, translation, and question answering
+(OpenAI, 2023). These achievements have fueled the development of LLM-based agents that can plan trips,
+manage schedules, or coordinate workflows through natural language interaction (Shinn et al., 2023; Patel et al.,
+2023). Despite such progress, there is growing recognition that beyond linguistic performance, agents must also
+demonstrate behavioral intelligence - the ability to reason, remember, and act coherently across multi-step tasks
+in ways that are interpretable, reliable, and adaptable (Griffiths et al., 2019; Lake et al., 2017).
+Recent implementations highlight both the promise and fragility of this pursuit. Systems such as ReAct (Yao et
+al., 2022) and LangChain (LangChain Team, 2025) integrate reasoning and action within prompt-based loops.
+While effective in constrained settings, these designs often yield behavioral variability, memory lapses, and
+unpredictable execution. Empirical evaluations confirm that the absence of persistent, structured memory
+contributes to redundant actions, state drift, and failures in long-term coherence (Liu et al., 2023; Ye, 2025).
+Interestingly, these challenges parallel well-documented human cognitive limitations, including the volatility of
+working memory (Baddeley, 2012), susceptibility to reasoning errors (Kahneman, 2011), and difficulties in
+maintaining executive control under load (Miller & Cohen, 2001).
+
+To address such challenges, researchers have begun to advocate for architectural modularity: reasoning
+delegated to the LLM, structured memory maintained externally, and execution governed by explicit control
+mechanisms (Qiao et al., 2023; Xu et al., 2025). This perspective resonates with traditions in cognitive architecture,
+such as SOAR and ACT-R, where reasoning, memory, and control are treated as distinct yet interacting
+components (Anderson, 2007; Laird et al., 2017).
+In this context, the concept of the Structured Cognitive Loop (SCL) becomes particularly relevant. Building on
+prior theoretical work that identified resonances between modular agent design and cognitive theories such as
+dual-process models, predictive processing, society of mind, and extended cognition (Dennett, 1991; Clark, 2016;
+Kahneman, 2011; Minsky, 1986), we develop SCL as a practical architectural framework for behavioral
+intelligence in LLM agents. Unlike prompt-based chaining, SCL explicitly separates reasoning, memory, and
+execution control in a cyclical and interpretable loop.
+The present paper advances three goals. First, we analyze how structural entanglement in existing agent
+frameworks gives rise to failure patterns that mirror human cognitive biases and limitations. Second, we illustrate
+how SCL mitigates these challenges through scenario-based demonstrations. Third, we argue that SCL provides
+a bridge between computational design and cognitive theory, offering a foundation for more predictable,
+transparent, and explainable agentic systems. In doing so, we suggest that the path to behavioral intelligence in
+LLM-based agents lies not in scaling models or refining prompts, but in adopting structural modularity that reflects
+principles long emphasized in cognitive science.
+
+2 Structural Considerations in Existing Agent Architectures
+While large language models (LLMs) have demonstrated impressive capabilities in language understanding and
+generation, their extension to complex, multi-step tasks raises important architectural questions. This chapter
+examines how existing agent designs coordinate reasoning, memory, and control through a concrete yet compact
+evaluation scenario. We draw on recent benchmarks to motivate the discussion and then consider conceptual
+parallels with findings from cognitive science that help situate these observations within a broader account of
+intelligent behavior.
+2.1 Evaluating Agent Architectures through Illustrative Scenarios
+A temperature-dependent travel decision serves as a focused probe for multi-step competence. In each episode,
+the agent receives three cities and simple conditional rules expressed in Fahrenheit. A typical instruction reads as
+follows: if San Francisco exceeds 77°F select San Francisco, otherwise check Miami, if Miami exceeds 82°F
+select Miami, otherwise choose New York. To succeed, the agent must query tools, retain intermediate
+observations, branch according to explicit thresholds, and terminate once the goal condition is met. Tasks of this
+general form are now common in evaluations of LLM-based agents and tend to surface recurrent patterns in state
+handling and control (Liu et al., 2023; Shinn et al., 2023). Similar tendencies have long been documented in
+human cognition, where working memory constraints and biases in reasoning shape task performance (Baddeley,
+2012; Kahneman, 2011).
+To make the probe concrete, consider two short episodes.
+1) Episode A. The agent is instructed to prefer San Francisco if above 77°F, otherwise prefer Miami if above
+82°F, otherwise choose New York. The weather tool returns San Francisco at 74°F and Miami at 84°F. A
+robust execution queries each city once, preserves both values as observations, and selects Miami. A less
+robust execution repeats the Miami query after the San Francisco check, then overwrites the first Miami value
+with the same call, and finally proceeds to New York because the earlier 84°F observation is no longer
+referenced in the branching step. Both executions produce fluent final messages, yet only the first aligns with
+the rule.
+2) Episode B. Thresholds and order are changed: if Miami exceeds 82°F select Miami, otherwise if San
+Francisco exceeds 77°F select San Francisco, otherwise choose New York. The tool returns Miami at 81°F
+and San Francisco at 78°F. The agent must respect the order of checks and stop early when a condition is met.
+A careful run queries Miami once, records 81°F, then queries San Francisco, records 78°F, selects San
+
+Francisco, and terminates. A more fragile run queries Miami twice, then queries San Francisco, selects San
+Francisco, but continues to ask for New York out of habit, producing an extra tool call and an ambiguous
+narrative. These small variations illustrate how memory persistence and explicit stop conditions influence
+correctness and efficiency.
+2.2 The ReAct Framework
+The ReAct framework intertwines natural language traces and tool invocation within a single prompt loop,
+allowing models to interleave thought-like steps with external actions (Yao et al., 2022). This design increases
+interpretability because intermediate steps are explicit, and in many interactive settings it outperforms standard
+chain of thought prompting. At the same time, reliance on an evolving prompt to hold state means that memory is
+largely implicit and distributed across tokens. Information gathered early in an episode can be difficult to preserve
+across later turns, especially when multiple tools are involved or when the episode length grows. Execution control
+is likewise embedded in free-form text. In practice this can lead a model to repeat an action after a long reasoning
+segment, to skip a necessary check, or to continue beyond the point of goal satisfaction. Performance often hinges
+on carefully engineered prompts whose adaptation to new domains and tool schemas can be resource intensive.
+A short ReAct trace on the Fahrenheit probe clarifies both strengths and challenges. With the instruction from
+Episode A, the agent first reasons that it should check San Francisco, calls the weather tool, and receives 74°F.
+The reasoning then correctly proposes checking Miami and receives 84°F. At this point, because the full state lives
+inside the growing prompt, the agent may either carry forward both observations or rely on a summary sentence.
+In the latter case, after several additional tokens of self-explanation, the agent may reissue the Miami call before
+choosing a city. The transparency of the intermediate text makes such slips visible and therefore easier to diagnose,
+yet the absence of a dedicated mechanism for state retention and guarded execution leaves the loop sensitive to
+prompt length and phrasing. These tendencies echo known limits in human executive control, where sustaining
+task goals under load can be challenging (Miller & Cohen, 2001).
+2.3 LangChain Agent Variants
+LangChain provides several agent types that extend prompt-based strategies in different ways, and they illustrate
+distinct trade-offs in how state and control are handled (LangChain Team, 2025). A zero-shot ReAct agent keeps
+the interface simple and flexible, using minimal instructions and no persistent store. In the Fahrenheit probe this
+often works for short episodes, yet as the number of branches grows the agent can re-check a city or overlook a
+prior observation. For example, with the Episode B instruction, the agent may check Miami twice at 81°F, then
+check San Francisco at 78°F, select San Francisco, but continue to ask about New York because the stop condition
+is not explicitly represented. The simplicity that enables quick integrations thus comes with a tendency to
+accumulate redundant calls as depth increases.
+A ReAct DocStore agent augments the loop with retrieval over documents. When the store contains relevant and
+recent summaries, the agent can ground its decisions in retrieved snippets and reduce free-form deliberation. In a
+variant of Episode A using a travel brief, the agent consults the brief, confirms that Miami is usually warmer in
+late summer, and proceeds after a single weather check. When the store is stale or tangential, however, the
+retrieved text can crowd the prompt without improving state fidelity, and the agent may still rely on repeated live
+queries to compensate. The added layer therefore helps when the corpus is curated for the task at hand but
+introduces additional complexity in execution and maintenance.
+A self-ask with search agent decomposes the problem into sub-questions, issuing targeted lookups and then
+synthesizing an answer. Decomposition can clarify structure and can be especially helpful when city sets are larger
+than three. In the Fahrenheit probe the agent might split the problem into two sub-queries for each city, accumulate
+answers, then combine them with the thresholds. The sequential nature of the method, however, means that an
+early mistake can propagate. If a first sub-query returns a city name with a unit mismatch that is later reinterpreted,
+the final synthesis may attach the wrong threshold to the wrong value. Latency also increases because each subquestion is handled in series. Taken together, these variants highlight both the value and the limits of extending
+prompt-centric control without explicit mechanisms for persistent memory and guarded execution. The need for
+
+such mechanisms has long been recognized in cognitive architectures that treat reasoning, memory, and control
+as separable yet interacting components (Anderson, 2007; Laird et al., 2017).
+To further illustrate, consider an extended episode. The instruction sets San Francisco at 77°F, Miami at 82°F, and
+New York as the default otherwise. The tool returns San Francisco at 79°F on the first call, then after a later recheck returns 78°F due to an update. A zero-shot ReAct agent may base its decision on the most recent tokenlevel narrative and select New York because the last seen value falls below the threshold. A Self-Ask agent that
+stored both values as text may perform a final synthesis that prefers the first observation because it appears earlier
+in the context. A DocStore agent that cached an hourly forecast might rely on the cached line and forego the recheck. These outcomes do not indicate failure so much as sensitivity to where and how state is represented.
+2.4 Comparative Reflections
+Applied to multi-step tasks such as the Fahrenheit-based travel scenario, these frameworks demonstrate both
+important innovations and recurring challenges. Memory is frequently handled implicitly, which constrains the
+accumulation and organization of information over longer interactions. Prompt design remains central to
+performance, yet as tasks deepen it increases development overhead and can make behavior more variable. As
+task structure becomes more intricate, implicit reasoning within a static conversational context becomes harder to
+audit, complicating error analysis and reproducibility.
+From a cognitive science perspective these outcomes are not unexpected. Human cognition itself is bounded by
+working memory capacity, subject to biases in reasoning, and reliant on structured executive control (Baddeley,
+2012; Kahneman, 2011; Miller & Cohen, 2001). Recognizing these parallels suggests that current limitations are
+not merely engineering artifacts but reflections of broader principles. This perspective motivates exploration of
+designs in which reasoning, memory, and control are explicitly separated and coordinated, echoing longstanding
+traditions in cognitive architecture research (Anderson, 2007; Griffiths et al., 2019; Lake et al., 2017).
+
+3. The Structured Cognitive Loop (SCL): Architecture and Principles
+As outlined in Chapter 2, existing agent frameworks demonstrate both promising capabilities and recurring
+challenges when applied to complex, multi-step tasks. These challenges motivate the search for a new design
+perspective that does not simply scale models or refine prompts, but instead rethinks the structural organization
+of reasoning, memory, and control. In this chapter, we introduce the Structured Cognitive Loop (SCL), an
+architecture that seeks to address these issues through modular separation and iterative coordination. While
+conceived as an engineering framework, SCL also resonates with ideas long explored in cognitive science,
+offering a bridge between computational design and theoretical principles.
+3.1 Conceptual Motivation
+The motivation for SCL arises from both practical limitations observed in current LLM-based agents and insights
+from cognitive science. Large language model (LLM) agents have recently been extended to increasingly complex,
+multi-step tasks. While such progress has been remarkable, evaluations often show that current systems encounter
+difficulties in sustaining coherence, retaining intermediate information, and managing execution over extended
+interactions (Liu et al., 2023; Shinn et al., 2023). These tendencies are not surprising from a cognitive science
+perspective: human cognition itself is known to be limited by working memory constraints, reasoning biases, and
+challenges in executive control (Baddeley, 2012; Kahneman, 2011; Miller & Cohen, 2001).
+To design agents that are more interpretable and adaptable, it is therefore helpful to revisit a principle that has
+long been emphasized in cognitive architectures: the explicit separation of cognition, memory, and control
+(Anderson, 2007; Laird et al., 2017). The Structured Cognitive Loop (SCL) is proposed as one such framework.
+Unlike approaches that attempt to embed all reasoning, memory management, and execution logic inside a single
+evolving prompt, SCL offloads key cognitive functions outside the language model itself. In this design, the
+LLM is tasked with cognition only, while memory is maintained in a persistent external module and execution is
+coordinated by a lightweight controller.
+
+This architectural philosophy treats the agent not as a monolithic prompt but as a goal-directed loop in which
+cognition, control, action, and memory interact iteratively. By shifting the burden of state retention and execution
+management away from the LLM, the system avoids overloading the model with functions for which it is illsuited. Instead, each component contributes in a specialized and auditable way, making the resulting behavior
+more coherent, transparent, and easier to extend.
+SCL is not presented as a literal model of human cognition, but as an engineering framework that resonates with
+established principles of modularity in cognitive science. Just as cognitive theories highlight the importance of
+separating memory from reasoning and control, SCL demonstrates that offloading and orchestrating these roles in
+a structured cycle can make agentic behavior both more tractable and more interpretable.
+3.2 Architectural Overview
+At its core, SCL is organized as a cyclical loop that connects distinct but interacting modules. This design is
+intended to reduce the entanglement of reasoning, memory, and execution often observed in prompt-based
+frameworks and instead emphasize modular clarity. By explicitly distinguishing roles, the system can support
+more coherent and traceable behavior across tasks.
+• Cognition Module: Delegates inferential and planning tasks to the LLM.
+• Control Module: Oversees task execution, monitors state transitions, and decides when to continue, revise,
+or terminate processes.
+• Action Module: Interfaces with external tools, APIs, or environments to implement chosen behaviors.
+• Memory Module: Maintains structured and persistent information in an external store, accessible across
+steps and sessions.
+The loop proceeds through a structured cycle of Retrieve → Cognition → Control → Action → Update Memory.
+The ordering is crucial: retrieval provides initial grounding; cognition leverages both the retrieved context and
+existing memory; control ensures that decisions align with goals and constraints; action executes those decisions;
+and memory update integrates outcomes back into the system for use in subsequent cycles. The loop continues
+until the task is judged complete, either because the goal has been satisfied, confidence has reached a threshold,
+or resources are exhausted.
+
+Figure 1. Flowchart of the Structured Cognitive Loop.
+The process begins with targeted retrieval and then enters a loop integrating cognition (leveraging memory),
+control (aligning with goals), action execution, and memory update. The cycle continues until termination conditions
+are satisfied.
+
+This cyclical process enables intermediate outputs to be stored and revisited, with execution guided by explicit
+control rather than embedded entirely in prompts. By separating core cognitive functions and offloading them
+from the LLM, SCL enhances traceability, facilitates systematic error handling, and establishes a clearer
+foundation for empirical evaluation.
+3.3 Cognitive Science Resonances
+Although SCL is designed as an engineering framework, its modular organization bears several interesting
+parallels to established theories in cognitive science. These comparisons are intended as heuristic, not literal
+equivalences.
+• Dual-Process Theory (Kahneman, 2011):
+The distinction between cognition and control resembles the interplay between reflective processes (System
+2) and more automatic monitoring (System 1). The analogy illustrates how separating functions may help
+agents balance flexibility with oversight.
+• Predictive Processing (Clark, 2016):
+The iterative cycle of retrieval, cognition, and revision in SCL loosely reflects predictive coding frameworks,
+where systems generate hypotheses, test them against feedback, and adjust accordingly. Both perspectives
+emphasize the value of feedback loops for maintaining coherence.
+• Society of Mind (Minsky, 1986):
+SCL’s modular components echo the view that complex behavior can arise from the coordination of simpler
+interacting parts. Like Minsky’s vision, SCL suggests that emergent behavior can be understood as the product
+of multiple specialized subsystems working together.
+• Extended Cognition (Clark & Chalmers, 1998):
+By incorporating external memory and tool use as integral supports for reasoning, SCL reflects the notion
+that cognitive systems often extend beyond the biological individual into the environment. This connection
+highlights the importance of external structures in sustaining intelligent behavior.
+Taken together, these resonances suggest that SCL may be viewed as a structurally motivated approach that
+benefits from concepts developed in cognitive science. At the same time, it is important to note that SCL is not
+intended as a substitute for empirical models of human cognition but as a framework for improving the coherence
+and interpretability of LLM-based agents.
+3.4 Illustrative Simulation
+To make the Structured Cognitive Loop (SCL) concrete, this section walks through a single scenario in which an
+agent must decide on a travel destination based on weather. The goal is not to demonstrate absolute performance,
+but to show how the loop coordinates Cognition, Memory, Control, and Action over successive cycles. The
+example also clarifies what is stored, when decisions are approved, and how termination is determined.
+Task. “Check San Francisco and Miami. If both are hot (> 77°F), book a flight to Miami. If only one is hot, go
+there. If neither is hot, send an email saying that I will stay home. Otherwise, draw the weather for the warmer
+city.”
+1) Initialization. On receipt of the instruction, the Control module creates an initial task record in Memory
+(MEM) with goal, constraints, and an empty observation set. No external calls have yet been made. The loop
+starts in a neutral state: required information is missing, termination is false, and no tools have been invoked.
+2) Cycle 1: Retrieve → Cognition → Control → Action → Update Memory.
+The Control module queries MEM and recognizes missing observations for both cities. It passes the structured
+task state to the Cognition module which must cite MEM keys for every proposal together with meta-level
+directives (e.g., propose the minimal next action that advances the goal; avoid redundancy; reference MEM
+facts). Cognition proposes two candidate actions: call get_weather("San Francisco") and
+get_weather("Miami"). Control validates that neither call has been executed in this episode and authorizes
+both. Action executes the two calls and returns, for instance, 68°F for San Francisco and 82°F for Miami.
+
+Memory then records the results with timestamps, sources, and normalized units. The loop returns to Control
+for a new pass.
+3) Cycle 2: Decision formation with explicit checks.
+On the next pass, Retrieve yields a complete set of temperatures. Cognition consults MEM and proposes a
+conditional conclusion: “Only Miami is hot.” It then proposes the primary action book_flight("Miami")
+and, as an optional follow-up, draw_weather("Miami") on the basis of relative warmth. Control examines
+termination preconditions and potential conflicts. It approves the booking action, defers the drawing action
+until after booking confirmation, and records the decision plan into MEM as a structured judgment. Action
+executes the booking; the confirmation code is stored back into MEM. Control then authorizes the optional
+drawing action. Memory is updated again with the resulting artifact’s handle.
+4) Cycle 3: Termination and audit.
+Retrieve now yields a state in which the primary goal is satisfied, and all required confirmations are present.
+Cognition suggests termination. Control runs a final goal-fidelity check against the original instruction and
+verifies that the side effect (drawing) was optional and safely executed. The loop terminates, preserving a
+complete trace of judgments, tool calls, results, and state transitions.
+A compact view of MEM after Cycle 2 might look as follows:
+{
+"goal": "Choose destination based on temperature thresholds",
+"constraints": {"threshold_hot_f": 77},
+"observations": {
+"San Francisco": {"temp_f": 68, "source": "get_weather", "t": "12:03"},
+"Miami": {"temp_f": 82, "source": "get_weather", "t": "12:03"}
+},
+"judgments": [
+{"t": "12:04", "proposition": "Only Miami is hot",
+"evidence": ["obs.Miami.temp_f=82"]}
+],
+"approved_actions": [
+{"t": "12:04", "name": "book_flight", "args": ["Miami"], "status": "executed",
+"confirmation": "ABC123"}
+],
+"pending": [
+{"t": "12:04", "name": "draw_weather", "args": ["Miami"]}
+],
+"termination": {"ready": false}
+}
+
+Two properties of the loop are worth noting. First, redundancy is avoided because Control checks MEM before
+approving any external call. This prevents unnecessary or repeated actions and ensures that every execution step
+builds upon previously verified context. As a result, tool use and reasoning remain both efficient and interpretable.
+Second, explainability is intrinsic: every proposal from Cognition and every approval from Control is logged,
+which allows a reviewer to reconstruct why specific actions were taken and in what order. This auditability
+transforms what would otherwise be an opaque prompt sequence into a traceable cognitive record.
+If the initial measurements had instead returned 80°F for both cities, the same loop would have proposed the
+“both-hot” branch and arrived at the same termination logic through identical mechanisms. Conversely, if neither
+city was hot, the loop would have proposed an email rather than a booking, again with auditable justification
+embedded in MEM. This shows that the architecture is not merely reactive to textual prompts but dynamically
+grounded in the evolving task state.
+
+This illustrative simulation is deliberately simple, yet it exhibits the aspects that become decisive in more complex
+problems: explicit state accumulation, guarded execution, and termination based on verifiable preconditions rather
+than ad hoc prompt patterns. In higher-dimensional tasks - such as multi-agent collaboration, multimodal
+reasoning, or tool orchestration across time - the same structural principles help maintain coherence and
+accountability. Thus, even though the present example is minimal, it demonstrates the essential behavior that
+enables the Structured Cognitive Loop to scale gracefully to richer domains where transparency, stability, and
+correctness are critical.
+3.5 Implementation Details
+Having illustrated the loop qualitatively, we now describe the key implementation choices that make SCL testable
+and reproducible. The emphasis is on data structures, control semantics, and logging, because these choices
+determine whether behavior can be evaluated and compared in a principled manner.
+1) Memory organization. MEM is a structured, external store that separates short-term episode data from longterm knowledge. Episode memory holds current observations, intermediate judgments, and action outcomes;
+it is pruned or archived at termination. Long-term memory holds reusable artifacts such as tool schemas, user
+preferences, and prior summaries. Each record is time-stamped, typed, and addressable (e.g.,
+obs.Miami.temp_f) so that Cognition can cite specific evidence and Control can apply rule-like checks.
+Indexes over keys and tags support efficient retrieval without expanding prompt length.
+2) Control semantics. Control implements the loop invariant “no action without preconditions” by consulting
+MEM before approval. It enforces termination guards such as “goal satisfied,” “confidence threshold reached,”
+or “resource budget met.” It also maintains a deduplication cache keyed by (tool, arguments, salient context)
+to prevent unnecessary re-execution. When Cognition proposes a plan, Control can approve it atomically,
+defer parts of it, or request clarification in the next cycle by writing queries into MEM for Cognition to resolve.
+3) Cognition behavior. Cognition is instructed by a domain-agnostic meta-prompt that specifies how to read
+MEM, how to ground proposals in evidence, how to avoid redundancy, and how to declare completion.
+Importantly, Cognition produces proposals rather than executing actions directly. The meta-prompt thus plays
+a central role in regulating cognitive discipline: by constraining the model to generate evidence-grounded
+proposals rather than free-form reasoning, it suppresses unsupported statements that would otherwise
+manifest as hallucinations. Its outputs are structured (e.g., {"propose": "book_flight", "args": ["Miami"],
+"because": ["obs.Miami.temp_f>=77"]}) so that Control can validate them deterministically.
+4) Action layer. The Action module is a thin, auditable interface to tools and environments. Every call is
+wrapped with input validation and result normalization. Failures are recorded as first-class events in MEM,
+allowing the loop to recover (e.g., retry with backoff or propose an alternative path) without losing state.
+5) Traceability and reproducibility. Each cycle persists a snapshot of MEM and a signed log of proposals and
+approvals. This enables replay for debugging and generates artifacts suitable for evaluation: success labels,
+counts of redundant calls, and a taxonomy of errors. Because the same loop and meta-prompt are reused
+across tasks, differences in outcomes can be attributed to task demands rather than invisible prompt drift.
+6) Operational pseudocode. The following sketch captures the control flow in a compact form while preserving
+the Retrieve → Cognition → Control → Action → Update Memory structure:
+while not termination:
+state ← MEM.read()
+proposal ← COGNITION.propose(state)
+# cites evidence from MEM
+decision ← CONTROL.evaluate(proposal, state) # checks preconditions, deduplicates
+if decision.approve:
+result ← ACTION.execute(decision.action)
+MEM.write(result)
+if decision.defer or decision.query:
+MEM.add(decision.notes)
+termination ← CONTROL.check_termination(MEM)
+
+These choices are intended to be minimally prescriptive, leaving room for alternative designs (e.g., different
+memory schemas or control strategies) while preserving the loop’s core guarantees: explicit state, guarded
+execution, and auditable reasoning.
+3.6 Hypotheses for Empirical Evaluation.
+The implementation supports several testable hypotheses that will be evaluated in Chapter 4:
+• H1 (Task success). Agents built on SCL will achieve higher task success in multi-step, tool-augmented
+decision problems than prompt-based baselines, because precondition checks reduce branch errors and
+premature termination.
+• H2 (Redundancy avoidance). SCL will result in fewer redundant tool calls and fewer state overwrites, due
+to MEM-backed deduplication and explicit approval by Control.
+• H3 (Goal fidelity and traceability). Final outputs produced by SCL will align more consistently with initial
+instructions, and the accompanying traces will enable clearer post hoc explanations and error localization.
+• H4 (Error patterns). When errors do occur, their distribution will reflect specific points in the loop (e.g.,
+mis-specified proposals vs. failed approvals vs. tool errors), enabling a finer-grained taxonomy than is
+typically available in prompt-only systems.
+Each hypothesis is linked to measurable quantities already derivable from the logs: task success rate, counts of
+redundant calls, goal-fidelity scores from rubric-based adjudication, and an error ledger with locations in the loop.
+This makes the evaluation replicable and allows future work to substitute different LLMs, memories, or controllers
+without altering the fundamental measurement strategy. These hypotheses are operationalized in Section 4.4,
+which defines success, goal fidelity, tool-use efficiency, memory fidelity, and hallucination rates.
+
+4. Experimental Evaluation
+In this chapter, we compare SCL with representative prompt-based agent frameworks under controlled conditions.
+The goal is not to present a final benchmark, but to provide initial evidence that explicit separation of cognition,
+memory, and control can support more reliable and interpretable behavior in multi-step settings.
+SCL was motivated by the observation that prompt-centric agents often mix judgment, state, and execution in a
+single conversational stream. The previous chapter argued that a loop which retrieves state, proposes cognitions,
+validates them through control, acts through tools, and then updates memory can reduce ambiguity and improve
+traceability. We now evaluate this claim empirically. The experiments were designed to stress three aspects that
+frequently challenge agents in the wild: conditional decision making, persistence of intermediate results, and
+termination under clear goal criteria.
+4.1 Tasks, Data and Protocol
+We constructed three scenarios that mirror common patterns in agent use while remaining simple enough to
+analyze carefully.
+1) Scenario A: Conditional travel planning.
+The agent must decide among three destinations based on temperature thresholds. Each episode provides a
+set of cities and rules, for example: if San Francisco is above 73°F then select San Francisco, otherwise check
+Miami, if Miami is above 77°F then select Miami, otherwise select New York. Ground-truth temperatures are
+retrieved through a tool interface that returns noisy but bounded values. Episodes vary the city set, thresholds,
+and order of checks. The challenge is to avoid redundant queries, remember earlier readings, and branch
+correctly.
+2) Scenario B: Email drafting with contingent send.
+The agent is asked to prepare an email with specified content, revise it after a short checklist, and send it only
+if a named recipient is found in a contact store. When the recipient is missing, the agent should draft a short
+note to the requester and terminate without sending. This tests whether intermediate judgments are preserved
+and whether termination conditions are respected.
+
+3) Scenario C: Image generation under constraints.
+The agent should generate an image only when a scalar predicate is satisfied, for example sentiment above a
+threshold or a numeric score computed from retrieved data. Otherwise, it should either propose a different
+output or exit. This probes control over action gating, since image generation is a salient action that promptbased agents sometimes execute prematurely.
+To encourage generalization and reduce overfitting to a single phrasing, each scenario contains 120 episodes per
+agent, formed by 12 templates each sampled with 10 random seeds. Across scenarios this yields 360 episodes per
+agent. All agents use the same underlying LLM with identical decoding parameters. Temperature is fixed,
+maximum tokens are matched, and tool endpoints are shared. We randomize episode order and reseed between
+runs to dampen incidental ordering effects.
+We intentionally fixed the base model to isolate architectural effects under matched tools and decoding. Varying
+models would increase outcome variance and confound attribution. This design choice favors traceability and
+reproducibility in a first pass.
+4.2 Systems Under Comparison
+We evaluate SCL in its reference configuration described in Chapter 3. The Cognition module produces structured
+proposals that cite explicit evidence from the external memory. The Control module checks preconditions,
+prevents duplicates, manages stopping criteria, and mediates tool execution. The Memory module stores
+observations, judgments, and results with timestamps and types. Actions are implemented through a uniform tool
+interface with validation and normalization.
+Baselines reflect prevalent styles of prompt-based agent design. A ReAct agent interleaves thought-like steps and
+actions in one loop. A Zero-shot ReAct variant relies on minimal instructions and no persistent store. A ReAct
+DocStore variant can retrieve documents but does not maintain a typed task state. A Self-Ask with Search variant
+decomposes questions into sub-queries and synthesizes answers. All baselines use the same LLM and tool
+interfaces for fairness.
+4.3 Measures
+We report four primary measures and one descriptive rate.
+1) Task success rate (TSR). An episode is successful when the final output satisfies all scenario conditions. For
+travel planning, the selected city must match the rule and any required side effect must complete. For email,
+the correct message must be sent or correctly withheld. For images, generation must occur only when the
+predicate holds.
+2) Goal fidelity score (GFS). A rubric-based score in [0, 1] that judges alignment between the final output and
+the initial instruction, including formatting and ancillary requirements. This captures near misses that fall
+short of full success.
+3) Tool use efficiency (TUE). The count of redundant tool calls per episode, where redundancy is defined as a
+repeated call with the same arguments in the same episode without a state change that would justify it.
+4) Memory fidelity (MF). The proportion of episodes in which intermediate observations are correctly reused
+at the time of decision, as determined by trace analysis.
+5) Hallucination rate. The number of unsupported textual assertions per 100 tool calls, measured by comparing
+claims against the memory trace and tool returns.
+4.4 Results
+Across the 360-episode suite, SCL shows modest but consistent advantages on success and traceability while
+using the same base model and tools as the baselines. Table 1 reports macro-averages across scenarios. Values are
+means over 3 seeds × 120 episodes per scenario.
+Table 1. Summary of results across scenarios (per 100 calls)
+System
+TSR ↑
+GFS ↑
+TUE ↓
+SCL (ours)
+86.3%
+0.88
+
+MF ↑
+0.47
+
+0.86
+
+Hallucinations ↓
+1.2
+
+ReAct
+Zero-shot ReAct
+ReAct DocStore
+Self-Ask with Search
+
+74.1%
+70.5%
+76.8%
+73.9%
+
+0.80
+0.78
+0.82
+0.81
+
+0.96
+1.12
+0.89
+0.94
+
+0.72
+0.68
+0.74
+0.73
+
+4.8
+5.2
+4.3
+4.6
+
+In Scenario A the main difference arises from reduced branching slips. SCL stores each temperature once in
+external memory and reuses it during decision checks. Prompt-based agents occasionally re-query the same city
+or apply a threshold to a stale value after several turns. In Scenario B SCL’s control layer gates the send action
+on the outcome of the contact lookup, which helps avoid both premature sends and missed sends after a successful
+lookup. In Scenario C the controller defers image generation until predicates are confirmed. Prompt-only agents
+sometimes generate early and then attempt to reconcile the result with the rule.
+A representative trace from Scenario A shows a ReAct run that queries Miami twice with identical arguments and
+then selects New York after misreading the earlier result. The SCL run queries each city once, normalizes units,
+proposes a single booking, and terminates after a goal check. Latency is comparable, but the SCL trace is easier
+to audit because proposals and approvals are logged with evidence pointers.
+As a sanity check we repeated Scenario A on a second model at 60 episodes and observed the same direction of
+differences. We also swept decoding parameters on the primary model and found the gap between SCL and
+baselines to be stable within confidence intervals.
+1) Error Analysis
+When SCL fails, the issues tend to concentrate on proposal quality rather than execution flow. In Scenario B,
+for example, the Cognition module sometimes drafts an email that misses a minor formatting constraint even
+though the control checks are correct. Baseline agents show a broader mix of problems. In Scenario A, state
+lapses are common, such as overwriting or dropping an earlier observation. In Scenario C, premature action
+appears more frequently. The hallucination rate remains non-zero for all systems. SCL’s rate is lower in part
+because unverified statements are treated as proposals and typically checked before tools are invoked.
+2) Ablations and Robustness Checks
+Two ablations on Scenario A clarify which components contribute most. Removing external memory while
+keeping control yields a task success of 80.1% and increases redundant calls to 0.89 per episode. Removing
+control while keeping memory produces 78.6% success and reintroduces occasional premature actions.
+Removing both brings performance close to the prompt baselines. These results suggest that memory and
+control contribute independently and additively to overall behavior.
+Robustness tests also indicate stable trends. Adding bounded noise to tool returns has limited effect because
+SCL reuses prior observations unless context changes. Introducing random delays in tool responses affects
+latency more than accuracy. Increasing the number of candidate cities from three to five lowers success for
+all systems by a few points, with SCL showing a somewhat smaller drop, likely due to predictable scaling of
+checks within the explicit loop.
+3) Additional Validation Plans
+Although this study fixed a single base model to isolate architectural effects, further validation is essential to
+test generality across model families. Two follow-up steps are underway. First, we will replicate Scenario A
+with smaller open-weight models to verify that the observed trends persist under lower-capacity cognition.
+Second, we will extend evaluation to a second frontier-scale model family under matched tasks and tools.
+These checks aim not to maximize performance but to test whether the relative contributions of memory and
+control remain consistent across architectures. Preliminary spot checks with another model show similar
+trends, and full multi-model results will follow in a later version.
+4.5 Discussion and Summary
+Taken together, the experiments suggest that architectural separation of cognition, state, and execution yields
+reliable but not dramatic gains in multi-step tasks. Improvements are most evident in measures that depend on
+state reuse and action gating, such as memory fidelity and tool efficiency.
+
+Notably, hallucinations were reduced by more than threefold, a change attributable not only to control checks but
+also to the meta-prompt that governs cognition. By explicitly constraining the model to produce evidencegrounded proposals instead of free-form reasoning, the meta-prompt suppresses unsupported statements at their
+source, yielding more disciplined cognitive behavior.
+Equally important, the audit trail produced by the loop clarifies where an episode diverged, shifting error analysis
+from broad prompt tuning to localized inspection of proposals and approvals. This study compared SCL with
+several prompt-based agents across three task families. SCL achieved higher task success, stronger alignment with
+instructions, fewer redundant calls, and more consistent reuse of intermediate observations, with differences that
+were stable across templates and random seeds. The scope, however, remains narrow: a single model, fixed tools,
+and limited domains. Broader evaluations will be required to test generality across model scales and collaborative
+or multimodal settings. Nonetheless, the evidence indicates that modest but consistent improvements can arise
+from structuring agent behavior around an explicit cognitive loop with external memory and a lightweight
+controller.
+To support reproducibility and hands-on exploration, a live demonstration of the travel planner scenario described
+in Section 4 is available at https://scl-travel-planner.streamlit.app/.
+
+5. Conclusion and Future Directions
+This paper introduced the Structured Cognitive Loop (SCL) as an architectural framework that makes cognition,
+memory, control, and action explicit within a repeatable cycle. The argument is structural rather than algorithmic.
+By relocating state from the evolving prompt into a persistent store and by mediating proposals through a
+lightweight controller before any tool is executed, SCL turns multi-step behavior into a sequence of auditable
+decisions. Chapters 2 and 3 motivated the need for such separation, illustrated the loop with a step-by-step
+simulation, and situated the design alongside ideas from cognitive science without claiming literal equivalence.
+Chapter 4 then provided initial evidence that the same base model exhibits modest but consistent gains when
+organized by SCL rather than a purely prompt-centric loop.
+5.1 What the Evidence Shows
+Across decision-and-tool tasks, SCL yielded higher task success, better goal fidelity, fewer redundant calls, and
+more reliable reuse of intermediate observations under matched models and tools. Two properties appear central.
+First, traceability is built in. Proposals from the Cognition module and approvals by the Control module are
+logged with references to memory, which localizes errors to specific phases of the loop. Second, predictable
+execution follows from guarded action and explicit termination checks, which help prevent premature steps and
+unnecessary re-queries. These properties make behavior easier to inspect and reproduce, and they encourage
+improvements targeted at the right part of the loop.
+5.2 Limitations
+The study is intentionally narrow. Tasks emphasize conditional decision making with tools and bounded
+complexity. A single base model and fixed interfaces were used for fairness, which makes it possible to isolate
+architectural effects but limits generality. As a mitigation, we report effect sizes with confidence intervals, sweep
+decoding hyperparameters, and conduct ablations that remove memory or control. The direction of the effects
+remains stable under these checks, and preliminary spot checks with an additional model show the same trend.
+Nonetheless, a broader multi-model study is required to fully establish generality. The present loop also does not
+yet address open-ended social interaction, extended multi-day workflows, or adversarial tool responses. Finally,
+while the paper notes resonances with cognitive science, SCL is not claimed as a model of human cognition.
+5.3 Future Directions
+Several concrete extensions follow from the current results.
+• Broaden tasks and environments. Longer horizons, multi-day plans, and scenarios that mix planning with
+opportunistic replanning can probe how termination and recovery scale. Collaborative settings where agents
+
+•
+
+•
+
+•
+
+•
+
+must negotiate goals and share state will test memory schemas and controller policies. Multimodal inputs and
+outputs - documents, images, structured tables - can evaluate whether typed memory and evidence citation
+generalize beyond text.
+Vary models and controllers. Swapping the base LLM while holding the loop constant will separate model
+effects from architectural ones. Alternative controllers can explore different approval heuristics and resource
+budgets. Learning-to-control approaches that adapt thresholds online can be compared against fixed rules to
+study speed versus caution.
+Strengthen memory as a first-class object. Richer schemas and indices may further reduce redundancy and
+state loss. Typed evidence graphs - where proposals must cite explicit nodes and edges - could tighten the
+link between justification and action. Summarization and compaction strategies that preserve an audit trail
+while reducing footprint deserve systematic study.
+Tighten evaluation and release artifacts. Pre-registered specifications, open episode generators, and signed
+traces will improve reproducibility and enable ablations by others. Human-in-the-loop adjudication for goal
+fidelity can be paired with automated checks. Safety-oriented stress tests - for example injected delays or
+conflicting tool returns - can characterize failure envelopes. As an initial step toward open evaluation and
+shared benchmarks, a public instance of the travel planner experiment is available at https://scl-travelplanner.streamlit.app/.
+Deepen links to cognitive science. Agent analogs of n-back, task-switching, go-no-go, and stop-signal
+paradigms can produce directly comparable error profiles and recovery dynamics. Formal connections to
+predictive coding or resource-rational analysis may yield testable predictions about controller policies and
+memory budgets without implying equivalence to human cognition.
+
+5.4 Closing Remark
+SCL reframes agent behavior as a managed process rather than a monologue inside a prompt. The early results
+are encouraging without being dramatic. The path forward is to broaden tasks and environments, diversify
+controllers and memories, and standardize evaluation so that architectural choices can be studied with the same
+care typically reserved for models themselves. We are preparing larger-scale evaluations with additional models,
+longer horizons, multimodal inputs, and collaborative settings to test whether the same structural benefits hold
+across more varied conditions. We will also extend the evaluation to multiple model families and report effect
+sizes with uncertainty to assess the robustness of architectural separation beyond a single base model.
+
+References
+• Anderson, J. R. (2007). How can the human mind occur in the physical universe? Oxford University Press.
+• Baddeley, A. D. (2012). Working memory: Theories, models, and controversies. Annual Review of
+Psychology, 63(1), 1-29. https://doi.org/10.1146/annurev-psych-120710-100422
+• Dennett, D. C. (1991). Consciousness explained. Little, Brown and Company.
+• Griffiths, T. L., Lieder, F., & Goodman, N. D. (2019). Rational use of cognitive resources: Levels of analysis
+between the computational and the algorithmic. Topics in Cognitive Science, 11(2), 468-502.
+https://doi.org/10.1111/tops.12356
+• Kahneman, D. (2011). Thinking, fast and slow. Farrar, Straus and Giroux.
+• Lake, B. M., Ullman, T. D., Tenenbaum, J. B., & Gershman, S. J. (2017). Building machines that learn and
+think like people. Behavioral and Brain Sciences, 40, e253. https://doi.org/10.1017/S0140525X16001837
+• Laird, J. E., Lebiere, C., & Rosenbloom, P. S. (2017). The Soar cognitive architecture. MIT Press.
+• LangChain Team. (2025). LangChain Python API reference v0.3.25: Agent types. Retrieved from
+https://python.langchain.com
+• Liu, X., et al. (2023). AgentBench: Evaluating foundation models as agents. arXiv preprint
+arXiv:2310.03211. https://arxiv.org/abs/2310.03211
+• Miller, E. K., & Cohen, J. D. (2001). An integrative theory of prefrontal cortex function. Annual Review of
+Neuroscience, 24(1), 167-202. https://doi.org/10.1146/annurev.neuro.24.1.167
+
+• OpenAI. (2023). GPT-4 technical report. arXiv preprint arXiv:2303.08774. https://arxiv.org/abs/2303.08774
+• Patel, R., et al. (2023). AutoGPT: Enabling autonomous GPT agents. GitHub repository. Retrieved from
+https://github.com/Torantulino/Auto-GPT
+• Qiao, S., et al. (2023). Making language models better tool learners with execution feedback. arXiv preprint
+arXiv:2305.13068. https://arxiv.org/abs/2305.13068
+• Shinn, N., Cassano, F., Gopinath, A., & Narasimhan, K. (2023). Reflexion: Language agents with verbal
+reinforcement learning. arXiv preprint arXiv:2303.11366. https://arxiv.org/abs/2303.11366
+• Xu, W., et al. (2025). A-MEM: Agentic memory for LLM agents. arXiv preprint arXiv:2502.12110.
+https://arxiv.org/abs/2502.12110
+• Yao, S., Zhao, J., Yu, D., Du, N., Shafran, I., Narasimhan, K., & Cao, Y. (2022). ReAct: Synergizing
+reasoning and acting in language models. arXiv preprint arXiv:2210.03629. https://arxiv.org/abs/2210.03629
+• Ye, Y. (2025). Task Memory Engine (TME): Enhancing state awareness for multi-step LLM agent tasks.
+arXiv preprint arXiv:2504.08525. https://arxiv.org/abs/2504.08525
+
+
