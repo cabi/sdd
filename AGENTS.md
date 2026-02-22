@@ -2,11 +2,74 @@
 
 ## Project: SDD Workflow for OpenCode
 
-This project provides a Spec-Driven Development (SDD) workflow implementation for OpenCode.
+This project provides a Spec-Driven Development (SDD) workflow implementation for OpenCode with optional SCL (Structured Cognitive Loop) enhancements.
 
 ---
 
-## SDD Workflow Rules
+## SCL-Enhanced Workflow (RECOMMENDED)
+
+The SCL-enhanced workflow provides superior reliability through:
+- **Memory persistence** across artifact creation and task execution
+- **Evidential grounding** - all claims MUST cite sources
+- **Normative control** - explicit validation before action
+- **Scope enforcement** - subagents constrained to allowed files
+
+### SCL Core Principles (RFC2119)
+
+1. The system **MUST** maintain memory state in `.memory/` directory
+2. Every requirement **MUST** cite its source
+3. Every decision **MUST** document alternatives considered
+4. Every task **MUST** reference at least one requirement
+5. The system **MUST** validate before executing actions
+
+### SCL Commands
+
+```
+# Initialize SCL memory for a change
+/sdd-init-memory [change-name]
+
+# Create artifacts with memory tracking
+/sdd-artefact-scl
+
+# Execute tasks with memory context
+/sdd-apply-group-scl N
+/sdd-apply-all-scl
+
+# Verify with memory tracing
+/sdd-verify-scl
+
+# Inspect memory state
+/sdd-memory-status [change-name]
+```
+
+### SCL Directory Structure
+
+```
+.specs/changes/<change-name>/
+├── proposal.md
+├── specs/<capability>/spec.md
+├── design.md
+├── tasks.md
+├── .memory/                    # SCL Memory Module
+│   ├── decisions.json          # All decisions with evidence
+│   ├── requirements.json       # Requirement index
+│   ├── citations.json          # Citation graph
+│   ├── control-log.json        # Validation checkpoints
+│   └── episodes.json           # Cycle-by-cycle history
+└── regulation.md               # Epistemic Constitution
+```
+
+### Regulation.md (Epistemic Constitution)
+
+Every SCL-enhanced change **MUST** include a `regulation.md` defining:
+- Evidential rules (how to cite sources)
+- Scope rules (what files may be modified)
+- Validation rules (how completion is verified)
+- Memory rules (how state is maintained)
+
+---
+
+## Standard SDD Workflow (Legacy)
 
 ### When to Use SDD
 
@@ -301,3 +364,185 @@ mkdir -p .specs/specs .specs/changes .specs/archive
 
 > A spec not verified is just a wish.
 > Check implementation matches spec before claiming done.
+
+---
+
+## SCL-Enhanced Task Format
+
+When using SCL-enhanced workflow, tasks **MUST** include:
+
+```markdown
+- [ ] N.M <Task description>
+  - _Requirements: REQ-ID (per specs/capability/spec.md#L<N>)_
+  - _Evidence: design.md#decision-name_
+  - _Creates: path/to/file.ts_ | _Modifies: path/to/file.ts_
+  - _Validation: <testable criteria>_
+  - _Memory Write: requirements.json#REQ-ID.status ← "implemented"_
+```
+
+### Task Group with SCL Context
+
+```markdown
+## 2. Core Implementation
+_Meta: parallel-safe, depends on: 1_
+
+### Preconditions
+- [ ] Group 1 complete
+- [ ] Required files exist
+
+### Memory Context for Subagent
+```json
+{
+  "decisions": ["DEC-001", "DEC-002"],
+  "requirements": ["AUTH-001", "AUTH-002"],
+  "constraints": {
+    "allowed_files": ["src/auth/**/*"],
+    "must_cite": ["design.md#*", "specs/**/spec.md#*"]
+  }
+}
+```
+
+### Tasks
+- [ ] 2.1 Implement password hashing
+  ...
+```
+
+---
+
+## Subagent Context Injection (SCL)
+
+When dispatching subagents in SCL mode, the following context **MUST** be injected:
+
+### Required Context Components
+
+1. **Decisions** - Relevant design decisions with sources
+2. **Requirements** - Requirements for the task group
+3. **Prior Outcomes** - What was done in previous groups
+4. **Constraints** - Allowed/blocked files, required citations
+5. **Regulation** - Applicable rules from regulation.md
+
+### Subagent Prompt Template
+
+```
+You are executing Group N: <Group Name> of <spec-name>.
+
+## Memory Context (from prior work)
+
+### Decisions You MUST Follow
+<list with sources>
+
+### Requirements You MUST Satisfy  
+<list with sources>
+
+### Prior Work Outcomes
+<what was done>
+
+## Constraints (YOU MUST NOT VIOLATE)
+
+### Allowed Files
+You MAY only create/modify: <list>
+
+### Blocked Files
+You MUST NOT touch: <list>
+
+### Required Citations
+Every file MUST include:
+// Implements: REQ-ID (per specs/.../spec.md#L<N>)
+
+## Your Tasks
+<task list>
+
+## Completion Criteria
+You MUST:
+1. Complete ALL tasks
+2. Verify all files exist
+3. Ensure all tests pass
+4. Output "GROUP N COMPLETE" as final line
+```
+
+---
+
+## Mitigation of Separate Context Limitations
+
+SCL addresses the fundamental limitation of subagent context isolation:
+
+### Problem: Context Isolation
+
+Subagents operate in isolated contexts and cannot:
+- Access decisions made in prior groups
+- Know what files were created previously
+- Understand the reasoning behind design choices
+
+### SCL Solution: External Memory
+
+1. **Before dispatch**: Load memory state, inject into prompt
+2. **During execution**: Subagent has full context from memory
+3. **After completion**: Write outcomes back to memory
+
+### Memory Operations
+
+| Operation | Purpose | Timing |
+|-----------|---------|--------|
+| `MEM.read()` | Load prior decisions, requirements | Before subagent dispatch |
+| `MEM.write()` | Record new decisions, citations | After artifact creation |
+| `CONTROL.evaluate()` | Validate proposals | Before action execution |
+| `CONTROL.verify_scope()` | Check file boundaries | After subagent completion |
+
+### Example Memory Context
+
+```json
+{
+  "group_id": 2,
+  "memory": {
+    "decisions": [
+      {"id": "DEC-001", "chosen": "JWT", "source": "design.md#L78"}
+    ],
+    "requirements": [
+      {"id": "AUTH-001", "description": "Passwords SHALL be hashed"}
+    ],
+    "prior_outcomes": {
+      "files_created": ["src/models/User.ts"],
+      "decisions_made": ["Use interface over class"]
+    }
+  },
+  "constraints": {
+    "allowed_files": ["src/auth/**/*.ts"],
+    "blocked_files": ["src/core/*"]
+  }
+}
+```
+
+---
+
+## RFC2119 Compliance
+
+All SCL-enhanced artifacts, commands, and skills use RFC2119 keywords:
+
+| Keyword | Meaning |
+|---------|---------|
+| **MUST** / **REQUIRED** / **SHALL** | Absolute requirement |
+| **MUST NOT** / **SHALL NOT** | Absolute prohibition |
+| **SHOULD** / **RECOMMENDED** | Recommended but exceptions may exist |
+| **SHOULD NOT** / **NOT RECOMMENDED** | Not recommended but exceptions may exist |
+| **MAY** / **OPTIONAL** | Truly optional |
+
+### When to Use Each Keyword
+
+- **MUST**: For requirements critical to correctness, traceability, memory integrity
+- **SHOULD**: For best practices that improve quality but have valid exceptions
+- **MAY**: For optional features or alternative approaches
+
+### Examples in Artifacts
+
+```markdown
+### Requirement: AUTH-001
+The system **MUST** hash passwords using bcrypt with cost factor >= 10.
+
+### Design Decision: DEC-002
+The system **SHOULD** use JWT for session management.
+Alternatives: Redis sessions, database sessions.
+
+### Task: 2.1
+The implementation **MAY** include additional password strength checks
+beyond the minimum requirements.
+```

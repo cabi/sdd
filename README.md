@@ -64,7 +64,9 @@ If the command is recognized, installation was successful.
 
 ## Components
 
-### Skills (9)
+### Skills (13)
+
+**Standard Skills (9):**
 
 | Skill | Purpose |
 |-------|---------|
@@ -78,7 +80,18 @@ If the command is recognized, installation was successful.
 | `sdd-reverse` | Extract specs from existing code |
 | `sdd-verify` | Verify implementation matches specs |
 
-### Commands (11)
+**SCL-Enhanced Skills (4):**
+
+| Skill | Purpose |
+|-------|---------|
+| `sdd-memory` | Memory module with JSON schemas for decisions, requirements, citations |
+| `sdd-control` | Control module with precondition checking, scope enforcement |
+| `sdd-artefact-scl` | SCL-enhanced artifact creation with 5-phase loop |
+| `sdd-tasks-scl` | SCL-enhanced task breakdown with memory context generation |
+
+### Commands (17)
+
+**Standard Commands (11):**
 
 | Command | Purpose |
 |---------|---------|
@@ -93,6 +106,23 @@ If the command is recognized, installation was successful.
 | `/sdd-explore` | Think before committing |
 | `/sdd-ff` | Fast-forward all artifacts |
 | `/sdd-reverse` | Extract spec from existing code |
+
+**SCL-Enhanced Commands (6):**
+
+| Command | Purpose |
+|---------|---------|
+| `/sdd-init-memory [name]` | Initialize `.memory/` structure for a change |
+| `/sdd-artefact-scl` | Create artifacts with memory tracking |
+| `/sdd-apply-group-scl N` | Execute group with memory context injection |
+| `/sdd-apply-all-scl` | Execute all groups with memory persistence |
+| `/sdd-verify-scl` | Verify with memory tracing and gap analysis |
+| `/sdd-memory-status [name]` | Inspect memory state for debugging |
+
+### Templates (1)
+
+| Template | Purpose |
+|----------|---------|
+| `templates/regulation.md` | Epistemic constitution with RFC2119 rules |
 
 ---
 
@@ -950,6 +980,296 @@ Tasks: 3/3 (100%) ✓
 | **Risk** | High (breaking changes) | Low (additive) |
 | **Artifacts** | proposal, specs, design, tasks | proposal, tasks |
 | **Review** | Multiple checkpoints | Quick review |
+
+---
+
+### Workflow 3: SCL-Enhanced (RECOMMENDED)
+
+**Use for:**
+- Complex features requiring high reliability
+- Multi-agent task execution
+- Projects requiring full traceability
+- When subagent context isolation is a problem
+
+**What is SCL?**
+
+SCL (Structured Cognitive Loop) is an architectural framework that addresses a fundamental limitation: **subagents operate in isolated contexts** and cannot access decisions made in prior groups.
+
+**SCL solves this with:**
+1. **Memory Persistence** - External `.memory/` directory stores state across cycles
+2. **Evidential Grounding** - Every claim MUST cite a source (RFC2119)
+3. **Normative Control** - Control module validates before execution
+4. **Scope Enforcement** - Subagents constrained to allowed files
+
+**Installation (SCL-enhanced):**
+```bash
+# Standard SDD installation
+cp -r skill/sdd-* ~/.config/opencode/skill/
+cp commands/sdd-*.md ~/.config/opencode/commands/
+
+# Copy SCL-specific templates
+cp -r templates/ ~/.config/opencode/templates/
+```
+
+**SCL Commands:**
+
+| Command | Purpose |
+|---------|---------|
+| `/sdd-init-memory [name]` | Initialize memory structure for change |
+| `/sdd-artefact-scl` | Create artifact with memory tracking |
+| `/sdd-apply-group-scl N` | Execute group with memory context |
+| `/sdd-apply-all-scl` | Execute all groups with persistence |
+| `/sdd-verify-scl` | Verify with memory tracing |
+| `/sdd-memory-status [name]` | Inspect memory state |
+
+**SCL Directory Structure:**
+```
+.specs/changes/<change-name>/
+├── proposal.md
+├── specs/<capability>/spec.md
+├── design.md
+├── tasks.md
+├── .memory/                    # SCL Memory Module
+│   ├── decisions.json          # All decisions with evidence
+│   ├── requirements.json       # Requirement index
+│   ├── citations.json          # Citation graph
+│   ├── control-log.json        # Validation checkpoints
+│   └── episodes.json           # Cycle-by-cycle history
+└── regulation.md               # Epistemic Constitution
+```
+
+**SCL Workflow:**
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│  1. INITIALIZE SCL MEMORY                                           │
+│     /sdd-init-memory <change-name>                                  │
+│     Creates .memory/ directory with JSON schemas                    │
+│     Creates regulation.md (epistemic constitution)                  │
+└──────────────────────────┬──────────────────────────────────────────┘
+                           │
+                           ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│  2. CREATE SPEC (SCL-Enhanced)                                      │
+│     /sdd-new                                                        │
+│     /sdd-artefact-scl                                               │
+│     Each artifact created with:                                      │
+│     - Evidence citations (MUST cite sources)                        │
+│     - Memory updates (decisions, requirements extracted)            │
+│     - Control validation (citations verified)                       │
+└──────────────────────────┬──────────────────────────────────────────┘
+                           │
+                           ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│  3. IMPLEMENT (SCL-Enhanced)                                        │
+│     /sdd-apply-group-scl N   OR   /sdd-apply-all-scl                │
+│                                                                     │
+│     Before dispatch:                                                │
+│     - Load memory context (decisions, requirements)                 │
+│     - Verify preconditions                                          │
+│     - Generate scope constraints                                    │
+│                                                                     │
+│     Subagent receives:                                              │
+│     - Full memory context from prior groups                         │
+│     - Allowed/blocked file lists                                    │
+│     - Required citations                                            │
+│                                                                     │
+│     After completion:                                               │
+│     - Verify scope compliance                                       │
+│     - Update memory (status, citations)                             │
+│     - Log episode                                                   │
+└──────────────────────────┬──────────────────────────────────────────┘
+                           │
+                           ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│  4. VERIFY (SCL-Enhanced)                                           │
+│     /sdd-verify-scl                                                 │
+│     - Requirement verification with memory tracing                  │
+│     - Decision compliance check                                     │
+│     - Citation integrity verification                               │
+│     - Memory consistency check                                      │
+│     - Goal fidelity score                                           │
+└──────────────────────────┬──────────────────────────────────────────┘
+                           │
+                           ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│  5. ARCHIVE                                                         │
+│     /sdd-archive                                                    │
+│     Memory preserved in archive for future reference                │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+#### SCL-Enhanced Example: User Authentication
+
+**Step 1: Initialize Memory**
+```
+You: /sdd-init-memory user-authentication
+
+AI: ✓ Initialized memory for: user-authentication
+
+Created:
+  .specs/changes/user-authentication/.memory/
+  ├── decisions.json      (0 decisions)
+  ├── requirements.json   (0 requirements)
+  ├── citations.json      (0 citations)
+  ├── control-log.json    (0 checkpoints)
+  └── episodes.json       (0 episodes)
+
+Created:
+  .specs/changes/user-authentication/regulation.md
+
+Memory is ready for SCL-enhanced artifact creation.
+```
+
+**Step 2: Create Artifacts with Memory Tracking**
+```
+You: /sdd-artefact-scl
+
+AI: ✓ Retrieved: Memory context loaded (0 decisions, 0 requirements)
+    ✓ Cognition: Generated specs/user-auth/spec.md with 5 requirements
+    ✓ Control: All 12 citations verified, regulation compliant
+    ✓ Action: Written to specs/user-auth/spec.md
+    ✓ Memory: Updated decisions.json, requirements.json, citations.json
+
+Artifact Status:
+  proposal: DONE
+  specs: DONE ← just completed
+  design: READY
+  tasks: BLOCKED (waiting for design)
+
+Memory State:
+  decisions: 0
+  requirements: 5 (extracted)
+  citations: 12 (recorded)
+
+Next: Use /sdd-artefact-scl to create design
+```
+
+**Step 3: Execute with Memory Context**
+```
+You: /sdd-apply-group-scl 2
+
+AI: ✓ Retrieved: Memory context (3 decisions, 5 requirements)
+    ✓ Control: Preconditions verified
+    ✓ Dispatch: Subagent for Group 2 with scope constraints
+
+    Injecting memory context into subagent:
+    - Decisions: DEC-001 (JWT), DEC-002 (bcrypt cost 12)
+    - Requirements: AUTH-001 through AUTH-005
+    - Prior outcomes: Group 1 created src/auth/ structure
+    - Constraints: allowed_files = ["src/auth/**/*.ts"]
+
+    [Subagent executes with full context...]
+
+    ✓ Completion Signal: "GROUP 2 COMPLETE"
+    ✓ Scope Verified: All files in allowed list
+    ✓ Tasks Verified: 5/5 complete
+    ✓ Tests: All passing
+
+Memory Updates:
+  requirements.json: AUTH-001, AUTH-002 → implemented
+  citations.json: +8 new citations
+  episodes.json: +1 episode (Group 2 outcome)
+
+Ready for next group. Use /sdd-apply-group-scl 3
+```
+
+**Step 4: Verify with Memory Tracing**
+```
+You: /sdd-verify-scl
+
+AI: ═══════════════════════════════════════════════════════════
+    SCL Verification Report: user-authentication
+    ═══════════════════════════════════════════════════════════
+
+    ## Summary
+
+    Goal Fidelity: 0.92 (EXCELLENT)
+    - Requirements: 11/12 implemented (92%)
+    - Tests: 18/20 passing (90%)
+    - Citations: 45/47 valid (96%)
+    - Memory: Consistent
+
+    ## Citation Integrity
+
+    Valid: 45/47 (96%)
+    Broken:
+      - CIT-012: design.md#L999 (line does not exist)
+      - CIT-027: specs/auth/spec.md#L200 (section removed)
+
+    ## Recommendation
+
+    ✓ READY FOR ARCHIVE
+
+    All critical requirements implemented and verified.
+    Minor citation issues can be addressed in future iteration.
+
+    ═══════════════════════════════════════════════════════════
+```
+
+**SCL-Enhanced Task Format:**
+
+Tasks in SCL mode include additional metadata:
+
+```markdown
+- [ ] 2.1 Implement password hashing utility
+  - _Requirements: AUTH-001 (per specs/auth/spec.md#L23)_
+  - _Evidence: design.md#decision-password-hashing (DEC-003)_
+  - _Precondition: Task 1.2 complete (bcrypt installed)_
+  - _Creates: src/auth/utils/hash.ts_
+  - _Validation:_
+    - Unit tests pass
+    - Bcrypt cost factor = 12 (per DEC-003)
+    - Export signature matches interface
+  - _Memory Write:_
+    - `requirements.json#AUTH-001.status ← "implemented"`
+    - `citations.json ← hash.ts implements AUTH-001`
+```
+
+**Regulation.md (Epistemic Constitution):**
+
+Every SCL-enhanced change includes a `regulation.md`:
+
+```markdown
+# Epistemic Constitution: user-authentication
+
+## 1. Evidential Rules
+1. Every requirement **MUST** cite its source
+2. Every decision **MUST** document alternatives considered
+3. Every task **MUST** reference at least one requirement
+
+## 2. Scope Rules
+1. Tasks in Group N **MAY ONLY** modify files from Groups 1..N
+2. Files outside allowed paths **MUST NOT** be modified
+
+## 3. Validation Rules
+1. Tasks **MUST** be verified before marked complete
+2. Files **MUST** have header comments citing requirements
+
+## 4. Memory Rules
+1. After each group, memory **MUST** be updated
+2. Citations **MUST** use format: `filename#location`
+```
+
+**Expected Benefits (from SCL research):**
+
+| Metric | Standard | SCL-Enhanced |
+|--------|----------|--------------|
+| Task Success Rate | ~70% | ~86% |
+| Redundant Actions | High | ~50% reduction |
+| Memory Fidelity | Low | High (persistent) |
+| Hallucination Rate | Moderate | ~3x reduction |
+| Error Localization | Poor | Good (cycle-level logs) |
+
+**When to Use SCL:**
+
+| Aspect | Use SCL | Standard OK |
+|--------|---------|-------------|
+| Subagent execution | ✓ Yes | - |
+| Multi-group tasks | ✓ Yes | - |
+| Need traceability | ✓ Yes | - |
+| Simple single-task | - | ✓ OK |
+| Quick prototype | - | ✓ OK |
 
 ---
 
