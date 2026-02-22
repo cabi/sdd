@@ -14,7 +14,16 @@ Follow the sdd-spec-create skill:
 5. **Create proposal.md** - Reference existing specs if modifying
 6. **Initialize artifact placeholders** (specs/, design.md, tasks.md)
 
-After creating, remind me:
-- Review the proposal
-- Use `/sdd-artefact` to develop the spec
-- Use `/sdd-status` to check progress
+After creating, output EXACTLY this Next Steps section:
+
+---
+## Next Steps
+
+1. Review `.specs/changes/<change-name>/proposal.md` - confirm scope
+2. Choose workflow:
+   - **Standard**: `/sdd-artefact` → `/sdd-apply` → `/sdd-verify` → `/sdd-archive`
+   - **SCL-enhanced**: `/sdd-artefact-scl` → `/sdd-apply-group-scl` → `/sdd-verify-scl`
+3. Use `/sdd-status` to check progress at any time
+---
+
+DO NOT suggest commands not listed above.
