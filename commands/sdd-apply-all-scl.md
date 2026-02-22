@@ -21,9 +21,10 @@ Execute all remaining task groups in dependency order using subagents with SCL-e
 2. **Build dependency graph** from group metadata
 3. **Topological sort** to determine execution order
 4. **Load full memory state**:
-   - All decisions, requirements, citations
-   - Prior episodes
-   - Control checkpoints
+    - All decisions, requirements, citations
+    - Prior episodes
+    - Control checkpoints
+    - Read `regulation.md` for scope and validation rules
 
 ## Phase 2: Plan
 
@@ -62,17 +63,63 @@ Execute all remaining task groups in dependency order using subagents with SCL-e
 ## Phase 4: Execute
 
 8. **For each group in order**:
-   
+
    ### Pre-Execution
    - **CONTROL.check_preconditions()**
    - **Build memory context** (decisions, requirements from prior groups)
    - **Generate scope constraints**
    - **IF blocked**: HALT and explain
-   
+
    ### Dispatch
    - Dispatch subagent with full context
    - Wait for "GROUP N COMPLETE"
-   
+
+   **Subagent Prompt Structure (per group):**
+   ```
+   You are executing Group N: <Group Name> of <spec-name>.
+
+   ## Memory Context
+
+   ### Decisions You MUST Follow
+   [Relevant decisions with sources]
+
+   ### Requirements You MUST Satisfy
+   [Relevant requirements with sources]
+
+   ### Prior Work Outcomes
+   [What was done in prior groups]
+
+   ### Regulation Rules (from regulation.md)
+   [Applicable scope and validation rules for this group]
+
+   ## Constraints (VIOLATION = FAILURE)
+
+   ### Allowed Files
+   You MAY only create/modify: [list]
+
+   ### Blocked Files
+   You MUST NOT touch: [list]
+
+   ### Required Citations
+   Every file MUST include:
+   // Implements: REQ-ID (per specs/.../spec.md#L<N>)
+
+   ## Your Tasks
+   [Task list with evidence citations]
+
+   ## Completion Criteria
+   You MUST:
+   1. Complete ALL tasks
+   2. Verify all files exist
+   3. Ensure all tests pass
+   4. Output "GROUP N COMPLETE" as final line
+
+   DO NOT:
+   - Start work on Group N+1
+   - Modify files outside allowed_files
+   - Skip validation steps
+   ```
+
    ### Post-Execution
    - **CONTROL.verify_scope_completion()**
    - **Update memory** (files, status, citations)

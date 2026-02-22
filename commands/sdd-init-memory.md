@@ -33,7 +33,13 @@ Initialize the SCL memory structure for the current or specified change.
    }
    ```
 
-4. **Create regulation.md** from template if not exists
+4. **Create regulation.md** from template:
+   - READ `templates/regulation.md`
+   - REPLACE `{{CHANGE_NAME}}` with the actual change name
+   - REPLACE `{{TIMESTAMP}}` with current ISO 8601 timestamp
+   - REPLACE `{{AUTHOR}}` with "SCL System" (user can customize)
+   - WRITE to `.specs/changes/<change-name>/regulation.md`
+   - SKIP if file already exists (user may have customized it)
 
 5. **Report initialization**
 
@@ -49,10 +55,12 @@ Created:
   ├── control-log.json    (0 checkpoints)
   └── episodes.json       (0 episodes)
 
-Created:
+Created from template:
   .specs/changes/user-authentication/regulation.md
+  (Epistemic constitution with RFC2119 rules - edit to customize)
 
 Memory is ready for SCL-enhanced artifact creation.
+The regulation.md file will be loaded automatically by SCL commands.
 Use /sdd-artefact-scl to create artifacts with memory tracking.
 ```
 
