@@ -86,19 +86,32 @@ Required actions:
 Memory state preserved. Re-run after fixes.
 ```
 
-After creating, report status and output EXACTLY this Next Steps section:
+After creating, report status. Then output ONLY the relevant next step based on what was just completed:
 
+**If specs were just created:**
+```
 ---
-## Next Steps
-
-- If specs created: Use `/sdd-artefact-scl` to create design
-- If design created: Use `/sdd-artefact-scl` to create tasks
-- If tasks created:
-  - `/sdd-apply-group-scl N` - Execute group N with memory context
-  - `/sdd-apply-all-scl` - Execute all groups
-- Use `/sdd-status` or `/sdd-memory-status` to check progress
+Next: Use /sdd-artefact-scl to create design
 ---
+```
 
+**If design was just created:**
+```
+---
+Next: Use /sdd-artefact-scl to create tasks
+---
+```
+
+**If tasks were just created:**
+```
+---
+Next Steps:
+  /sdd-apply-group-scl N - Execute group N with memory context
+  /sdd-apply-all-scl     - Execute all groups
+---
+```
+
+DO NOT show options that don't apply to the current state.
 DO NOT suggest commands not listed above.
 
 **Loads skill:** `sdd-artefact-scl`

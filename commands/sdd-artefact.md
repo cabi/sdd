@@ -23,18 +23,31 @@ Show me:
 - Why it's next (dependency status)
 - A preview before writing
 
-After creating, report status and output EXACTLY this Next Steps section:
+After creating, report status. Then output ONLY the relevant next step based on what was just completed:
 
+**If specs were just created:**
+```
 ---
-## Next Steps
-
-- If specs created: Use `/sdd-artefact` to create design
-- If design created: Use `/sdd-artefact` to create tasks
-- If tasks created:
-  - `/sdd-apply` - Execute one task at a time
-  - `/sdd-apply-group N` - Execute group N
-  - `/sdd-apply-all` - Execute all groups
-- Use `/sdd-status` to check progress at any time
+Next: Use /sdd-artefact to create design
 ---
+```
 
+**If design was just created:**
+```
+---
+Next: Use /sdd-artefact to create tasks
+---
+```
+
+**If tasks were just created:**
+```
+---
+Next Steps:
+  /sdd-apply        - Execute one task at a time
+  /sdd-apply-group N - Execute group N
+  /sdd-apply-all     - Execute all groups
+---
+```
+
+DO NOT show options that don't apply to the current state.
 DO NOT suggest commands not listed above.
