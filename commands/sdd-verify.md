@@ -31,7 +31,7 @@ Verify that the implementation matches the spec requirements.
    - Check scenario coverage
    - Verify tests exist
 
-4. **Report:**
+4. **Report (with gaps):**
    ```
    ┌──────────────────────────────────────────────────────────────┐
    │ VERIFICATION REPORT: authentication                          │
@@ -53,8 +53,26 @@ Verify that the implementation matches the spec requirements.
    [3] Fix issues first
    ```
 
+5. **Report (verification passed):**
+   ```
+   ┌──────────────────────────────────────────────────────────────┐
+   │ VERIFICATION REPORT: authentication                          │
+   ├──────────────────────────────────────────────────────────────┤
+   │ Requirements: 5 IMPLEMENTED, 0 PARTIAL, 0 MISSING            │
+   │ Scenarios: 12 COVERED, 0 MISSING                             │
+   │ Tests: All passing                                           │
+   └──────────────────────────────────────────────────────────────┘
+   
+   ✓ Verification passed. All requirements verified.
+   
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   
+   NEXT STEP: Run /sdd-archive to merge this change into
+   accumulated specs and complete the workflow.
+   ```
+
 **Use when:**
-- Before archiving a change
-- After implementing features
-- Checking for spec drift
-- Code review preparation
+   - Before archiving a change
+   - After implementing features
+   - Checking for spec drift
+   - Code review preparation

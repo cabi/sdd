@@ -176,6 +176,27 @@ Required actions:
 
 After fixes, re-run /sdd-verify-scl to confirm readiness.
 
+══════════════════════════════════════════════════════════════
+```
+
+**When verification passes (ready for archive):**
+```
+═══════════════════════════════════════════════════════════════
+✓ VERIFICATION PASSED
+═══════════════════════════════════════════════════════════════
+
+All requirements implemented and verified:
+- 10/10 requirements with status="implemented"
+- 24/24 tests passing
+- 42/42 citations valid
+- Memory consistent across all artifacts
+- Goal fidelity: 1.0 (100%)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+NEXT STEP: Run /sdd-archive to merge this change into
+accumulated specs and complete the workflow.
+
 ═══════════════════════════════════════════════════════════════
 ```
 

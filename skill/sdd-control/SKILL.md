@@ -202,6 +202,32 @@ Requirements:
   - Goal fidelity MUST be >= 0.8 for termination
 ```
 
+### Termination Success Output
+
+When verification passes and the system is ready for archive, the output **MUST** display:
+
+```
+═══════════════════════════════════════════════════════════════
+✓ VERIFICATION PASSED
+═══════════════════════════════════════════════════════════════
+
+All requirements implemented and verified:
+- X/X requirements with status="implemented"
+- Y/Y tests passing
+- Z/Z citations valid
+- Memory consistent across all artifacts
+- Goal fidelity: 1.0 (100%)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+NEXT STEP: Run /sdd-archive to merge this change into
+accumulated specs and complete the workflow.
+
+═══════════════════════════════════════════════════════════════
+```
+
+**Important:** The archive command is `/sdd-archive`.
+
 ## Control Checkpoint Schema
 
 The system **MUST** record control decisions in `control-log.json`:

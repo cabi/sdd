@@ -279,6 +279,11 @@ AI: Running pre-archive verification...
 
 ✓ Verification passed. Ready to archive.
 
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+NEXT STEP: Confirm to proceed with merging this change
+into accumulated specs.
+
 Proceed with archive? [Yes/No/Show details]
 ```
 
