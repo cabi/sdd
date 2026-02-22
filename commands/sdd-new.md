@@ -22,7 +22,7 @@ After creating, output EXACTLY this Next Steps section:
 1. Review `.specs/changes/<change-name>/proposal.md` - confirm scope
 2. Choose workflow:
    - **Standard**: `/sdd-artefact` → `/sdd-apply` → `/sdd-verify` → `/sdd-archive`
-   - **SCL-enhanced**: `/sdd-artefact-scl` → `/sdd-apply-group-scl` → `/sdd-verify-scl`
+   - **SCL-enhanced**: `/sdd-init-memory` → `/sdd-artefact-scl` → `/sdd-apply-group-scl` → `/sdd-verify-scl`
 3. Use `/sdd-status` to check progress at any time
 ---
 
