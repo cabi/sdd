@@ -401,9 +401,9 @@ Task groups support three execution modes:
 
 | Mode | Command | Use When |
 |------|---------|----------|
-| Single | `/sdd:apply` | High control, learning, risky changes |
-| Group | `/sdd:apply-group N` | Batch related tasks with clear scope |
-| All | `/sdd:apply-all` | Large projects, well-defined boundaries |
+| Single | `/sdd-apply` | High control, learning, risky changes |
+| Group | `/sdd-apply-group N` | Batch related tasks with clear scope |
+| All | `/sdd-apply-all` | Large projects, well-defined boundaries |
 
 **Group metadata enables:**
 - Dependency ordering (Group 3 waits for Group 2)

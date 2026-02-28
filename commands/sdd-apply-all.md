@@ -5,7 +5,7 @@ description: Execute all remaining task groups via subagents
 
 Execute all remaining task groups in dependency order using subagents.
 
-**Usage:** `/sdd:apply-all [options]`
+**Usage:** `/sdd-apply-all [options]`
 
 **Options:**
 - No option: Ask for confirmation mode
@@ -65,5 +65,5 @@ Total tasks: 12/12
 Files created: 8
 Files modified: 3
 
-Spec: user-authentication is ready for /sdd:archive
+Spec: user-authentication is ready for /sdd-archive
 ```

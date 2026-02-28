@@ -5,7 +5,7 @@ description: Execute all tasks in a specific group via subagent
 
 Execute all tasks in a task group using a subagent with strict scope boundaries.
 
-**Usage:** `/sdd:apply-group <number>`
+**Usage:** `/sdd-apply-group <number>`
 
 **Process:**
 1. Parse tasks.md for the specified group
@@ -28,7 +28,7 @@ Execute all tasks in a task group using a subagent with strict scope boundaries.
 
 **Example:**
 ```
-/sdd:apply-group 2
+/sdd-apply-group 2
 
 AI: Dispatching subagent for Group 2: Core Services
     Tasks: 2.1, 2.2, 2.3
@@ -39,5 +39,5 @@ AI: Dispatching subagent for Group 2: Core Services
     Completed: 2.1, 2.2, 2.3
     Files created: PasswordService.ts, TokenService.ts, UserService.ts
     
-    Ready for next group. Use /sdd:apply-group 3 or /sdd:apply-all
+    Ready for next group. Use /sdd-apply-group 3 or /sdd-apply-all
 ```

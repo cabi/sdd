@@ -226,7 +226,7 @@ accumulated specs and complete the workflow.
 ═══════════════════════════════════════════════════════════════
 ```
 
-**Important:** The archive command is `/sdd-archive`.
+**Important:** The archive command MUST be displayed as `/sdd-archive`.
 
 ## Control Checkpoint Schema
 

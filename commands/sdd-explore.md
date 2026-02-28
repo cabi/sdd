@@ -26,7 +26,7 @@ This is a thinking phase - no files are created.
    - What are risks?
 4. **Summarize** the key insights
 5. **Suggest next steps:**
-   - Ready for `/sdd:new`?
+   - Ready for `/sdd-new`?
    - Need more exploration?
    - Should research something specific?
 

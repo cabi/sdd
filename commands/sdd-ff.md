@@ -18,8 +18,8 @@ Use when I have a clear picture of what I want to build and want to skip the inc
 4. **Update proposal status** - Mark all complete
 5. **Report what was created**
 
-**Warning:** This creates everything at once. For complex features, `/sdd:continue` allows review between artifacts.
+**Warning:** This creates everything at once. For complex features, `/sdd-continue` allows review between artifacts.
 
 **After completion:**
 - Review the generated artifacts
-- Use `/sdd:apply` to start implementation
+- Use `/sdd-apply` to start implementation
