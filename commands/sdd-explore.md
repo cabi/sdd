@@ -39,3 +39,5 @@ This is a thinking phase - no files are created.
 - Help me clarify my thinking
 - Surface assumptions and risks
 - Prepare me for creating a good spec
+
+**Loads skill:** `sdd-interview`

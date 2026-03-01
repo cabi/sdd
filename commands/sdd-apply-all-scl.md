@@ -214,4 +214,4 @@ Options:
   [4] View memory state for debugging
 ```
 
-**Loads skills:** `sdd-control`, `sdd-memory`, `sdd-tasks-scl`
+**Loads skills:** `sdd-control`, `sdd-memory`

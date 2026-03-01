@@ -67,3 +67,4 @@ Files modified: 3
 
 Spec: user-authentication is ready for /sdd-archive
 ```
+**Loads skill:** `sdd-spec-apply`

@@ -114,4 +114,4 @@ Next Steps:
 DO NOT show options that don't apply to the current state.
 DO NOT suggest commands not listed above.
 
-**Loads skill:** `sdd-artefact-scl`
+**Loads skills:** `sdd-artefact-scl`, `sdd-requirements`, `sdd-memory`, `sdd-design`, `sdd-tasks-scl`

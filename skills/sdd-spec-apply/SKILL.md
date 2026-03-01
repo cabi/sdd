@@ -18,9 +18,9 @@ Implement a specification by working through tasks.
 
 | Mode | Command | Behavior |
 |------|---------|----------|
-| Single | `/sdd:apply` | One task, ask to continue |
-| Group | `/sdd:apply-group N` | All tasks in group N via subagent |
-| All | `/sdd:apply-all` | All groups via subagents |
+| Single | `/sdd-apply` | One task, ask to continue |
+| Group | `/sdd-apply-group N` | All tasks in group N via subagent |
+| All | `/sdd-apply-all` | All groups via subagents |
 
 ## Pre-Conditions
 
@@ -30,7 +30,7 @@ Implement a specification by working through tasks.
 
 ---
 
-## Mode 1: Single Task (`/sdd:apply`)
+## Mode 1: Single Task (`/sdd-apply`)
 
 Interactive, one task at a time with review between each.
 
@@ -51,7 +51,7 @@ Interactive, one task at a time with review between each.
 
 ---
 
-## Mode 2: Group Execution (`/sdd:apply-group N`)
+## Mode 2: Group Execution (`/sdd-apply-group N`)
 
 Execute all tasks in a group via a single subagent with strict scope.
 
@@ -152,7 +152,7 @@ Do not output anything after this signal.
 
 ---
 
-## Mode 3: All Groups (`/sdd:apply-all`)
+## Mode 3: All Groups (`/sdd-apply-all`)
 
 Execute all remaining groups in dependency order.
 
@@ -209,7 +209,7 @@ Wave 3: Group 4 (depends on 2 and 3)
 ### User Confirmation Options
 
 ```
-You: /sdd:apply-all
+You: /sdd-apply-all
 
 AI: Found 4 task groups to execute:
 
@@ -350,11 +350,11 @@ Options:
 
 | Mode | Control | Speed | Risk |
 |------|---------|-------|------|
-| `/sdd:apply` | High | Slow | Low |
-| `/sdd:apply-group N` | Medium | Medium | Medium |
-| `/sdd:apply-all` | Low | Fast | Medium |
+| `/sdd-apply` | High | Slow | Low |
+| `/sdd-apply-group N` | Medium | Medium | Medium |
+| `/sdd-apply-all` | Low | Fast | Medium |
 
 **Recommendations:**
-- Use `/sdd:apply` for high-risk or learning
-- Use `/sdd:apply-group` for batching related work
-- Use `/sdd:apply-all` with confirmation mode for large projects
+- Use `/sdd-apply` for high-risk or learning
+- Use `/sdd-apply-group` for batching related work
+- Use `/sdd-apply-all` with confirmation mode for large projects

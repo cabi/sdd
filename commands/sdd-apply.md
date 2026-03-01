@@ -20,3 +20,5 @@ If implementation reveals a gap in the spec:
 - Continue implementation
 
 Show me progress after each task.
+
+**Loads skill:** `sdd-spec-apply`

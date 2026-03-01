@@ -176,7 +176,7 @@ After completion, inform the user:
 
 Next steps:
 1. Review the proposal
-2. Use /sdd-artefact to create requirements (specs)
+2. Use `/sdd-artefact` or `/sdd-init-memory` + `/sdd-artefact-scl` to create requirements (specs)
 3. Use /sdd-status to check progress anytime
 ```
 

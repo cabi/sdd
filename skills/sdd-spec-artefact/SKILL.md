@@ -292,3 +292,5 @@ Next: Use /sdd-artefact to create design
 - [ ] Tasks properly sequenced
 - [ ] Each task is actionable
 - [ ] Requirement references included
+
+**Loads skill:** `sdd-design`

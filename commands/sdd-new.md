@@ -27,3 +27,5 @@ After creating, output EXACTLY this Next Steps section:
 ---
 
 DO NOT suggest commands not listed above.
+
+**Loads skill:** `sdd-spec-create`

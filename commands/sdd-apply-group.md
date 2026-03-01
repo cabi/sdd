@@ -41,3 +41,5 @@ AI: Dispatching subagent for Group 2: Core Services
     
     Ready for next group. Use /sdd-apply-group 3 or /sdd-apply-all
 ```
+
+**Loads skill:** `sdd-spec-apply`

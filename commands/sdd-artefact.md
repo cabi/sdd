@@ -51,3 +51,5 @@ Next Steps:
 
 DO NOT show options that don't apply to the current state.
 DO NOT suggest commands not listed above.
+
+**Loads skills:** `sdd-spec-artefact`, `sdd-requirements`, `sdd-design`, `sdd-tasks`
