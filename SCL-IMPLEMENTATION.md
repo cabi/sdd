@@ -121,10 +121,16 @@ Based on SCL empirical results from the papers:
 
 ## Usage
 
-### Initialize SCL for a new change
+### Create spec first
 
 ```bash
-/sdd-init-memory user-authentication
+/sdd-new
+```
+
+### Initialize SCL for the new change
+
+```bash
+/sdd-init-memory <change-name>
 ```
 
 ### Create artifacts with SCL

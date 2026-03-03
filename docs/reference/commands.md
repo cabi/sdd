@@ -291,7 +291,7 @@ Verifies completion, creates summary, moves to archive, merges deltas into `.spe
 | `/sdd-new` | Create | No | Start new spec |
 | `/sdd-init` | Create | No | Initialize project |
 | `/sdd-init-scl` | Create | Yes | Initialize with SCL |
-| `/sdd-init-memory` | Create | Yes | Initialize memory for change |
+| `/sdd-init-memory` | Create | Yes | Initialize memory for change (after /sdd-new) |
 | `/sdd-artefact` | Develop | No | Create next artifact |
 | `/sdd-artefact-scl` | Develop | Yes | Create with memory tracking |
 | `/sdd-ff` | Develop | No | Fast-forward all artifacts |

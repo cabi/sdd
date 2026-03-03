@@ -85,7 +85,7 @@ mkdir -p .specs/specs .specs/changes .specs/archive
 | `/sdd-new` | Start new spec | No |
 | `/sdd-init` | Initialize project structure | No |
 | `/sdd-init-scl` | Initialize with SCL structure | Yes |
-| `/sdd-init-memory <name>` | Initialize memory for change | Yes |
+| `/sdd-init-memory <name>` | Initialize memory for change (after /sdd-new) | Yes |
 
 **Develop Phase:**
 

@@ -24,8 +24,10 @@ The SCL-enhanced workflow provides superior reliability through:
 
 ### SCL Commands
 
+These SCL-specific commands extend the standard SDD workflow. Use them **after** `/sdd-new` has created the change directory:
+
 ```
-# Initialize SCL memory for a change
+# After /sdd-new: Initialize SCL memory for the change
 /sdd-init-memory [change-name]
 
 # Create artifacts with memory tracking

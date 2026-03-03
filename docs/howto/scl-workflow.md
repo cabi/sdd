@@ -37,14 +37,14 @@ SCL provides:
 ## Workflow Overview
 
 ```
-INIT → CREATE → DEVELOP → IMPLEMENT → VERIFY → ARCHIVE
-        (with memory tracking)
+CREATE → INIT → DEVELOP → IMPLEMENT → VERIFY → ARCHIVE
+              (with memory tracking)
 ```
 
 | Phase | Commands | Output |
 |-------|----------|--------|
-| Init | `/sdd-init-memory` | .memory/, regulation.md |
 | Create | `/sdd-new` | proposal.md |
+| Init SCL | `/sdd-init-memory` | .memory/, regulation.md |
 | Develop | `/sdd-artefact-scl` | specs/, design.md, tasks.md + memory |
 | Implement | `/sdd-apply-group-scl`, `/sdd-apply-all-scl` | Code + memory updates |
 | Verify | `/sdd-verify-scl` | Verification with memory tracing |
@@ -52,9 +52,21 @@ INIT → CREATE → DEVELOP → IMPLEMENT → VERIFY → ARCHIVE
 
 ---
 
-## Phase 1: Initialize SCL Memory
+## Phase 1: Create Change
 
-Initialize memory for a change:
+Create the change specification first:
+
+```
+/sdd-new
+```
+
+Creates `proposal.md` with WHY, WHAT, capabilities, and scope.
+
+---
+
+## Phase 2: Initialize SCL Memory
+
+After creating the change, initialize memory:
 
 ```
 /sdd-init-memory <change-name>
@@ -97,18 +109,6 @@ Every SCL-enhanced change includes a `regulation.md` defining rules:
 1. After each group, memory **MUST** be updated
 2. Citations **MUST** use format: `filename#location`
 ```
-
----
-
-## Phase 2: Create Spec
-
-Same as standard workflow:
-
-```
-/sdd-new
-```
-
-Creates `proposal.md` with WHY, WHAT, scope.
 
 ---
 
@@ -322,11 +322,11 @@ Shows:
 ## Quick Reference
 
 ```bash
-# Initialize
-/sdd-init-memory <name>
-
-# Create spec
+# Create change (creates change directory)
 /sdd-new
+
+# Initialize SCL memory for the change
+/sdd-init-memory <name>
 
 # Develop with memory
 /sdd-artefact-scl
