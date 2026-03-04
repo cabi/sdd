@@ -223,6 +223,7 @@ The system SHALL <behavior>.
 
 ### Step 2.3: Create Design
 
+**Require skill:**  `sdd-design`
 The system **MUST** create `.specs/changes/<name>/design.md`:
 
 ```markdown
@@ -329,6 +330,7 @@ The system **MUST** create `.specs/changes/<name>/design.md`:
 
 ### Step 2.4: Create Tasks
 
+**Require skill:** `sdd-tasks-scl`
 The system **MUST** create `.specs/changes/<name>/tasks.md`:
 
 ```markdown

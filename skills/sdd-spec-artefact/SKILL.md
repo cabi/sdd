@@ -154,6 +154,7 @@ The system SHALL <behavior>.
 
 #### Creating design
 
+**Require skill:** `sdd-design`
 Create `.specs/changes/<name>/design.md`:
 
 ```markdown
@@ -212,6 +213,7 @@ For simple changes, design can be minimal.
 
 #### Creating tasks
 
+**Require skill:** `sdd-tasks`
 Create `.specs/changes/<name>/tasks.md`:
 
 ```markdown
