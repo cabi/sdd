@@ -14,7 +14,7 @@ This project includes specialized subagents for design document creation. These 
 
 - **File:** `agents/sdd-design.md`
 - **Usage:** `@sdd-design`
-- **Purpose:** Standard design document creation with codebase analysis
+- **Purpose:** Standard design document creation with 3-iteration review loop
 - **Mode:** Subagent
 - **Temperature:** 0.3
 - **Features:**
@@ -22,18 +22,42 @@ This project includes specialized subagents for design document creation. These 
   - Creates comprehensive design documents with Mermaid diagrams
   - Documents decisions with alternatives and rationale
   - Respects prior context (decisions, preferences, Q&A)
+  - 3-iteration review loop with sdd-design-analyst
+  - Critique reports saved for traceability
 
 **Invoke:** `@sdd-design <context>`
+
+**Note:** This agent automatically invokes `sdd-design-analyst` for 3 review iterations before finalizing design.
+
+### SDD Design Analyst
+
+- **File:** `agents/sdd-design-analyst.md`
+- **Usage:** `@sdd-design-analyst`
+- **Purpose:** Brutally honest design critic for logical flaws, structural issues, and coverage gaps
+- **Mode:** Subagent
+- **Temperature:** 0.7 (higher for critical thinking)
+- **Features:**
+  - Analyzes designs for logical consistency
+  - Checks structural completeness
+  - Verifies requirement coverage
+  - Identifies design anti-patterns
+  - Produces structured critique reports with severity levels
+  - Tracks issues across iterations
+
+**Invoke:** Automatically during sdd-design review loop
+
+**Note:** This agent is automatically invoked by the design agents during the 3-iteration review loop.
 
 ### SDD Design Agent (SCL-Enhanced)
 
 - **File:** `agents/sdd-design-scl.md`
 - **Usage:** `@sdd-design-scl`
-- **Purpose:** Memory-integrated design with evidence tracking, citation validation, and control checkpoints
+- **Purpose:** Memory-integrated design with evidence tracking, 3-iteration review loop, citation validation, and control checkpoints
 - **Mode:** Subagent
 - **Temperature:** 0.2
 - **Features:**
-  - 5-phase SCL workflow (Retrieve → Cognition → Control → Action → Memory Update)
+  - 6-phase SCL workflow (Retrieve → Cognition → Control → Review Loop → Action → Memory Update)
+  - 3-iteration review loop with analyst critique
   - Memory persistence across artifact creation
   - Evidential grounding - all claims cite sources
   - Citation validation and consistency checks
@@ -42,13 +66,16 @@ This project includes specialized subagents for design document creation. These 
 
 **Invoke:** `@sdd-design-scl <context>`
 
+**Note:** This agent automatically invokes `sdd-design-analyst` for 3 review iterations before finalizing design.
+
 ### Agent Configuration
 
-Both agents have the following configuration:
+All design agents have the following configuration:
 - **Mode:** `subagent` (invoked via `@` mention or Task tool)
-- **Tools:** Full access to glob, grep, read, write, edit, bash
+- **Tools:** Full access to glob, grep, read, write, edit, bash, task
 - **Permissions:** Full write/edit access, unrestricted bash
 - **Scope:** Constrained to project files (see scope constraints in agent files)
+- **Review Loop:** All designs go through 3-iteration review with analyst
 
 ---
 

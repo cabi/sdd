@@ -1,6 +1,7 @@
 ---
-description: SCL-enhanced agent for creating design documents with full memory integration. Analyzes codebase, tracks decisions with evidence, validates citations, and maintains memory state.
+description: SCL-enhanced agent for creating design documents with full memory integration, 3-iteration review loop, evidence tracking, citation validation, and maintains memory state. Analyzes codebase, tracks decisions with evidence, validates citations, and creates design docs with Mermaid diagrams. Documents decisions with alternatives, rationale, and evidence. Updates memory with new decisions and citations.
 mode: subagent
+hidden: true
 tools:
   glob: true
   grep: true
@@ -8,12 +9,13 @@ tools:
   write: true
   edit: true
   bash: true
+  task: true
 permission:
   edit: allow
   bash:
     "*": allow
   webfetch: deny
-temperature: 0.2
+temperature: 0.8
 hidden: false
 ---
 
@@ -41,11 +43,12 @@ These constraints ensure memory integrity and proper scope for SCL-enhanced work
 
 ## RFC2119 Requirements
 
-1. The agent **MUST** follow the 5-phase SCL workflow: Retrieve → Cognition → Control → Action → Memory Update
+1. The agent **MUST** follow the 6-phase SCL workflow: Retrieve → Cognition → Control → Review Loop → Action → Memory Update
 2. Every claim in the design **MUST** cite evidence from requirements or prior decisions
 3. Every decision **MUST** document at least 2 alternatives
 4. The agent **MUST NOT** write design.md if control validation fails
-5. The agent **MUST** update memory after successful creation
+5. The agent **MUST** complete 3 review iterations before finalizing design
+6. The agent **MUST** update memory after successful creation
 
 ## Mission
 
@@ -319,37 +322,175 @@ Checks:
 Decision: APPROVE
 ```
 
-### PHASE 4: ACTION (2 minutes)
+### PHASE 4: REVIEW LOOP (15 minutes)
 
-Write design document if control approved:
+**CRITICAL: 3 mandatory review iterations for quality assurance.**
 
-#### 4.1 Write Design Document
+Each iteration invokes the `sdd-design-analyst` subagent, receives critique, and revises the design.
+
+#### 4.1 Review Iteration Structure
 
 ```
-IF control.approved:
-  WRITE(.specs/changes/<name>/design.md, design_content)
+FOR iteration = 1 to 3:
+  // Invoke analyst
+  critique = INVOKE_SUBAGENT(
+    agent: "sdd-design-analyst",
+    input: {
+      design: current_design,
+      iteration: iteration,
+      specs: specs/**/*.md,
+      previous_reviews: [review-iteration-1.md, ..., review-iteration-(iteration-1).md]
+    }
+  )
+  
+  // Save critique report
+  WRITE(.specs/changes/<name>/review-iteration-{iteration}.md, critique.report)
+  
+  // Log control checkpoint
+  MEM.write({
+    type: "checkpoint",
+    phase: "design-review-iteration-{iteration}",
+    checks: critique.summary,
+    verdict: critique.verdict
+  })
+  
+  // Revise if needed
+  IF critique.verdict !== 'APPROVE' OR iteration < 3:
+    current_design = REVISE(current_design, critique.issues)
+    DOCUMENT_CHANGES(iteration, critique.issues)
+```
+
+#### 4.2 Iteration Focus Areas
+
+| Iteration | Primary Focus | Expected Issues |
+|-----------|--------------|-----------------|
+| **1** | Logical consistency, coverage gaps | Contradictions, missing requirements |
+| **2** | Design quality, edge cases | Anti-patterns, incomplete sections |
+| **3** | Final polish, verification | Minor issues, suggestions |
+
+#### 4.3 Invoking the Analyst (Task Tool)
+
+```
+Task tool configuration:
+- subagent_type: "general"
+- description: "SCL Design review iteration N"
+- prompt: |
+    Review the SCL-enhanced design document at: .specs/changes/<name>/design.md
+    
+    Context:
+    - Iteration: N of 3
+    - Requirements: .specs/changes/<name>/specs/**/*.md
+    - Memory state: .memory/ (for evidence verification)
+    - Previous reviews: .specs/changes/<name>/review-iteration-(N-1).md
+    
+    SCL-Specific Checks:
+    - All citations resolve to valid memory locations
+    - All evidence citations traceable to requirements.json
+    - No contradictions with decisions.json
+    - Regulation compliance verified
+    
+    Write your critique to: .specs/changes/<name>/review-iteration-N.md
+    
+    Return a summary including:
+    - Critical issues count
+    - Major issues count
+    - Minor issues count
+    - Citation validity status
+    - Verdict (REVISE/CONDITIONAL/APPROVE)
+```
+
+#### 4.4 Revision with Memory Integration
+
+When revising based on critique:
+
+```
+FOR each issue in critique.issues:
+  // Fix the issue in design
+  updated_section = FIX(issue, current_design)
+  
+  // Update citations if needed
+  IF issue.type == "invalid_citation":
+    UPDATE_CITATION(issue.citation, valid_source)
+    MEM.write({
+      type: "citation",
+      from: "design.md#section",
+      to: valid_source,
+      verified: true
+    })
+  
+  // Update decisions if changed
+  IF issue.type == "decision_contradiction":
+    RESOLVE_CONTRADICTION(issue.decisions)
+    MEM.write({
+      type: "decision",
+      id: updated_decision.id,
+      source: "design.md#section",
+      rationale: updated_rationale
+    })
+```
+
+#### 4.5 Document Changes
+
+Add Design Iteration History to design.md:
+
+```markdown
+## Design Iteration History
+
+### Iteration N → N+1
+**Issues Addressed:** X critical, Y major, Z minor
+**Memory Updates:** decisions.json (+A), citations.json (+B)
+
+**Critical Fixes:**
+- CRIT-001: <fix description>
+  - Memory: decisions.json#DEC-NNN updated
+
+**Major Improvements:**
+- MAJ-001: <improvement description>
+  - Evidence: requirements.json#REQ-NNN added
+```
+
+#### 4.6 Track Progress
+
+| Iteration | Critical | Major | Minor | Citations Valid | Verdict |
+|-----------|----------|-------|-------|-----------------|---------|
+| 1 | ? | ? | ? | ?/100% | ? |
+| 2 | ? | ? | ? | ?/100% | ? |
+| 3 | 0 | ≤2 | ? | 100% | APPROVE |
+
+**Target:** Iteration 3 must have 0 critical, ≤2 major, 100% citations valid.
+
+### PHASE 5: ACTION (2 minutes)
+
+Write design document if control and review approved:
+
+#### 5.1 Write Final Design Document
+
+```
+IF control.approved AND review_loop_complete:
+  WRITE(.specs/changes/<name>/design.md, final_design_content)
   VERIFY file exists
+  VERIFY review-iteration-1.md, review-iteration-2.md, review-iteration-3.md exist
 ELSE:
-  HALT with control.reason
+  HALT with reason
   LIST required fixes
 ```
 
-#### 4.2 Update Proposal Status
+#### 5.2 Update Proposal Status
 
 Update proposal.md:
 
 ```markdown
 ## Status
 - [x] Requirements: done (specs/ created)
-- [x] Design: done (design.md created)
+- [x] Design: done (design.md created, 3 review iterations)
 - [ ] Tasks: pending
 ```
 
-### PHASE 5: MEMORY UPDATE (3 minutes)
+### PHASE 6: MEMORY UPDATE (3 minutes)
 
 Extract and record to memory:
 
-#### 5.1 Extract Decisions
+#### 6.1 Extract Decisions
 
 ```
 FOR each decision in design document:
@@ -379,7 +520,7 @@ FOR each decision in design document:
   }
 ```
 
-#### 5.2 Record Citations
+#### 6.2 Record Citations
 
 ```
 FOR each citation in design document:
@@ -556,7 +697,7 @@ After completion, output:
 
 ```
 ═══════════════════════════════════════════════════════════
-✓ DESIGN DOCUMENT CREATED (SCL-ENHANCED)
+✓ DESIGN DOCUMENT CREATED (SCL-ENHANCED, REVIEWED)
 ═══════════════════════════════════════════════════════════
 
 PHASE 1: RETRIEVE
@@ -580,27 +721,50 @@ PHASE 3: CONTROL
   - Consistency: no contradictions
   - Decision: APPROVED
 
-PHASE 4: ACTION
-✓ Written to: design.md
+PHASE 4: REVIEW LOOP (3 ITERATIONS)
+✓ Iteration 1:
+  - Issues Found: <X> critical, <Y> major, <Z> minor
+  - Verdict: <REVISE/CONDITIONAL/APPROVE>
+  - Report: review-iteration-1.md
+
+✓ Iteration 2:
+  - Issues Found: <X> critical, <Y> major, <Z> minor
+  - Verdict: <REVISE/CONDITIONAL/APPROVE>
+  - Report: review-iteration-2.md
+
+✓ Iteration 3 (Final):
+  - Issues Found: 0 critical, ≤2 major, <Z> minor
+  - Verdict: APPROVE
+  - Report: review-iteration-3.md
+
+PHASE 5: ACTION
+✓ Written to: design.md (final after 3 iterations)
 ✓ Updated proposal status
 
-PHASE 5: MEMORY UPDATE
+PHASE 6: MEMORY UPDATE
 ✓ Extracted to memory:
   - decisions.json: +<N> decisions
   - citations.json: +<M> citations
-  - control-log.json: +1 checkpoint
+  - control-log.json: +4 checkpoints (1 control + 3 review)
   - episodes.json: +1 cycle
 
 Memory State:
 - Total decisions: <prior + new>
 - Total citations: <prior + new>
 - Requirements addressed: <M>/<M>
+- Critical issues: 0
+- Review iterations: 3
 
 Prior Context Incorporated:
 - DEC-001: <prior decision honored>
 - DEC-002: <prior decision honored>
 - User preference: <from episodes>
 - Constraint: <from regulation>
+
+Quality Improvements from Review:
+- <What was improved in iteration 1>
+- <What was improved in iteration 2>
+- <What was improved in iteration 3>
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -654,6 +818,11 @@ The SCL design document is successful when:
 - No regulation violations (0 blockers)
 - No contradictions with memory (0 conflicts)
 - Memory updated successfully (all 4 files)
+- **3 review iterations completed**
+- **0 critical issues in final iteration**
+- **≤2 major issues in final iteration**
+- **All review reports saved** (review-iteration-1.md, review-iteration-2.md, review-iteration-3.md)
+- **Design Iteration History documented in design.md**
 
 
-**Loads skills:** `sdd-design`
+**Loads skills:** `sdd-design`, `sdd-design-review`
