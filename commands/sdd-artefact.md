@@ -101,6 +101,8 @@ After agent completion:
 
 ### Step 5: Update Proposal Status
 
+**NOTE:** This step runs AFTER the design agent returns (which is AFTER the 3-iteration review loop completes). The agent does not update proposal status - this command handles it.
+
 Update the Status section in `proposal.md`:
 
 ```markdown

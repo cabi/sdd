@@ -400,34 +400,57 @@ Before writing, verify:
 - [ ] All sections have content
 - [ ] File paths are correct
 
-### Phase 6: 3-Iteration Design Review Loop
+### Phase 6: Write Draft & 3-Iteration Review Loop
 
-You **MUST** execute a 3-iteration review loop before finalizing the design:
+**CRITICAL: Write draft first, then 3 mandatory review iterations.**
+
+#### Phase 6.0: Write Initial Draft
+
+Before the review loop can start, the design document **MUST** exist on disk for the analyst to read:
+
+```
+WRITE(.specs/changes/<name>/design.md, initial_design_content)
+VERIFY file exists
+```
+
+This initial draft is revised during the review iterations.
 
 #### Iteration 1
-1. Create initial design document (design.md)
-2. **INVOKE SUBAGENT**: Use the Task tool to invoke `sdd-design-analyst` with the design document
-3. Receive critique report from analyst
-4. Save critique report to `.specs/changes/<name>/critique-iteration-1.md`
-5. Revise design based on critique
+
+1. **INVOKE SUBAGENT**: Use the Task tool to invoke `sdd-design-analyst`
+   - Analyst reads design.md from disk (file exists from Phase 6.0)
+2. Receive critique report from analyst
+3. Save critique report to `.specs/changes/<name>/review-iteration-1.md`
+4. Revise design.md on disk based on critique
 
 #### Iteration 2
-1. Update design document with revisions
-2. **INVOKE SUBAGENT**: Use the Task tool to invoke `sdd-design-analyst` with the revised design
-3. Receive critique report from analyst
-4. Save critique report to `.specs/changes/<name>/critique-iteration-2.md`
-5. Revise design based on critique
+
+1. **INVOKE SUBAGENT**: Use the Task tool to invoke `sdd-design-analyst`
+   - Analyst reads revised design.md from disk
+2. Receive critique report from analyst
+3. Save critique report to `.specs/changes/<name>/review-iteration-2.md`
+4. Revise design.md on disk based on critique
 
 #### Iteration 3
-1. Update design document with revisions
-2. **INVOKE SUBAGENT**: Use the Task tool to invoke `sdd-design-analyst` with the revised design
-3. Receive critique report from analyst
-4. Save critique report to `.specs/changes/<name>/critique-iteration-3.md`
-5. Apply final revisions to design document
+
+1. **INVOKE SUBAGENT**: Use the Task tool to invoke `sdd-design-analyst`
+   - Analyst reads revised design.md from disk
+2. Receive critique report from analyst
+3. Save critique report to `.specs/changes/<name>/review-iteration-3.md`
+4. Apply final revisions to design.md on disk
+
+### Phase 7: Verification
+
+After review loop completes, verify all artifacts exist:
+
+- [ ] design.md exists with final content
+- [ ] review-iteration-1.md, review-iteration-2.md, review-iteration-3.md exist
+- [ ] 0 critical issues remain
+- [ ] Design Iteration History section added to design.md
 
 ### Subagent Invocation Template
 
-When invoking the `sdd-design-analyst` subagent, use this prompt structure:
+When invoking the `sdd-design-analyst` subagent for each iteration, use this prompt structure:
 
 ```
 You are analyzing the design document for: <change-name>
@@ -436,23 +459,13 @@ Design Document Location: .specs/changes/<name>/design.md
 Iteration: N of 3
 
 Your task:
-1. Read the design document
+1. Read the design document from disk
 2. Analyze for logical flaws, structural issues, and coverage gaps
 3. Provide a brutally honest critique with severity levels (CRITICAL, MAJOR, MINOR)
 4. Suggest specific improvements
 
 Output a structured critique report following your analyst format.
 ```
-
-### Phase 7: Write Final Design Document
-
-Write to: `.specs/changes/<name>/design.md`
-
-Use clear, simple language:
-- Short sentences
-- Bulleted lists
-- Concrete examples
-- No unnecessary jargon
 
 ## Output Format
 
@@ -469,35 +482,41 @@ Analysis Completed:
 - Conventions: <key conventions found>
 - Similar Features: <what was found>
 
-Initial Design Document:
-- Sections: 13/13 complete
-- Decisions: <N> documented with alternatives
-- Diagrams: <N> Mermaid diagrams generated
-- Requirements Addressed: <N>/<M>
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PHASE 6: WRITE DRAFT & REVIEW LOOP
 
-REVIEW LOOP (3 ITERATIONS)
+✓ Written initial draft: design.md
 
 Iteration 1:
 - Issues Found: <X> critical, <Y> major, <Z> minor
 - Verdict: <REVISE/CONDITIONAL/APPROVE>
 - Key Fixes: <brief summary of what was addressed>
+- Design revised on disk
 - Report: review-iteration-1.md
 
 Iteration 2:
 - Issues Found: <X> critical, <Y> major, <Z> minor  
 - Verdict: <REVISE/CONDITIONAL/APPROVE>
 - Key Fixes: <brief summary of what was addressed>
+- Design revised on disk
 - Report: review-iteration-2.md
 
 Iteration 3 (Final):
-- Issues Found: <X> critical, <Y> major, <Z> minor
+- Issues Found: 0 critical, ≤2 major, <Z> minor
 - Verdict: <APPROVE>
 - Final Polish: <brief summary>
+- Design revised on disk
 - Report: review-iteration-3.md
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PHASE 7: VERIFICATION
+
+✓ All artifacts verified:
+  - design.md exists
+  - review-iteration-1.md, review-iteration-2.md, review-iteration-3.md exist
+  - 0 critical issues remain
 
 Final Design Document:
 - File: .specs/changes/<name>/design.md
@@ -522,7 +541,7 @@ Quality Improvements from Review:
 - <What was improved in iteration 2>
 - <What was improved in iteration 3>
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 Next: Use /sdd-artefact to create tasks
 
@@ -537,9 +556,10 @@ Next: Use /sdd-artefact to create tasks
 4. **Decision Depth**: Document at least 2 alternatives per decision
 5. **Testability First**: Include testing strategy, not just implementation
 6. **Concrete Examples**: Use realistic examples, not "foo/bar/baz"
-7. **Review Loop is Mandatory**: All 3 iterations must complete, even if early iterations approve
-8. **Address All Critical Issues**: Every CRIT-* from analyst MUST be fixed before proceeding
-9. **Document Iteration Changes**: Design Iteration History section is required in final design
+7. **Write Draft Before Review**: design.md MUST exist on disk before invoking analyst (Phase 6.0)
+8. **Review Loop is Mandatory**: All 3 iterations must complete, even if early iterations approve
+9. **Address All Critical Issues**: Every CRIT-* from analyst MUST be fixed before proceeding
+10. **Document Iteration Changes**: Design Iteration History section is required in final design
 
 ## Error Handling
 
@@ -559,6 +579,7 @@ The design document is successful when:
 - Risks are identified with mitigations
 - Testing and monitoring are addressed
 - Prior context is honored
+- **Design draft written before review loop (Phase 6.0)**
 - **3 review iterations completed**
 - **0 critical issues remain**
 - **Design Iteration History is documented**

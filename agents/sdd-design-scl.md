@@ -42,12 +42,13 @@ These constraints ensure memory integrity and proper scope for SCL-enhanced work
 
 ## RFC2119 Requirements
 
-1. The agent **MUST** follow the 6-phase SCL workflow: Retrieve → Cognition → Control → Review Loop → Action → Memory Update
+1. The agent **MUST** follow the 6-phase SCL workflow: Retrieve → Cognition → Control → Write & Review Loop → Finalization → Memory Update
 2. Every claim in the design **MUST** cite evidence from requirements or prior decisions
 3. Every decision **MUST** document at least 2 alternatives
 4. The agent **MUST NOT** write design.md if control validation fails
-5. The agent **MUST** complete 3 review iterations before finalizing design
-6. The agent **MUST** update memory after successful creation
+5. The agent **MUST** write design.md BEFORE starting review loop (analyst needs file to read)
+6. The agent **MUST** complete 3 review iterations before updating proposal status
+7. The agent **MUST** update memory after successful creation
 
 ## Mission
 
@@ -60,7 +61,7 @@ Create a design.md file that:
 6. Documents decisions with alternatives, rationale, and evidence
 7. Updates memory with new decisions and citations
 
-## SCL 5-Phase Workflow
+## SCL 6-Phase Workflow
 
 ### PHASE 1: RETRIEVE (5 minutes)
 
@@ -321,21 +322,34 @@ Checks:
 Decision: APPROVE
 ```
 
-### PHASE 4: REVIEW LOOP (15 minutes)
+### PHASE 4: WRITE & REVIEW LOOP (20 minutes)
 
-**CRITICAL: 3 mandatory review iterations for quality assurance.**
+**CRITICAL: Write draft first, then 3 mandatory review iterations.**
+
+#### 4.0 Write Initial Draft
+
+Before the review loop can start, the design document **MUST** exist on disk for the analyst to read:
+
+```
+WRITE(.specs/changes/<name>/design.md, initial_design_content)
+VERIFY file exists
+```
+
+This initial draft is revised during the review iterations.
+
+#### 4.1 Review Loop Structure
 
 Each iteration invokes the `sdd-design-analyst` subagent, receives critique, and revises the design.
 
-#### 4.1 Review Iteration Structure
+#### 4.2 Review Iteration Loop
 
 ```
 FOR iteration = 1 to 3:
-  // Invoke analyst
+  // Invoke analyst (reads design.md from disk)
   critique = INVOKE_SUBAGENT(
     agent: "sdd-design-analyst",
     input: {
-      design: current_design,
+      design_path: ".specs/changes/<name>/design.md",  // File exists from 4.0
       iteration: iteration,
       specs: specs/**/*.md,
       previous_reviews: [review-iteration-1.md, ..., review-iteration-(iteration-1).md]
@@ -353,13 +367,14 @@ FOR iteration = 1 to 3:
     verdict: critique.verdict
   })
   
-  // Revise if needed
+  // Revise design.md on disk if needed
   IF critique.verdict !== 'APPROVE' OR iteration < 3:
-    current_design = REVISE(current_design, critique.issues)
+    current_design = REVISE(READ(design.md), critique.issues)
+    WRITE(design.md, current_design)  // Update file for next iteration
     DOCUMENT_CHANGES(iteration, critique.issues)
 ```
 
-#### 4.2 Iteration Focus Areas
+#### 4.3 Iteration Focus Areas
 
 | Iteration | Primary Focus | Expected Issues |
 |-----------|--------------|-----------------|
@@ -458,25 +473,22 @@ Add Design Iteration History to design.md:
 
 **Target:** Iteration 3 must have 0 critical, ≤2 major, 100% citations valid.
 
-### PHASE 5: ACTION (2 minutes)
+### PHASE 5: FINALIZATION (2 minutes)
 
-Write design document if control and review approved:
+After review loop completes, finalize status and verify artifacts:
 
-#### 5.1 Write Final Design Document
+#### 5.1 Verify Review Artifacts
 
 ```
-IF control.approved AND review_loop_complete:
-  WRITE(.specs/changes/<name>/design.md, final_design_content)
-  VERIFY file exists
-  VERIFY review-iteration-1.md, review-iteration-2.md, review-iteration-3.md exist
-ELSE:
-  HALT with reason
-  LIST required fixes
+VERIFY design.md exists (written in Phase 4.0, revised in iterations)
+VERIFY review-iteration-1.md, review-iteration-2.md, review-iteration-3.md exist
+IF any missing:
+  HALT with error
 ```
 
 #### 5.2 Update Proposal Status
 
-Update proposal.md:
+Update proposal.md **AFTER** all review iterations complete:
 
 ```markdown
 ## Status
@@ -720,24 +732,27 @@ PHASE 3: CONTROL
   - Consistency: no contradictions
   - Decision: APPROVED
 
-PHASE 4: REVIEW LOOP (3 ITERATIONS)
+PHASE 4: WRITE & REVIEW LOOP
+✓ Written initial draft: design.md
 ✓ Iteration 1:
   - Issues Found: <X> critical, <Y> major, <Z> minor
   - Verdict: <REVISE/CONDITIONAL/APPROVE>
   - Report: review-iteration-1.md
+  - Design revised on disk
 
 ✓ Iteration 2:
   - Issues Found: <X> critical, <Y> major, <Z> minor
   - Verdict: <REVISE/CONDITIONAL/APPROVE>
   - Report: review-iteration-2.md
+  - Design revised on disk
 
 ✓ Iteration 3 (Final):
   - Issues Found: 0 critical, ≤2 major, <Z> minor
   - Verdict: APPROVE
   - Report: review-iteration-3.md
 
-PHASE 5: ACTION
-✓ Written to: design.md (final after 3 iterations)
+PHASE 5: FINALIZATION
+✓ Verified all review artifacts exist
 ✓ Updated proposal status
 
 PHASE 6: MEMORY UPDATE

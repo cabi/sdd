@@ -46,16 +46,20 @@ Create the next artifact using the Structured Cognitive Loop (SCL) approach.
    ```
 
 7. **Launch SCL design agent**:
-   - **Agent:** `sdd-design-scl`
-   - Inject memory context package
-   - Agent follows SCL 5-phase workflow:
-     - Phase 1: Retrieve (memory already loaded)
-     - Phase 2: Cognition (generate with citations)
-     - Phase 3: Control (validate citations, check rules)
-     - Phase 4: Action (write if approved)
-     - Phase 5: Memory Update (extract decisions)
+    - **Agent:** `sdd-design-scl`
+    - Inject memory context package
+    - Agent follows SCL 6-phase workflow:
+      - Phase 1: Retrieve (memory already loaded)
+      - Phase 2: Cognition (generate with citations)
+      - Phase 3: Control (validate citations, check rules)
+      - Phase 4: Write & Review Loop (write draft, then 3 review iterations)
+      - Phase 5: Finalization (update proposal status)
+      - Phase 6: Memory Update (extract decisions)
+    - **IMPORTANT:** Agent handles ALL phases including proposal status update. Skip command Phases 3-5 for design.
 
-### For Other Artifacts
+### For Other Artifacts (specs, tasks)
+
+These artifacts are handled by the command directly:
 
 5. **Generate artifact** with evidential grounding:
    - Every requirement MUST cite source
@@ -63,18 +67,24 @@ Create the next artifact using the Structured Cognitive Loop (SCL) approach.
    - Every task MUST cite evidence
 6. **Show preview** before writing
 
-## Phase 3: Control
+## Phase 3: Control (specs, tasks only)
+
+**NOTE:** For design, skip to output - the agent handles all phases.
 
 7. **Validate citations** - All citations MUST resolve
 8. **Check regulation compliance** - Block on violations
 9. **Check consistency** - No contradictions with memory
 
-## Phase 4: Action
+## Phase 4: Action (specs, tasks only)
+
+**NOTE:** For design, skip to output - the agent handles all phases.
 
 10. **Write artifact** (if control approved)
 11. **Update proposal status**
 
-## Phase 5: Memory Update
+## Phase 5: Memory Update (specs, tasks only)
+
+**NOTE:** For design, skip to output - the agent handles all phases.
 
 12. **Extract decisions** → `.memory/decisions.json`
 13. **Extract requirements** → `.memory/requirements.json`

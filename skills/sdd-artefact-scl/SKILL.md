@@ -223,8 +223,19 @@ The system SHALL <behavior>.
 
 ### Step 2.3: Create Design
 
-**Require skill:**  `sdd-design`
-The system **MUST** create `.specs/changes/<name>/design.md`:
+**Require skill:** `sdd-design`
+**Agent:** `sdd-design-scl` (handles full workflow including proposal status update)
+
+The system **MUST** create `.specs/changes/<name>/design.md` via the SCL design agent:
+
+**Agent Workflow (handled entirely by sdd-design-scl):**
+1. Phase 4: Write draft design.md → 3 review iterations → revise after each
+2. Phase 5: Finalization → Update proposal status (AFTER all reviews)
+3. Phase 6: Memory update
+
+**The command MUST NOT update proposal status for design artifacts.**
+
+Template for design.md:
 
 ```markdown
 # Design: <spec-name>
@@ -466,16 +477,19 @@ ELSE:
   ABORT with control.reason
 ```
 
-### Step 4.2: Update Proposal Status
+### Step 4.2: Update Proposal Status (Non-Design Artifacts Only)
 
-The system **MUST** update the Status section in `proposal.md`:
+**IMPORTANT for Design Artifacts:** When creating a design document via the `sdd-design-scl` agent, the agent handles ALL phases including proposal status update as part of its review-finalization workflow (Phase 5 after the 3-iteration review loop completes).
+
+The command **MUST NOT** update proposal status for design artifacts - this would lead to premature status updates before reviews are complete.
+
+For non-design artifacts (specs, tasks), update `proposal.md` status section:
 
 ```markdown
 ## Status
 - [x] Requirements: done (specs/ created)
 - [ ] Design: pending
 - [ ] Tasks: pending
-- [x] Memory: updated (see .memory/)
 ```
 
 ## Phase 5: Memory Update
