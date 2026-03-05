@@ -202,4 +202,16 @@ If proposal sections are not perfectly structured, use pattern matching:
 | "Q:/A:" or "Question/Answer" | exploration episode | Q&A pairs |
 | "Considered/Option/Tried" | options_not_decided | "Considered using Redis" |
 
+---
+
+## Valid Next Commands
+
+**After memory initialization:**
+- `/sdd-artefact-scl` - Create requirements (specs) with memory tracking
+- `/sdd-memory-status` - View harvested knowledge
+
+**Do NOT use these as commands (they are skills):**
+- ❌ `/sdd-memory` (skill, loaded by this command)
+- ❌ `/sdd-requirements` (skill, loaded by /sdd-artefact-scl)
+
 **Loads skills:** `sdd-memory`

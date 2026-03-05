@@ -74,4 +74,15 @@ Handled by the `sdd-interview` skill - it will:
 - Explore options without deciding
 - Prepare for creating a good proposal
 
+---
+
+## Valid Next Commands
+
+**After exploration complete:**
+- `/sdd-propose <change-name>` - Create formal proposal from context-log
+
+**Do NOT use these as commands (they are skills):**
+- ❌ `/sdd-interview` (skill, loaded by this command)
+- ❌ `/sdd-spec-create` (skill, loaded by /sdd-propose)
+
 **Loads skill:** `sdd-interview`

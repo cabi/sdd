@@ -214,4 +214,20 @@ Options:
   [4] View memory state for debugging
 ```
 
+---
+
+## Valid Next Commands
+
+**After all groups completed:**
+- `/sdd-verify-scl` - Verify implementation with memory tracing
+- `/sdd-status` - Confirm all tasks done
+- `/sdd-memory-status` - View final memory state
+- `/sdd-archive` - Archive the change (after verification)
+
+**Do NOT suggest:**
+- ❌ `/sdd-apply-group-scl` (all groups already done)
+- ❌ `/sdd-apply-all-scl` (all groups already done)
+- ❌ `/sdd-artefact-scl` (already completed)
+- ❌ `/sdd-verify` (use /sdd-verify-scl for SCL workflow)
+
 **Loads skills:** `sdd-control`, `sdd-memory`

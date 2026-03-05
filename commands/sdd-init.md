@@ -92,3 +92,15 @@ Next steps:
   - Use /sdd-explore to explore your first feature
   - Use /sdd-propose to create your first specification
 ```
+
+---
+
+## Valid Next Commands
+
+**After initializing project:**
+- `/sdd-reverse src/` - Extract specs from existing code (brownfield)
+- `/sdd-explore` - Start exploring a new change (greenfield)
+
+**Do NOT suggest:**
+- ❌ `/sdd-artefact` (no change exists yet)
+- ❌ `/sdd-apply` (no change exists yet)

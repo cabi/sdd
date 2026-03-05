@@ -157,4 +157,20 @@ Options:
   [3] Manual intervention
 ```
 
+---
+
+## Valid Next Commands
+
+**After completing a group:**
+- `/sdd-apply-group-scl N+1` - Execute next group with SCL memory context
+- `/sdd-apply-all-scl` - Execute all remaining groups with SCL memory context
+- `/sdd-status` - Check progress
+- `/sdd-memory-status` - View memory state
+- `/sdd-verify-scl` - Verify implementation with memory tracing (after all groups done)
+
+**Do NOT suggest:**
+- ❌ `/sdd-artefact-scl` (already completed)
+- ❌ `/sdd-apply` (use /sdd-apply-group-scl or /sdd-apply-all-scl)
+- ❌ `/sdd-verify` (use /sdd-verify-scl for SCL workflow)
+
 **Loads skills:** `sdd-control`, `sdd-memory`

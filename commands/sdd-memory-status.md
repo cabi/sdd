@@ -119,4 +119,14 @@ Suggestion: Update references to DEC-003 (superseding decision)
 }
 ```
 
+---
+
+## Valid Next Commands
+
+**Memory status is informational - use it anytime in SCL workflow:**
+- Any SCL command appropriate to current stage
+- No restrictions (this is a read-only utility)
+
+**Only available in SCL workflow** (requires .memory/ directory)
+
 **Loads skills:** `sdd-memory`

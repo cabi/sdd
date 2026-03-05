@@ -131,9 +131,15 @@ Created directories:
   .specs/changes/
   .specs/archive/
 
-Next steps:
-  - Review AGENTS.md for the new workflow rules
-  - Use /sdd-explore to explore your first feature
-  - Use /sdd-propose to create your first specification
-  - Use /sdd-init-memory <change-name> to initialize SCL memory
-```
+---
+
+## Valid Next Commands
+
+**After initializing project:**
+- `/sdd-reverse src/` - Extract specs from existing code (brownfield)
+- `/sdd-explore` - Start exploring a new change (greenfield)
+
+**Do NOT suggest:**
+- ❌ `/sdd-artefact-scl` (no change exists yet)
+- ❌ `/sdd-apply-group-scl` (no change exists yet)
+

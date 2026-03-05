@@ -25,3 +25,18 @@ Follow the sdd-spec-archive skill:
 8. **Report completion**
 
 Key principle: `.specs/specs/` becomes the single source of truth after merge.
+
+---
+
+## Valid Next Commands
+
+**After archiving:**
+- `/sdd-explore` - Start a new change
+- `/sdd-status` - View archived change (read-only)
+
+**Do NOT suggest:**
+- ❌ `/sdd-apply` (change is archived)
+- ❌ `/sdd-verify` (change is archived)
+- ❌ `/sdd-artefact` (change is archived)
+
+**Loads skill:** `sdd-spec-archive`

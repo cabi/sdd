@@ -76,3 +76,20 @@ Verify that the implementation matches the spec requirements.
    - After implementing features
    - Checking for spec drift
    - Code review preparation
+
+---
+
+## Valid Next Commands
+
+**If verification passed:**
+- `/sdd-archive` - Archive the completed change
+- `/sdd-status` - Review final status
+
+**If verification failed:**
+- `/sdd-apply` - Fix failed tasks one at a time
+- `/sdd-apply-group N` - Fix failed tasks in specific group
+- `/sdd-status` - See which tasks failed
+
+**Do NOT suggest:**
+- ❌ `/sdd-artefact` (already completed)
+- ❌ `/sdd-init-memory` (already completed)

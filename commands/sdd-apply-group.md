@@ -42,4 +42,18 @@ AI: Dispatching subagent for Group 2: Core Services
     Ready for next group. Use /sdd-apply-group 3 or /sdd-apply-all
 ```
 
+---
+
+## Valid Next Commands
+
+**After completing a group:**
+- `/sdd-apply-group N+1` - Execute next group
+- `/sdd-apply-all` - Execute all remaining groups
+- `/sdd-status` - Check progress
+- `/sdd-verify` - Verify implementation (after all groups done)
+
+**Do NOT suggest:**
+- ❌ `/sdd-artefact` (already completed)
+- ❌ `/sdd-apply` (use /sdd-apply-group or /sdd-apply-all)
+
 **Loads skill:** `sdd-spec-apply`

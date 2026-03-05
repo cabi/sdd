@@ -214,4 +214,24 @@ Re-verification after fixes:
 Remaining issues require manual intervention.
 ```
 
+---
+
+## Valid Next Commands
+
+**If verification passed:**
+- `/sdd-archive` - Archive the completed change
+- `/sdd-status` - Review final status
+- `/sdd-memory-status` - View final memory state
+
+**If verification failed:**
+- `/sdd-apply-group-scl N` - Fix failed tasks in specific group
+- `/sdd-apply-all-scl` - Re-execute all groups after fixes
+- `/sdd-status` - See which tasks failed
+- `/sdd-memory-status` - Debug memory inconsistencies
+
+**Do NOT suggest:**
+- ❌ `/sdd-artefact-scl` (already completed)
+- ❌ `/sdd-init-memory` (already completed)
+- ❌ `/sdd-verify` (use /sdd-verify-scl for SCL workflow)
+
 **Loads skills:** `sdd-memory`, `sdd-control`

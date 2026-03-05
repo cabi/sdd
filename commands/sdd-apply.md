@@ -21,4 +21,19 @@ If implementation reveals a gap in the spec:
 
 Show me progress after each task.
 
+---
+
+## Valid Next Commands
+
+**After completing a task:**
+- `/sdd-apply` - Execute next task
+- `/sdd-apply-group N` - Execute all tasks in group N
+- `/sdd-apply-all` - Execute all remaining tasks
+- `/sdd-status` - Check progress
+- `/sdd-verify` - Verify implementation (after all tasks done)
+
+**Do NOT suggest:**
+- ❌ `/sdd-artefact` (already completed - specs/design/tasks exist)
+- ❌ `/sdd-requirements` (skill, not command)
+
 **Loads skill:** `sdd-spec-apply`

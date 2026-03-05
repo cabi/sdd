@@ -146,4 +146,26 @@ Next Steps:
 DO NOT show options that don't apply to the current state.
 DO NOT suggest commands not listed above.
 
+---
+
+## Valid Next Commands
+
+**After creating specs:**
+- `/sdd-artefact-scl` - Create design document with memory tracking
+
+**After creating design:**
+- `/sdd-artefact-scl` - Create tasks document with memory tracking
+
+**After creating tasks:**
+- `/sdd-apply-group-scl N` - Execute group N with SCL memory context
+- `/sdd-apply-all-scl` - Execute all groups with SCL memory context
+- `/sdd-status` - Check current progress
+- `/sdd-memory-status` - View memory state
+
+**Do NOT use these as commands (they are skills/agents):**
+- ❌ `/sdd-requirements` (skill, loaded by this command)
+- ❌ `/sdd-design-scl` (agent, invoked by this command)
+- ❌ `/sdd-tasks-scl` (skill, loaded by this command)
+- ❌ `/sdd-memory` (skill, loaded by /sdd-init-memory)
+
 **Loads skills:** `sdd-artefact-scl`, `sdd-requirements`, `sdd-memory`, `sdd-design`, `sdd-tasks-scl`

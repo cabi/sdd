@@ -139,5 +139,26 @@ Next Steps:
 DO NOT show options that don't apply to the current state.
 DO NOT suggest commands not listed above.
 
+---
+
+## Valid Next Commands
+
+**After creating specs:**
+- `/sdd-artefact` - Create design document
+
+**After creating design:**
+- `/sdd-artefact` - Create tasks document
+
+**After creating tasks:**
+- `/sdd-apply` - Execute one task at a time
+- `/sdd-apply-group N` - Execute all tasks in group N
+- `/sdd-apply-all` - Execute all remaining groups
+- `/sdd-status` - Check current progress
+
+**Do NOT use these as commands (they are skills/agents):**
+- ❌ `/sdd-requirements` (skill, loaded by this command)
+- ❌ `/sdd-design` (agent, invoked by this command)
+- ❌ `/sdd-tasks` (skill, loaded by this command)
+
 **Loads skills:** `sdd-spec-artefact`, `sdd-requirements`, `sdd-design`, `sdd-tasks`
 **Loads agents:** `sdd-design-agent` (for design phase)

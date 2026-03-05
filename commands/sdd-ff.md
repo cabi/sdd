@@ -18,8 +18,20 @@ Use when I have a clear picture of what I want to build and want to skip the inc
 4. **Update proposal status** - Mark all complete
 5. **Report what was created**
 
-**Warning:** This creates everything at once. For complex features, `/sdd-continue` allows review between artifacts.
+**Warning:** This creates everything at once. For complex features, use `/sdd-artefact` to allow review between artifacts.
 
-**After completion:**
-- Review the generated artifacts
-- Use `/sdd-apply` to start implementation
+---
+
+## Valid Next Commands
+
+**After fast-forward (all artifacts created):**
+- `/sdd-apply` - Execute one task at a time
+- `/sdd-apply-group N` - Execute group N
+- `/sdd-apply-all` - Execute all groups
+- `/sdd-status` - Review what was created
+
+**Do NOT suggest:**
+- ❌ `/sdd-artefact` (fast-forward already created all artifacts)
+- ❌ `/sdd-explore` (already done)
+- ❌ `/sdd-propose` (already done)
+- ❌ `/sdd-continue` (does not exist - use `/sdd-artefact` instead)

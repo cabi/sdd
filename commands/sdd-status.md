@@ -47,3 +47,11 @@ If multiple changes, show summary for all.
 Also show:
 - Existing specs in `.specs/specs/` (accumulated)
 - Recent archives in `.specs/archive/`
+
+---
+
+## Valid Next Commands
+
+**Status is informational - use it anytime:**
+- Any command appropriate to current workflow stage
+- No restrictions (this is a read-only utility)

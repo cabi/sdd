@@ -67,4 +67,19 @@ Files modified: 3
 
 Spec: user-authentication is ready for /sdd-archive
 ```
+
+---
+
+## Valid Next Commands
+
+**After all tasks completed:**
+- `/sdd-verify` - Verify implementation matches spec
+- `/sdd-status` - Confirm all tasks done
+- `/sdd-archive` - Archive the change (after verification)
+
+**Do NOT suggest:**
+- ❌ `/sdd-apply` (all tasks already done)
+- ❌ `/sdd-apply-group` (all groups already done)
+- ❌ `/sdd-artefact` (already completed)
+
 **Loads skill:** `sdd-spec-apply`

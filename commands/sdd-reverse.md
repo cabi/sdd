@@ -74,9 +74,25 @@ Analyzing 4 capabilities in parallel...
       ├── registration/spec.md (2 requirements)
       ├── password-reset/spec.md (2 requirements)
       └── session-mgmt/spec.md (2 requirements)
+```
 
-Next: Use /sdd-explore to explore a change, then /sdd-propose to create a spec in .specs/changes/
-that references these existing capabilities.
+---
+
+## Valid Next Commands
+
+**After reverse-engineering existing code:**
+- `/sdd-explore` - Explore a change you want to make
+- `/sdd-propose <name>` - Create proposal for a change (after exploration)
+- `/sdd-status` - View what was extracted
+
+**Workflow:**
+```
+/sdd-reverse src/auth/
+  ↓ (extracts specs to .specs/specs/auth/)
+/sdd-explore add-2fa
+  ↓ (creates .specs/changes/add-2fa/context-log.md)
+/sdd-propose add-2fa
+  ↓ (creates proposal referencing existing capabilities)
 ```
 
 **Use when:**
