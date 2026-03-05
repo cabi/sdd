@@ -12,24 +12,43 @@ Status: exploring
 
 ### Clarifying Questions
 
-#### Q1: What problem are you solving?
-**A:** _To be filled during exploration_
+#### Fast-Path Check
+**Q:** Use all recommended defaults?
+**A:** _To be filled (yes/no)_
+_Insight: If yes, only Batch 3 is asked_
+
+#### Batch 1: Problem Context
+
+**Q1:** What type of change is this?
+**A:** _To be filled (New feature/Bug fix/Enhancement/Refactor)_
+_Default: New feature (Recommended)_
 _Insight: _To be filled_
 
-#### Q2: Who is this for?
-**A:** _To be filled_
+**Q2:** Who will primarily use this?
+**A:** _To be filled (End users/Developers/Internal team/External API)_
+_Default: End users (Recommended)_
 _Insight: _To be filled_
 
-#### Q3: What does success look like?
-**A:** _To be filled_
+#### Batch 2: Scope & Timeline
+
+**Q3:** Which areas will be affected? (Select all that apply)
+**A:** _To be filled (API/Database/UI/Config/Tests/Documentation)_
 _Insight: _To be filled_
 
-#### Q4: What constraints exist?
-**A:** _To be filled_
+**Q4:** What's the expected timeline?
+**A:** _To be filled (Urgent/This week/This month/No deadline)_
+_Default: No deadline (Recommended)_
 _Insight: _To be filled_
 
-#### Q5: What's the scope (in/out)?
-**A:** _To be filled_
+#### Batch 3: Success & Risk
+
+**Q5:** Could this break existing functionality?
+**A:** _To be filled (No/Unsure/Yes)_
+_Default: No (Recommended)_
+_Insight: _To be filled_
+
+**Q6:** What does success look like? How will we know it's done?
+**A:** _To be filled during exploration (open-ended response)_
 _Insight: _To be filled_
 
 ### Goals Identified

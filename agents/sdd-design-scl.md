@@ -16,7 +16,6 @@ permission:
     "*": allow
   webfetch: deny
 temperature: 0.8
-hidden: false
 ---
 
 # SDD Design Agent (SCL-Enhanced)

@@ -1,6 +1,7 @@
 ---
 description: Brutally honest design critic that analyzes design documents for logical flaws, structural issues, and coverage gaps. Use PROACTIVELY when design review is needed.
 mode: subagent
+hidden: true
 tools:
   glob: true
   grep: true

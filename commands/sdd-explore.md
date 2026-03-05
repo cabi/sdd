@@ -39,41 +39,29 @@ Help me think through an idea or problem and capture the exploration context.
    - WRITE to `.specs/changes/<change-name>/context-log.md`
 
 5. **Run exploration interview**:
-   - Use `sdd-interview` skill
-   - Ask clarifying questions:
-     - What problem are you solving?
-     - Who is this for?
-     - What does success look like?
-     - What constraints exist?
-     - What's the scope (in/out)?
-   - Update context-log.md in real-time
-   - Populate sections:
-     - Goals Identified
-     - Constraints Discovered (technical/business/external)
-     - Scope Boundaries
-     - Options Considered
-     - Risks Identified
-     - Domain Knowledge
+   - Invoke `sdd-interview` skill
+   - Ask structured questions using `question` tool in 3 batches:
+     - **Fast-path option**: "Use all recommended defaults?" (skip Batches 1-2 if yes)
+     - **Batch 1**: Problem type, primary audience
+     - **Batch 2**: Scope areas (multi-select), timeline
+     - **Batch 3**: Breaking change risk, success criteria (open-ended)
+   - After answers received, update context-log.md:
+     - Map problem type → Goals Identified
+     - Map audience → Domain Knowledge
+     - Map scope areas → Scope Boundaries (In Scope/Out of Scope)
+     - Map timeline → Business Constraints
+     - Map breaking risk → Risks Identified
+     - Map success criteria → Goals Identified (refined)
+   - Populate all sections: Goals, Constraints, Scope, Options, Risks, Domain Knowledge
+   - Show completion summary and prompt for /sdd-propose
 
-6. **Report completion**
+6. **Done** - The sdd-interview skill handles the completion summary and prompts for /sdd-propose
 
 **Output:**
-```
-✓ Created exploration context for: <change-name>
-
-Created:
-  .specs/changes/<change-name>/
-  └── context-log.md
-
-Exploration captured:
-  - X goals identified
-  - Y constraints discovered
-  - Z scope boundaries defined
-  - N options considered
-
-Context log ready for proposal creation.
-Next: Use /sdd-propose <change-name> to create the formal proposal
-```
+Handled by the `sdd-interview` skill - it will:
+- Save context-log.md with all exploration data
+- Show completion summary
+- Prompt user to run `/sdd-propose <change-name>`
 
 **Don't:**
 - Create proposal.md (that's `/sdd-propose`)
