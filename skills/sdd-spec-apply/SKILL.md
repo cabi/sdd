@@ -167,7 +167,7 @@ Execute all remaining groups in dependency order.
    b. Dispatch subagent with constrained prompt
    c. Wait for completion signal
    d. Verify results
-   e. Report progress
+   e. Report progress / Mark task status
    f. Optionally: ask user to confirm before next group
 5. Final summary
 ```
