@@ -347,7 +347,7 @@ Once you have baseline specs:
 1. /sdd-reverse src/auth/
    → Creates .specs/specs/auth/ with separate capability specs
 
-2. /sdd-new add-two-factor
+2. /sdd-propose add-two-factor
    → Creates change spec
 
 3. Change proposal references baseline:

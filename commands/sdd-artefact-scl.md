@@ -25,6 +25,38 @@ Create the next artifact using the Structured Cognitive Loop (SCL) approach.
 
 ## Phase 2: Cognition
 
+### For Design Document Creation
+
+5. **Gather prior context from memory**:
+   - Read `.memory/decisions.json` for all prior decisions
+   - Read `.memory/requirements.json` for requirement priorities
+   - Read `.memory/episodes.json` for Q&A history
+   - Parse `proposal.md` for _Context Log section
+   - Extract user preferences and constraints
+
+6. **Build memory context package**:
+   ```
+   Memory Context:
+   - Prior Decisions: [from decisions.json]
+   - Requirements: [from requirements.json with status]
+   - Q&A History: [from episodes.json]
+   - User Preferences: [from proposal/specs]
+   - Constraints: [technical/business/external]
+   - Control State: [from control-log.json]
+   ```
+
+7. **Launch SCL design agent**:
+   - **Agent:** `sdd-design-scl`
+   - Inject memory context package
+   - Agent follows SCL 5-phase workflow:
+     - Phase 1: Retrieve (memory already loaded)
+     - Phase 2: Cognition (generate with citations)
+     - Phase 3: Control (validate citations, check rules)
+     - Phase 4: Action (write if approved)
+     - Phase 5: Memory Update (extract decisions)
+
+### For Other Artifacts
+
 5. **Generate artifact** with evidential grounding:
    - Every requirement MUST cite source
    - Every decision MUST cite alternatives

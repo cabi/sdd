@@ -75,7 +75,7 @@ Analyzing 4 capabilities in parallel...
       ├── password-reset/spec.md (2 requirements)
       └── session-mgmt/spec.md (2 requirements)
 
-Next: Use /sdd-new to create a change in .specs/changes/
+Next: Use /sdd-explore to explore a change, then /sdd-propose to create a spec in .specs/changes/
 that references these existing capabilities.
 ```
 

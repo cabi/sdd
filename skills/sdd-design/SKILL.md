@@ -33,16 +33,40 @@ For simple changes, minimal design is fine.
 ```markdown
 # Design: <spec-name>
 
+## Problem Statement
 ## Context
 ## Goals / Non-Goals
+## Existing Solution (if modification)
 ## Architecture
 ## Decisions
 ## Components
 ## Data Models
 ## API Changes
+## Testability, Monitoring & Alerting
 ## Risks / Trade-offs
 ## Migration Plan
 ## Open Questions
+```
+
+## Section Details
+
+### Problem Statement
+
+Clear, non-technical description of the challenge:
+
+```markdown
+## Problem Statement
+
+<What problem are we solving? Describe in plain language.>
+<Why does this matter to users/business?>
+<What happens if we don't solve it?>
+
+**Example:**
+Users currently cannot log into our application. This prevents them from 
+accessing personalized features and forces them to use the application as 
+guests. Without authentication, we cannot offer saved preferences, order 
+history, or account-specific features. Implementing user authentication 
+will enable personalized experiences and increase user engagement.
 ```
 
 ## Section Details
@@ -98,6 +122,52 @@ Explicitly define scope:
 - Single sign-on (SSO)
 ```
 
+### Existing Solution (if modification)
+
+When modifying existing capabilities, document current state:
+
+```markdown
+## Existing Solution
+
+**Current Implementation:**
+- Users authenticate via API keys stored in config files
+- API keys are manually distributed by admins
+- No expiration or rotation mechanism
+
+**How It Works:**
+```mermaid
+sequenceDiagram
+    participant Client
+    participant API
+    participant Config
+    
+    Client->>API: Request with API key header
+    API->>Config: Look up key in config file
+    Config-->>API: Key found
+    API-->>Client: Allow access
+```
+
+**Limitations:**
+- API keys never expire (security risk)
+- Manual key distribution is error-prone
+- No audit trail of key usage
+- Difficult to revoke compromised keys
+
+**User Flow (Current):**
+1. User requests API access from admin
+2. Admin generates key manually
+3. Admin sends key via email (insecure)
+4. User adds key to their application config
+5. Key works indefinitely
+
+**Why Change:**
+Moving to email/password auth with JWT tokens provides:
+- Better security with expiring tokens
+- Self-service account management
+- Audit trail of authentication events
+- Easier key rotation and revocation
+```
+
 ### Architecture
 
 High-level system design:
@@ -105,19 +175,81 @@ High-level system design:
 ```markdown
 ## Architecture
 
-<Diagram or description of system structure>
+<High-level overview of the solution>
 
-### Flow
-1. User submits credentials
-2. API validates against auth service
-3. Session token generated
-4. Token returned to client
+### System Design
+
+```mermaid
+graph TB
+    subgraph "Client Layer"
+        UI[React UI]
+    end
+    
+    subgraph "API Layer"
+        Gateway[API Gateway]
+        Auth[Auth Service]
+        User[User Service]
+    end
+    
+    subgraph "Data Layer"
+        DB[(PostgreSQL)]
+        Cache[(Redis)]
+    end
+    
+    UI --> Gateway
+    Gateway --> Auth
+    Gateway --> User
+    Auth --> Cache
+    User --> DB
 ```
 
-**Diagram formats:**
-- Mermaid diagrams in markdown
-- ASCII diagrams for simplicity
-- Reference to external diagrams
+### Component Flow
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant UI as React UI
+    participant API as API Gateway
+    participant Auth as Auth Service
+    participant DB as Database
+    
+    U->>UI: Enter credentials
+    UI->>API: POST /auth/login
+    API->>Auth: Validate credentials
+    Auth->>DB: Get user by email
+    DB-->>Auth: User record
+    Auth->>Auth: Verify password hash
+    Auth->>Auth: Generate JWT token
+    Auth-->>API: Token + user data
+    API-->>UI: Success response + token
+    UI-->>U: Redirect to dashboard
+```
+
+### Data Flow
+
+```mermaid
+flowchart LR
+    A[User Input] --> B[Validation]
+    B --> C{Valid?}
+    C -->|Yes| D[Hash Password]
+    C -->|No| E[Return Error]
+    D --> F[Create User]
+    F --> G[Generate Token]
+    G --> H[Return Success]
+```
+
+### Key Components
+- **Auth Service**: Handles authentication logic
+- **Token Service**: Generates and validates JWT tokens
+- **User Repository**: Database operations for users
+```
+
+**Diagram Best Practices:**
+- Use Mermaid diagrams (render natively in GitHub/GitLab/VS Code)
+- Keep diagrams simple and readable
+- Use subgraphs to group related components
+- Label all connections with descriptions
+- Show error paths when relevant
 
 ### Decisions
 
@@ -232,6 +364,61 @@ Document API modifications:
 **Errors:**
 - 401: Invalid credentials
 - 400: Missing fields
+```
+
+### Testability, Monitoring & Alerting
+
+Document testing strategy and observability:
+
+```markdown
+## Testability, Monitoring & Alerting
+
+### Testing Strategy
+
+**Unit Tests:**
+- Test password hashing utility
+- Test token generation/validation
+- Test authentication middleware
+- Mock database calls
+
+**Integration Tests:**
+- Test login flow end-to-end
+- Test token refresh flow
+- Test logout functionality
+- Test error scenarios
+
+**End-to-End Tests:**
+- Test complete user journey
+- Test session persistence
+- Test concurrent sessions
+
+### Monitoring
+
+**Metrics to Track:**
+- Login success/failure rate
+- Token generation count
+- Authentication latency
+- Active sessions count
+- Password reset requests
+
+**Logging:**
+- Log all authentication attempts (without passwords)
+- Log token refresh events
+- Log suspicious activity patterns
+- Use structured logging (JSON)
+
+### Alerting
+
+**Alert Conditions:**
+- Spike in failed login attempts (>10/minute per IP)
+- Authentication service down
+- Token validation errors spike
+- Database connection failures
+
+**Runbooks:**
+- Link to authentication troubleshooting guide
+- Document common error codes
+- Escalation procedures
 ```
 
 ### Risks / Trade-offs

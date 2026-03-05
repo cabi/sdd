@@ -1,20 +1,36 @@
 # Skills Reference
 
-All 13 SDD skills organized by purpose.
+All 15 SDD skills organized by purpose.
 
-## Spec Creation Skills
+## Exploration & Spec Creation Skills
+
+### `sdd-interview`
+
+Clarify requirements through structured questioning.
+
+**Used by:** `/sdd-explore`
+
+**Purpose:**
+Ask clarifying questions to gather complete context during exploration phase. Captures:
+- Problem being solved
+- Success criteria
+- Constraints
+- Scope boundaries
+- Options considered
+
+---
 
 ### `sdd-spec-create`
 
 Create proposal.md for a new change.
 
-**Used by:** `/sdd-new`
+**Used by:** `/sdd-propose`
 
 **Creates:**
-- `.specs/changes/<name>/proposal.md`
+- `.specs/changes/<name>/proposal.md` (with Context Log, Goals, Constraints sections)
 
 **Purpose:**
-Generates the initial proposal document with WHY, WHAT, capabilities, and scope sections.
+Generates the formal proposal document from context-log.md. Transfers Q&A, goals, constraints, and exploration notes into structured sections for harvesting.
 
 ---
 
@@ -155,7 +171,7 @@ Scans existing codebase to detect capabilities and generate specification files.
 
 ### `sdd-memory`
 
-Memory module with JSON schemas.
+Memory module with JSON schemas and harvesting operations.
 
 **Used by:** SCL commands
 
@@ -165,14 +181,24 @@ Memory module with JSON schemas.
 - `citations.json` schema
 - `control-log.json` schema
 - `episodes.json` schema
+- `MEM.harvest_from_proposal()` operation
 
 **Purpose:**
-Defines the structure for SCL memory persistence. Each schema tracks specific aspects:
+Defines the structure for SCL memory persistence and provides harvesting from proposal.md:
+
+**Harvesting Rules:**
+- Goals → requirements.json (type: functional)
+- Constraints → requirements.json (type: constraint)
+- Context Log → episodes.json (phase: exploration)
+- Exploration Notes → episodes.json (judgments)
+- Preserves decisions.json (design phase owns this)
+
+Each schema tracks specific aspects:
 - Decisions: choices made with alternatives and rationale
-- Requirements: extracted from specs with status
+- Requirements: harvested from proposal + extracted from specs with status
 - Citations: links between code and requirements
 - Control-log: validation checkpoints
-- Episodes: cycle-by-cycle history
+- Episodes: exploration history + cycle-by-cycle execution
 
 ---
 
@@ -233,7 +259,8 @@ Generates tasks with SCL-specific metadata:
 
 | Skill | Purpose | SCL | Used By |
 |-------|---------|-----|---------|
-| `sdd-spec-create` | Create proposal.md | No | `/sdd-new` |
+| `sdd-interview` | Clarify requirements | No | `/sdd-explore` |
+| `sdd-spec-create` | Create proposal.md | No | `/sdd-propose` |
 | `sdd-spec-artefact` | Create artifacts | No | `/sdd-artefact` |
 | `sdd-spec-archive` | Archive completed | No | `/sdd-archive` |
 | `sdd-requirements` | EARS format guide | No | Referenced |
@@ -242,7 +269,7 @@ Generates tasks with SCL-specific metadata:
 | `sdd-spec-apply` | Implement tasks | No | `/sdd-apply` |
 | `sdd-verify` | Verify implementation | No | `/sdd-verify` |
 | `sdd-reverse` | Extract specs from code | No | `/sdd-reverse` |
-| `sdd-memory` | Memory JSON schemas | Yes | SCL commands |
+| `sdd-memory` | Memory schemas + harvesting | Yes | SCL commands |
 | `sdd-control` | Control/validation | Yes | SCL commands |
 | `sdd-artefact-scl` | SCL artifact creation | Yes | `/sdd-artefact-scl` |
 | `sdd-tasks-scl` | SCL task breakdown | Yes | `/sdd-artefact-scl` |

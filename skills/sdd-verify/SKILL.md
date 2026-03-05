@@ -355,16 +355,19 @@ Spec drift detected. Consider updating specs or implementation.
 
 ```
 # New feature
-/sdd-new
-/sdd-artefact
-/sdd-apply
-/sdd-verify              # ← Check before archive
+/sdd-explore
+/sdd-propose
+/sdd-init-memory
+/sdd-artefact-scl
+/sdd-apply-group-scl
+/sdd-verify-scl           # ← Check before archive
 /sdd-archive
 
 # Existing code
 /sdd-reverse
-/sdd-verify --all        # ← Check if specs match reality
-/sdd-new                 # Then make changes
+/sdd-verify --all         # ← Check if specs match reality
+/sdd-explore              # Then explore changes
+/sdd-propose              # Create proposal
 ```
 
 ---

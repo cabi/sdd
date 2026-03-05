@@ -37,14 +37,15 @@ SCL provides:
 ## Workflow Overview
 
 ```
-CREATE → INIT → DEVELOP → IMPLEMENT → VERIFY → ARCHIVE
-              (with memory tracking)
+EXPLORE → PROPOSE → INIT MEMORY → DEVELOP → IMPLEMENT → VERIFY → ARCHIVE
+                       (with knowledge harvesting)
 ```
 
 | Phase | Commands | Output |
 |-------|----------|--------|
-| Create | `/sdd-new` | proposal.md |
-| Init SCL | `/sdd-init-memory` | .memory/, regulation.md |
+| Explore | `/sdd-explore` | context-log.md |
+| Propose | `/sdd-propose` | proposal.md with Context Log |
+| Init Memory | `/sdd-init-memory` | .memory/ + harvested knowledge |
 | Develop | `/sdd-artefact-scl` | specs/, design.md, tasks.md + memory |
 | Implement | `/sdd-apply-group-scl`, `/sdd-apply-all-scl` | Code + memory updates |
 | Verify | `/sdd-verify-scl` | Verification with memory tracing |
@@ -52,21 +53,42 @@ CREATE → INIT → DEVELOP → IMPLEMENT → VERIFY → ARCHIVE
 
 ---
 
-## Phase 1: Create Change
+## Phase 1: Explore
 
-Create the change specification first:
+Think through the idea and capture exploration context:
 
 ```
-/sdd-new
+/sdd-explore [name]
 ```
 
-Creates `proposal.md` with WHY, WHAT, capabilities, and scope.
+Creates `context-log.md` with:
+- **Clarifying Questions** - Q&A from exploration interview
+- **Goals Identified** - What we're trying to achieve
+- **Constraints Discovered** - What limits our choices
+- **Scope Boundaries** - In scope / out of scope
+- **Options Considered** - Alternative approaches discussed
 
 ---
 
-## Phase 2: Initialize SCL Memory
+## Phase 2: Propose
 
-After creating the change, initialize memory:
+Create the formal proposal from exploration context:
+
+```
+/sdd-propose <name>
+```
+
+Creates `proposal.md` with:
+- **Context Log** - Full Q&A history (MANDATORY section)
+- **Goals** - What we're trying to achieve (not HOW)
+- **Constraints** - Technical, business, external limitations
+- **Exploration Notes** - Options, risks, domain knowledge
+
+---
+
+## Phase 3: Initialize SCL Memory
+
+After creating the proposal, initialize memory (with automatic harvesting):
 
 ```
 /sdd-init-memory <change-name>
@@ -110,9 +132,62 @@ Every SCL-enhanced change includes a `regulation.md` defining rules:
 2. Citations **MUST** use format: `filename#location`
 ```
 
+### Knowledge Harvesting
+
+`/sdd-init-memory` automatically harvests knowledge from proposal.md:
+
+**Goals → requirements.json (type: functional)**
+- Extracts "Goal X" bullets
+- Creates functional requirements with status "pending"
+
+**Constraints → requirements.json (type: constraint)**
+- Extracts technical/business/external constraints
+- Creates constraint requirements
+
+**Context Log → episodes.json (exploration)**
+- Parses Q&A pairs
+- Creates exploration episodes with insights
+
+**Exploration Notes → episodes.json (judgments)**
+- Extracts options considered
+- Creates judgments with confidence "medium"
+
+**Preserves decisions.json** - Left empty for design phase to populate
+
+### Output
+
+```
+✓ Initialized memory for: user-authentication
+
+Created:
+  .specs/changes/user-authentication/.memory/
+  ├── decisions.json      (0 decisions - ready for design phase)
+  ├── requirements.json   (5 harvested from proposal)
+  ├── citations.json      (0 citations)
+  ├── control-log.json    (0 checkpoints)
+  └── episodes.json       (4 exploration episodes)
+
+Harvested from proposal.md:
+  Goals → 3 functional requirements (REQ-FUNC-001, REQ-FUNC-002, REQ-FUNC-003)
+  Constraints → 2 constraint requirements (REQ-CONST-001, REQ-CONST-002)
+  Context Log → 3 exploration episodes
+  Exploration Notes → 1 episode with options considered
+
+Memory is ready for SCL-enhanced artifact creation.
+The design agent will receive full context from exploration.
+Use /sdd-artefact-scl to create artifacts with memory tracking.
+```
+
+### Re-harvesting
+
+If you edit `proposal.md` after initialization, run `/sdd-init-memory` again:
+- Updates requirements and episodes from changed proposal
+- Preserves decisions.json (design phase owns these)
+- Logs re-harvest in control-log.json
+
 ---
 
-## Phase 3: Develop Artifacts with Memory
+## Phase 4: Develop Artifacts with Memory
 
 Create artifacts with memory tracking:
 
@@ -145,7 +220,7 @@ Memory State:
 
 ---
 
-## Phase 4: Implement with Memory Context
+## Phase 5: Implement with Memory Context
 
 ### Group Execution with Memory
 
@@ -219,7 +294,7 @@ You MUST:
 
 ---
 
-## Phase 5: Verify with Memory Tracing
+## Phase 6: Verify with Memory Tracing
 
 Verify with full memory tracing:
 
@@ -258,7 +333,7 @@ Broken:
 
 ---
 
-## Phase 6: Archive
+## Phase 7: Archive
 
 Same as standard workflow:
 
@@ -322,10 +397,13 @@ Shows:
 ## Quick Reference
 
 ```bash
-# Create change (creates change directory)
-/sdd-new
+# Explore (optional but recommended)
+/sdd-explore [name]
 
-# Initialize SCL memory for the change
+# Propose
+/sdd-propose <name>
+
+# Initialize SCL memory (harvests from proposal)
 /sdd-init-memory <name>
 
 # Develop with memory

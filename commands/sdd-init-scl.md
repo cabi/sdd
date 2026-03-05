@@ -92,7 +92,8 @@ Initialize this project with SCL-enhanced SDD (Structured Cognitive Loop + Spec-
    
    ```
    # Initialization
-   /sdd-new              # Start new spec
+   /sdd-explore          # Explore idea, create context-log
+   /sdd-propose          # Create proposal from context-log
    /sdd-init-memory      # Initialize SCL memory
    
    # Artifact Creation
@@ -132,6 +133,7 @@ Created directories:
 
 Next steps:
   - Review AGENTS.md for the new workflow rules
-  - Use /sdd-new to create your first specification
+  - Use /sdd-explore to explore your first feature
+  - Use /sdd-propose to create your first specification
   - Use /sdd-init-memory <change-name> to initialize SCL memory
 ```

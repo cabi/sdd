@@ -23,7 +23,7 @@ Initialize this project with Standard SDD (Spec-Driven Development) workflow rul
    1. **Check for existing specs** - Look in `.specs/specs/` for related capabilities before proposing solutions
    2. **Ask about scope** - Determine if this is a new capability or modifying existing
    3. **Choose appropriate workflow**:
-      - Full spec (use `/sdd-new`) for features > 1 day
+       - Full spec (use `/sdd-explore` + `/sdd-propose`) for features > 1 day
       - Micro-spec for changes < 1 day
       - Skip SDD for trivial changes only
    
@@ -53,8 +53,9 @@ Initialize this project with Standard SDD (Spec-Driven Development) workflow rul
    ### Available Commands
    
    ```
-   /sdd-new         # Start new spec
-   /sdd-artefact    # Develop spec incrementally
+    /sdd-explore    # Explore idea, create context-log
+    /sdd-propose    # Create proposal from context-log
+    /sdd-artefact   # Develop spec incrementally
    /sdd-ff          # Fast-forward all artifacts
    /sdd-status      # Check progress
    /sdd-apply       # Execute one task
@@ -88,5 +89,6 @@ Created directories:
 
 Next steps:
   - Review AGENTS.md for the new workflow rules
-  - Use /sdd-new to create your first specification
+  - Use /sdd-explore to explore your first feature
+  - Use /sdd-propose to create your first specification
 ```

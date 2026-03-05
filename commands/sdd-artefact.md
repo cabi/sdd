@@ -23,6 +23,93 @@ Show me:
 - Why it's next (dependency status)
 - A preview before writing
 
+## Design Document Creation
+
+When creating design.md, follow this enhanced workflow:
+
+### Step 1: Gather Prior Context
+
+Before launching the design agent, collect context from earlier phases:
+
+**From proposal.md:**
+- Parse `_Context Log` section if present
+- Extract Q&A responses and user preferences
+- Note constraints mentioned during proposal creation
+- Capture any remarks or decisions made
+
+**From specs/**/*.md:**
+- Extract requirements with IDs
+- Note priority markers (critical/high/medium/low)
+- Identify dependencies between requirements
+- Mark design hints or implementation preferences
+
+**From interactive session:**
+- User clarifications from any Q&A
+- Design preferences expressed
+- Constraint refinements
+
+### Step 2: Build Context Package
+
+Compile the gathered context into a structured package:
+
+```
+Context Package:
+- User Preferences: [list of preferences]
+- Constraints: [technical/business/external]
+- Prior Decisions: [decisions from proposal/specs]
+- Priority Requirements: [critical/high items]
+- Similar Features: [existing code to reference]
+- Q&A Responses: [relevant answers]
+```
+
+### Step 3: Launch Design Agent
+
+**Agent:** `sdd-design`
+
+Launch the design agent with:
+- Context package (from Step 2)
+- File paths to read (proposal.md, specs/**/*.md)
+- Expected output location (.specs/changes/<name>/design.md)
+
+The design agent will:
+1. Read all source documents
+2. Analyze codebase (detect tech stack, patterns, conventions)
+3. Find similar existing features
+4. Generate design.md with:
+   - Problem Statement
+   - Context (with detected constraints)
+   - Goals / Non-Goals
+   - Existing Solution (if modification)
+   - Architecture (with Mermaid diagrams)
+   - Decisions (with alternatives)
+   - Components
+   - Data Models
+   - API Changes
+   - Testability, Monitoring & Alerting
+   - Risks / Trade-offs
+   - Migration Plan
+   - Open Questions
+5. Respect prior context (decisions, preferences, constraints)
+
+### Step 4: Verify Design Document
+
+After agent completion:
+- Verify design.md exists with substantive content
+- Check all sections are populated
+- Confirm Mermaid diagrams are present
+- Verify prior context was incorporated
+
+### Step 5: Update Proposal Status
+
+Update the Status section in `proposal.md`:
+
+```markdown
+## Status
+- [x] Requirements: done (specs/ created)
+- [x] Design: done (design.md created)
+- [ ] Tasks: pending
+```
+
 After creating, report status. Then output ONLY the relevant next step based on what was just completed:
 
 **If specs were just created:**
@@ -53,3 +140,4 @@ DO NOT show options that don't apply to the current state.
 DO NOT suggest commands not listed above.
 
 **Loads skills:** `sdd-spec-artefact`, `sdd-requirements`, `sdd-design`, `sdd-tasks`
+**Loads agents:** `sdd-design-agent` (for design phase)

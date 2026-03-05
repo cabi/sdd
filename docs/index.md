@@ -27,7 +27,8 @@ Information-oriented documentation:
 
 | I want to... | Go to |
 |--------------|-------|
-| Start a new feature | [SDD Workflow: Create Spec](howto/sdd-workflow.md#create-spec) |
+| Explore a new feature | [SDD Workflow: Explore](howto/sdd-workflow.md#explore) |
+| Start a new feature | [SDD Workflow: Propose](howto/sdd-workflow.md#propose) |
 | Use parallel execution | [SCL Workflow](howto/scl-workflow.md) |
 | Understand the philosophy | [SDD Methodology](concepts/sdd-methodology.md) |
 | Look up a command | [Commands Reference](reference/commands.md) |

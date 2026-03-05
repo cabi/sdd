@@ -18,12 +18,13 @@ For simpler changes (< 1 day, single component), consider using a micro-spec app
 ## Workflow Overview
 
 ```
-CREATE → DEVELOP → IMPLEMENT → VERIFY → ARCHIVE
+EXPLORE → PROPOSE → DEVELOP → IMPLEMENT → VERIFY → ARCHIVE
 ```
 
 | Phase | Commands | Output |
 |-------|----------|--------|
-| Create | `/sdd-new` | proposal.md |
+| Explore | `/sdd-explore` | context-log.md |
+| Propose | `/sdd-propose` | proposal.md |
 | Develop | `/sdd-artefact` or `/sdd-ff` | specs/, design.md, tasks.md |
 | Implement | `/sdd-apply`, `/sdd-apply-group`, `/sdd-apply-all` | Code |
 | Verify | `/sdd-verify` | Verification report |
@@ -31,28 +32,73 @@ CREATE → DEVELOP → IMPLEMENT → VERIFY → ARCHIVE
 
 ---
 
-## Phase 1: Create Spec
+## Phase 1: Explore
 
-Start a new specification:
+Think through the idea and capture exploration context:
 
 ```
-/sdd-new
+/sdd-explore [name]
+```
+
+This creates `.specs/changes/<name>/context-log.md` containing:
+
+- **Clarifying Questions** - Q&A from exploration interview
+- **Goals Identified** - What we're trying to achieve
+- **Constraints Discovered** - What limits our choices
+- **Scope Boundaries** - In scope / out of scope
+- **Options Considered** - Alternative approaches discussed
+- **Risks Identified** - Potential problems
+
+### Auto-Naming
+
+If you don't provide a name, the agent will:
+1. Listen to your description
+2. Extract key words
+3. Suggest a kebab-case name
+4. Ask for confirmation
+
+---
+
+## Phase 2: Propose
+
+Create the formal proposal from exploration context:
+
+```
+/sdd-propose <name>
 ```
 
 This creates `.specs/changes/<name>/proposal.md` containing:
 
-- **Why** - The motivation for this change
+- **Context Log** - Full Q&A history from exploration
+- **Goals** - What we're trying to achieve (not HOW)
+- **Constraints** - Technical, business, external limitations
 - **What Changes** - Description of the changes
 - **Capabilities** - New or modified capabilities
 - **Scope** - In scope / out of scope items
+- **Exploration Notes** - Options, domain knowledge, risks
 
 ### Proposal Structure
 
 ```markdown
 # Proposal: <change-name>
 
-## Why
-<Motivation and problem statement>
+## Context Log
+<Full Q&A history from exploration>
+
+## Goals
+- Goal 1: <description>
+- Goal 2: <description>
+
+## Constraints
+
+### Technical Constraints
+- <constraint>: <reason>
+
+### Business Constraints
+- <constraint>: <reason>
+
+### External Constraints
+- <constraint>: <reason>
 
 ## What Changes
 <Description of changes>
@@ -73,11 +119,16 @@ This creates `.specs/changes/<name>/proposal.md` containing:
 
 ### Out of Scope
 - <items>
+
+## Exploration Notes
+- Option: <description>
+  _Pros: <...>_
+  _Cons: <...>_
 ```
 
 ---
 
-## Phase 2: Develop Artifacts
+## Phase 3: Develop Artifacts
 
 ### Incremental Approach
 
@@ -101,16 +152,6 @@ Create all artifacts at once:
 ```
 
 Use this when you have a clear understanding of the feature.
-
-### Optional: Explore First
-
-Think through the idea before committing:
-
-```
-/sdd-explore
-```
-
-This helps clarify requirements and identify gaps.
 
 ### Check Progress
 
@@ -242,8 +283,11 @@ Then use the standard workflow to create changes that reference existing capabil
 ## Quick Reference
 
 ```bash
-# Start
-/sdd-new
+# Explore (optional but recommended)
+/sdd-explore [name]
+
+# Propose
+/sdd-propose <name>
 
 # Develop (choose one)
 /sdd-artefact          # Incremental

@@ -124,7 +124,12 @@ This means:
 
 ```
 ┌─────────────┐
-│   CREATE    │  /sdd-new → proposal.md
+│   EXPLORE   │  /sdd-explore → context-log.md
+└──────┬──────┘
+       │
+       ▼
+┌─────────────┐
+│   PROPOSE   │  /sdd-propose → proposal.md
 └──────┬──────┘
        │
        ▼

@@ -48,10 +48,10 @@ SCL (Structured Cognitive Loop) provides external memory persistence:
 ```
 .memory/
 ├── decisions.json          # All decisions with evidence
-├── requirements.json       # Requirement index
+├── requirements.json       # Requirement index (harvested from proposal + specs)
 ├── citations.json          # Citation graph
 ├── control-log.json        # Validation checkpoints
-└── episodes.json           # Cycle-by-cycle history
+└── episodes.json           # Exploration history + cycle-by-cycle execution
 ```
 
 #### decisions.json
@@ -74,18 +74,26 @@ Records every design decision with alternatives:
 
 #### requirements.json
 
-Tracks requirements with status:
+Tracks requirements with status and source:
 
 ```json
 {
-  "AUTH-001": {
-    "id": "AUTH-001",
+  "REQ-FUNC-001": {
+    "id": "REQ-FUNC-001",
+    "type": "functional",
+    "title": "Users SHALL be able to log in",
     "description": "Users SHALL be able to log in",
-    "source": "specs/auth/spec.md#L23",
-    "status": "pending"
+    "source": "proposal.md#L45",
+    "status": "pending",
+    "created_at": "2026-03-05T10:30:00Z"
   }
 }
 ```
+
+**Sources:**
+- Harvested from proposal.md (goals → functional, constraints → constraint)
+- Extracted from specs during design phase
+- Status updated during implementation
 
 #### citations.json
 
@@ -120,19 +128,25 @@ Records validation checkpoints:
 
 #### episodes.json
 
-Cycle-by-cycle history:
+Exploration history and cycle-by-cycle execution:
 
 ```json
 {
-  "EP-001": {
-    "cycle": 2,
-    "group": 2,
-    "input": ["DEC-001", "AUTH-001"],
-    "output": ["src/auth/login.ts"],
-    "memory_writes": ["AUTH-001.status = implemented"]
+  "cycle": 1,
+  "phase": "exploration",
+  "timestamp": "2026-03-05T10:30:00Z",
+  "observations": {
+    "files_read": ["proposal.md"],
+    "questions": ["What problem are you solving?"],
+    "answers": ["Users can't access accounts without IT help"],
+    "insights": ["Self-service is critical"]
   }
 }
 ```
+
+**Sources:**
+- Exploration episodes harvested from Context Log in proposal.md
+- Execution episodes recorded during task implementation
 
 ---
 
@@ -145,6 +159,43 @@ precondition_check()  → Verify conditions before action
 scope_verify()        → Check file boundaries
 citation_validate()   → Verify citation integrity
 ```
+
+---
+
+### Knowledge Harvesting
+
+When `/sdd-init-memory` runs, it automatically harvests structured knowledge from proposal.md:
+
+**Extraction Process:**
+
+```
+proposal.md
+    │
+    ├─→ ## Goals
+    │       └─→ requirements.json (type: functional)
+    │
+    ├─→ ## Constraints
+    │       └─→ requirements.json (type: constraint)
+    │
+    ├─→ ## Context Log
+    │       └─→ episodes.json (phase: exploration)
+    │
+    └─→ ## Exploration Notes
+            └─→ episodes.json (judgments)
+```
+
+**Key Principle:**
+
+Harvesting preserves exploration knowledge WITHOUT constraining design:
+- Goals → WHAT to achieve (functional requirements)
+- Constraints → boundaries to respect (constraint requirements)
+- Context → WHY we're doing this (exploration episodes)
+- **decisions.json left empty** → design phase decides HOW
+
+This ensures:
+- Design agent has full context from exploration
+- Design agent makes technical decisions within constraints
+- No premature decisions from exploration phase
 
 ---
 

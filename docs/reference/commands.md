@@ -1,21 +1,36 @@
 # Commands Reference
 
-All 19 SDD commands organized by workflow phase.
+All 20 SDD commands organized by workflow phase.
 
 ## Create Phase
 
-### `/sdd-new`
+### `/sdd-explore`
 
-Start a new specification.
+Explore an idea and create exploration context.
+
+**Creates:** `.specs/changes/<name>/context-log.md`
+
+**Usage:**
+```
+/sdd-explore [name]
+```
+
+Runs exploration interview to capture Q&A, goals, constraints, and options. Auto-generates name from description if not provided.
+
+---
+
+### `/sdd-propose`
+
+Create formal proposal from exploration context.
 
 **Creates:** `.specs/changes/<name>/proposal.md`
 
 **Usage:**
 ```
-/sdd-new
+/sdd-propose <name>
 ```
 
-Prompts for feature description, then creates proposal with WHY, WHAT, capabilities, and scope.
+Requires context-log.md to exist (run /sdd-explore first). Creates proposal with Context Log, Goals, Constraints, and Exploration Notes sections.
 
 ---
 
@@ -51,16 +66,22 @@ Prepares project for SCL-enhanced workflow from the start.
 
 ### `/sdd-init-memory`
 
-Initialize SCL memory for a specific change.
+Initialize SCL memory structure and harvest knowledge from proposal.
 
 **Creates:** `.memory/` directory, `regulation.md`
 
 **Usage:**
 ```
-/sdd-init-memory <change-name>
+/sdd-init-memory [change-name]
 ```
 
-Creates memory structure for tracking decisions, requirements, citations, and episodes.
+Creates memory structure and automatically harvests knowledge from proposal.md:
+- Goals → requirements.json (functional requirements)
+- Constraints → requirements.json (constraint requirements)
+- Context Log → episodes.json (exploration episodes)
+- Exploration Notes → episodes.json (options/risks)
+
+Re-harvesting: If memory exists, updates requirements/episodes from changed proposal while preserving decisions.json.
 
 ---
 
@@ -113,14 +134,16 @@ Use when you have a clear understanding and want to skip incremental creation.
 
 ### `/sdd-explore`
 
-Think through an idea before committing.
+Explore an idea and create exploration context.
+
+**Creates:** `.specs/changes/<name>/context-log.md`
 
 **Usage:**
 ```
-/sdd-explore
+/sdd-explore [name]
 ```
 
-Interactive exploration to clarify requirements and identify gaps. Does not create files.
+Interactive exploration that creates structured context-log capturing Q&A, goals, constraints, options, and risks. Auto-generates name if not provided.
 
 ---
 
@@ -288,14 +311,14 @@ Verifies completion, creates summary, moves to archive, merges deltas into `.spe
 
 | Command | Phase | SCL | Purpose |
 |---------|-------|-----|---------|
-| `/sdd-new` | Create | No | Start new spec |
+| `/sdd-explore` | Create | No | Explore idea, create context-log |
+| `/sdd-propose` | Create | No | Create proposal from context-log |
 | `/sdd-init` | Create | No | Initialize project |
 | `/sdd-init-scl` | Create | Yes | Initialize with SCL |
-| `/sdd-init-memory` | Create | Yes | Initialize memory for change (after /sdd-new) |
+| `/sdd-init-memory` | Create | Yes | Initialize memory + harvest knowledge |
 | `/sdd-artefact` | Develop | No | Create next artifact |
 | `/sdd-artefact-scl` | Develop | Yes | Create with memory tracking |
 | `/sdd-ff` | Develop | No | Fast-forward all artifacts |
-| `/sdd-explore` | Develop | No | Explore before committing |
 | `/sdd-status` | Develop | No | Check progress |
 | `/sdd-reverse` | Develop | No | Extract specs from code |
 | `/sdd-apply` | Implement | No | One task at a time |

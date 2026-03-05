@@ -6,6 +6,52 @@ This project provides a Spec-Driven Development (SDD) workflow implementation fo
 
 ---
 
+## Available Agents
+
+This project includes specialized subagents for design document creation. These agents are configured per [OpenCode standards](https://opencode.ai/docs/agents/).
+
+### SDD Design Agent
+
+- **File:** `agents/sdd-design.md`
+- **Usage:** `@sdd-design`
+- **Purpose:** Standard design document creation with codebase analysis
+- **Mode:** Subagent
+- **Temperature:** 0.3
+- **Features:**
+  - Analyzes codebase to detect tech stack, patterns, and conventions
+  - Creates comprehensive design documents with Mermaid diagrams
+  - Documents decisions with alternatives and rationale
+  - Respects prior context (decisions, preferences, Q&A)
+
+**Invoke:** `@sdd-design <context>`
+
+### SDD Design Agent (SCL-Enhanced)
+
+- **File:** `agents/sdd-design-scl.md`
+- **Usage:** `@sdd-design-scl`
+- **Purpose:** Memory-integrated design with evidence tracking, citation validation, and control checkpoints
+- **Mode:** Subagent
+- **Temperature:** 0.2
+- **Features:**
+  - 5-phase SCL workflow (Retrieve → Cognition → Control → Action → Memory Update)
+  - Memory persistence across artifact creation
+  - Evidential grounding - all claims cite sources
+  - Citation validation and consistency checks
+  - RFC2119 compliance (MUST/SHOULD/MAY)
+  - Automatic memory state updates
+
+**Invoke:** `@sdd-design-scl <context>`
+
+### Agent Configuration
+
+Both agents have the following configuration:
+- **Mode:** `subagent` (invoked via `@` mention or Task tool)
+- **Tools:** Full access to glob, grep, read, write, edit, bash
+- **Permissions:** Full write/edit access, unrestricted bash
+- **Scope:** Constrained to project files (see scope constraints in agent files)
+
+---
+
 ## SCL-Enhanced Workflow (RECOMMENDED)
 
 The SCL-enhanced workflow provides superior reliability through:
@@ -24,11 +70,15 @@ The SCL-enhanced workflow provides superior reliability through:
 
 ### SCL Commands
 
-These SCL-specific commands extend the standard SDD workflow. Use them **after** `/sdd-new` has created the change directory:
+The SCL-enhanced workflow starts with exploration, then creates a proposal with context preservation:
 
 ```
-# After /sdd-new: Initialize SCL memory for the change
-/sdd-init-memory [change-name]
+# Exploration & Planning
+/sdd-explore [name]          # Explore idea, create context-log
+/sdd-propose <name>          # Create proposal from context-log
+
+# Memory Initialization
+/sdd-init-memory             # Initialize memory + harvest from proposal
 
 # Create artifacts with memory tracking
 /sdd-artefact-scl
@@ -48,13 +98,14 @@ These SCL-specific commands extend the standard SDD workflow. Use them **after**
 
 ```
 .specs/changes/<change-name>/
-├── proposal.md
+├── context-log.md            # Exploration context (Q&A, goals, constraints)
+├── proposal.md               # Formal proposal with Context Log section
 ├── specs/<capability>/spec.md
 ├── design.md
 ├── tasks.md
 ├── .memory/                    # SCL Memory Module
 │   ├── decisions.json          # All decisions with evidence
-│   ├── requirements.json       # Requirement index
+│   ├── requirements.json       # Requirement index (harvested from proposal)
 │   ├── citations.json          # Citation graph
 │   ├── control-log.json        # Validation checkpoints
 │   └── episodes.json           # Cycle-by-cycle history
@@ -128,8 +179,11 @@ Every SCL-enhanced change **MUST** include a `regulation.md` defining:
 ### Starting New Work
 
 ```
-# New feature
-/sdd-new
+# New feature (SCL-enhanced - RECOMMENDED)
+/sdd-explore [name]     # Explore idea, create context-log
+/sdd-propose <name>     # Create proposal from context-log
+/sdd-init-memory        # Initialize memory + harvest knowledge
+/sdd-artefact-scl       # Create artifacts with memory tracking
 
 # Existing codebase (brownfield)
 /sdd-reverse src/<module>/
@@ -139,6 +193,7 @@ Every SCL-enhanced change **MUST** include a `regulation.md` defining:
 
 ```
 /sdd-artefact      # Create next artifact incrementally
+/sdd-artefact-scl  # Create with memory tracking (SCL)
 /sdd-ff            # Fast-forward all artifacts at once
 /sdd-status        # Check current progress
 ```
@@ -148,13 +203,16 @@ Every SCL-enhanced change **MUST** include a `regulation.md` defining:
 ```
 /sdd-apply              # One task at a time
 /sdd-apply-group N      # Execute group N via subagent
+/sdd-apply-group-scl N  # Execute with memory context (SCL)
 /sdd-apply-all          # Execute all groups via subagents
+/sdd-apply-all-scl      # Execute all with memory context (SCL)
 ```
 
 ### Completion
 
 ```
 /sdd-verify        # Verify implementation matches spec
+/sdd-verify-scl    # Verify with memory tracing (SCL)
 /sdd-archive       # Merge deltas and archive
 ```
 
@@ -340,12 +398,24 @@ mkdir -p .specs/specs .specs/changes .specs/archive
 
 ## Quick Reference
 
+**Standard SDD:**
 | Phase | Command | Output |
 |-------|---------|--------|
-| Start | `/sdd-new` | `.specs/changes/<name>/proposal.md` |
+| Start | `/sdd-reverse` | Baseline specs from code |
 | Develop | `/sdd-artefact` | specs, design, tasks |
 | Implement | `/sdd-apply` | Code + completed tasks |
 | Verify | `/sdd-verify` | Verification report |
+| Archive | `/sdd-archive` | Merged to `.specs/specs/` |
+
+**SCL-Enhanced (Recommended):**
+| Phase | Command | Output |
+|-------|---------|--------|
+| Explore | `/sdd-explore` | context-log.md |
+| Plan | `/sdd-propose` | proposal.md with Context Log |
+| Init Memory | `/sdd-init-memory` | .memory/ + harvested knowledge |
+| Develop | `/sdd-artefact-scl` | specs, design, tasks with memory |
+| Implement | `/sdd-apply-group-scl` | Code + memory updates |
+| Verify | `/sdd-verify-scl` | Verification with memory tracing |
 | Archive | `/sdd-archive` | Merged to `.specs/specs/` |
 
 ---

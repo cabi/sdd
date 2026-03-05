@@ -84,13 +84,31 @@ Naming convention: Use kebab-case describing the change (e.g., `add-two-factor`,
 
 ### Step 4: Create Proposal
 
-Create `.specs/changes/<spec-name>/proposal.md`:
+Create `.specs/changes/<spec-name>/proposal.md` with structured sections for harvesting:
 
 ```markdown
 # Proposal: <spec-name>
 
-## Why
-<1-2 sentences on the problem or opportunity. What problem does this solve? Why now?>
+## Context Log
+<!-- Transferred from context-log.md or created during interview -->
+<Full Q&A history from exploration>
+
+## Goals
+<!-- What we're trying to achieve (not HOW) -->
+- Goal 1: <description>
+- Goal 2: <description>
+
+## Constraints
+<!-- What limits our design choices -->
+
+### Technical Constraints
+- <constraint>: <reason>
+
+### Business Constraints
+- <constraint>: <reason>
+
+### External Constraints
+- <constraint>: <reason>
 
 ## What Changes
 <Bullet list of changes. Be specific about new capabilities, modifications, or removals. Mark breaking changes with **BREAKING**.>
@@ -110,11 +128,18 @@ Create `.specs/changes/<spec-name>/proposal.md`:
 <Affected code, APIs, dependencies, or systems. Who needs to know about this change?>
 
 ## Scope
+
 ### In Scope
 - <item>
 
 ### Out of Scope
 - <item>
+
+## Exploration Notes
+<!-- Optional: Options considered but not decided, domain knowledge, risks -->
+- Option: <description>
+  _Pros: <...>_
+  _Cons: <...>_
 
 ## Status
 - [ ] Requirements: pending
@@ -123,6 +148,7 @@ Create `.specs/changes/<spec-name>/proposal.md`:
 
 ---
 Created: <date>
+Source: context-log.md (if applicable)
 ```
 
 ### Step 5: Initialize Artifacts
@@ -176,9 +202,30 @@ After completion, inform the user:
 
 Next steps:
 1. Review the proposal
-2. Use `/sdd-artefact` or `/sdd-init-memory` + `/sdd-artefact-scl` to create requirements (specs)
-3. Use /sdd-status to check progress anytime
+2. Use `/sdd-init-memory` to create memory structure and harvest knowledge
+3. Use `/sdd-artefact-scl` to create requirements (specs)
+4. Use /sdd-status to check progress anytime
 ```
+
+## Harvesting from Proposal
+
+The proposal template is structured for easy knowledge extraction by `/sdd-init-memory`:
+
+| Section | Target | Type | Extraction |
+|---------|--------|------|-----------|
+| Goals | requirements.json | functional | "Goal X" → REQ-FUNC-NNN |
+| Constraints | requirements.json | constraint | "Constraint X" → REQ-CONST-NNN |
+| Context Log | episodes.json | exploration | Q&A pairs → exploration episodes |
+| Exploration Notes | episodes.json | options | Options/risks → judgments |
+
+**Why This Structure Matters:**
+
+- **Goals** define WHAT we're achieving (design decides HOW)
+- **Constraints** limit design choices (must be respected)
+- **Context Log** preserves exploration reasoning (why we're doing this)
+- **Exploration Notes** capture options considered (not decided yet)
+
+The design phase will populate `decisions.json` with technical choices made within these constraints.
 
 ## Directory Structure
 

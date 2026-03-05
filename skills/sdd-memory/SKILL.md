@@ -383,3 +383,54 @@ Returns: {
   control_status: {overall: "pass", last_checkpoint: "CHK-003"}
 }
 ```
+
+### Harvesting from Proposal
+
+```
+MEM.harvest_from_proposal("proposal.md")
+
+Extracts:
+  Goals → requirements.json (type: functional)
+  Constraints → requirements.json (type: constraint)
+  Context Log → episodes.json (phase: exploration)
+  Exploration Notes → episodes.json (judgments)
+
+Preserves:
+  decisions.json (design phase owns this)
+
+Returns: {
+  requirements_added: 5,
+  requirements_updated: 0,
+  episodes_added: 3,
+  decisions_preserved: true
+}
+```
+
+**Extraction Rules:**
+
+| Source Section | Target | Type | Pattern |
+|---------------|--------|------|---------|
+| Goals | requirements.json | functional | "- Goal N: ..." |
+| Constraints | requirements.json | constraint | "- <constraint>: <reason>" |
+| Context Log | episodes.json | exploration | "#### QN: ... **A:** ..." |
+| Exploration Notes | episodes.json | options | "- Option: ..." |
+
+**Semantic Extraction:**
+
+If sections aren't perfectly structured, use keyword patterns:
+
+- Lines containing "MUST/MUST NOT/SHALL" → constraint requirement
+- Lines starting with "Goal/Objective/Success" → functional requirement
+- Q&A pairs ("Q:"/"A:" or "Question"/"Answer") → exploration episodes
+- Lines with "Considered/Option/Tried" → options_not_decided judgments
+
+**Re-harvesting:**
+
+If memory already exists when harvesting runs:
+
+1. Match requirements by source location (proposal.md#L<N>)
+2. Update existing if source matches
+3. Add new if not found
+4. Remove stale (was in proposal, now gone)
+5. Always preserve decisions.json (design phase owns these)
+```
