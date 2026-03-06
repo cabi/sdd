@@ -9,32 +9,47 @@ Create the next artifact in the spec development process.
 
 ## Dependency Graph
 
+```mermaid
+flowchart LR
+    Proposal[proposal.md<br/>ROOT] -->|triggers| Specs[specs/*.md<br/>REQUIRED]
+    Specs -->|required for| Design[design.md]
+    Design -->|required for| Tasks[tasks.md]
+    
+    style Proposal fill:#90EE90,stroke:#333
+    style Specs fill:#FFD700,stroke:#333
+    style Design fill:#87CEEB,stroke:#333
+    style Tasks fill:#DDA0DD,stroke:#333
 ```
-                    proposal
-                   (root node)
-                       │
-         ┌─────────────┴─────────────┐
-         │                           │
-         ▼                           ▼
-      specs                       design
-   (requirements)               (optional)
-         │                           │
-         └─────────────┬─────────────┘
-                       │
-                       ▼
-                    tasks
-```
+
+**Sequential Rule:** Each artifact MUST be created in order. No skipping.
+- Specs MUST exist before design can be created
+- Both specs AND design MUST exist before tasks can be created
 
 ## State Detection
 
 Check filesystem for artifact status:
 
-| Status | Condition |
-|--------|-----------|
-| **DONE** | File exists AND has substantive content |
-| **READY** | All dependencies are DONE |
-| **BLOCKED** | Missing one or more dependencies |
-| **PENDING** | Placeholder exists, no content |
+| Status | Condition | Output Message |
+|--------|-----------|----------------|
+| **DONE** | File exists AND has substantive content | - |
+| **READY** | All dependencies are DONE | - |
+| **BLOCKED** | Missing one or more dependencies | **BLOCKED: Create [artifact] first** |
+| **PENDING** | Placeholder exists, no content | - |
+
+### Artifact Dependencies & BLOCKED Messages
+
+| Artifact | Status | Condition | BLOCKED Message |
+|----------|--------|-----------|-----------------|
+| proposal.md | DONE | exists with content | - |
+| proposal.md | READY | - | "Create proposal first: /sdd-propose <name>" |
+| specs/ | DONE | ≥1 spec file exists | - |
+| specs/ | READY | proposal.md is DONE | - |
+| specs/ | BLOCKED | proposal.md missing | **BLOCKED: Create proposal first** |
+| design.md | BLOCKED | no specs/*.md exist | **BLOCKED: Create specs first (required)** |
+| design.md | READY | specs/ has ≥1 file | - |
+| tasks.md | BLOCKED | specs/ missing | **BLOCKED: Create specs first** |
+| tasks.md | BLOCKED | design.md missing | **BLOCKED: Create design first** |
+| tasks.md | READY | specs/ AND design.md exist | - |
 
 ## Guardrails
 
@@ -53,21 +68,30 @@ Check filesystem for artifact status:
 
 Scan `.specs/changes/` for all active changes. If multiple found, ask user which one to continue.
 
-For the selected change, check each artifact:
+For the selected change, check each artifact in **strict order**:
 
 ```
 proposal.md  → DONE (exists with content)
 specs/       → READY (proposal is done)
-design.md    → READY (proposal is done)  
+             → BLOCKED (proposal missing) → "BLOCKED: Create proposal first"
+design.md    → BLOCKED (no specs exist) → "BLOCKED: Create specs first (required)"
+             → READY (specs DONE)
 tasks.md     → BLOCKED (needs specs AND design)
+             → READY (specs AND design DONE)
 ```
 
 ### Step 2: Select Next Artifact
 
-Priority order when multiple are READY:
-1. **specs** (requirements) - before design if both ready
-2. **design** - can be done in parallel with specs
+**STRICT SEQUENTIAL ORDER - No Parallel Creation:**
+
+1. **specs** - MUST complete before design (BLOCKED until proposal exists)
+2. **design** - BLOCKED until specs DONE (reads specs/**/*.md as REQUIRED input)
 3. **tasks** - only after specs AND design are done
+
+**Enforcement:**
+- Never offer to create design if specs/ directory is empty
+- Never offer to create tasks if specs/ or design.md missing
+- If user requests out-of-order, output BLOCKED message and suggest correct next step
 
 If all DONE, inform user and suggest `/sdd:apply`.
 
@@ -81,11 +105,23 @@ Before creating, read all dependency artifacts:
 
 **For design:**
 - Read `proposal.md` for context and scope
+- **REQUIRED:** Read `specs/**/*.md` for all requirements to address
+- Verify every requirement ID is covered in design decisions/components
 
 **For tasks:**
 - Read `proposal.md` for scope
 - Read `specs/**/*.md` for requirements to implement
 - Read `design.md` for technical approach
+
+#### Design Coverage Verification
+
+After creating design.md, verify:
+- [ ] All specs/*.md requirements have design coverage
+- [ ] Each requirement ID appears in design decisions or components
+- [ ] No orphaned requirements (in specs but not addressed in design)
+- [ ] Edge cases from specs are handled in design
+
+If gaps found: **BLOCKED** - Update design or specs before proceeding to tasks.
 
 ### Step 4: Create Artifact
 
@@ -154,7 +190,9 @@ The system SHALL <behavior>.
 
 #### Creating design
 
+**Requires:** `specs/*.md` MUST exist (BLOCKED otherwise)
 **Require skill:** `sdd-design`
+
 Create `.specs/changes/<name>/design.md`:
 
 ```markdown
@@ -202,14 +240,9 @@ Create `.specs/changes/<name>/design.md`:
 - <Outstanding decisions to resolve>
 ```
 
-**When to include design.md:**
-- Cross-cutting change (multiple services/modules)
-- New external dependency
-- Significant data model changes
-- Security or performance complexity
-- Ambiguity that benefits from upfront decisions
-
-For simple changes, design can be minimal.
+**Prerequisites Check:**
+- If `specs/` directory is empty: **BLOCKED** - Output "BLOCKED: Create specs first (required)"
+- Design agent will verify all requirements from specs are addressed
 
 #### Creating tasks
 

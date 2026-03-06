@@ -5,27 +5,109 @@ description: Create the next artifact in a spec
 
 Create the next artifact in my current spec development process.
 
+## Artifact Creation Workflow
+
+```mermaid
+flowchart TD
+    Start([/sdd-artefact]) --> Detect{Detect State}
+    
+    Detect --> CheckProposal{proposal.md<br/>exists?}
+    CheckProposal -->|No| BlockProposal[BLOCKED<br/>Create proposal first<br/>/sdd-propose name]
+    
+    CheckProposal -->|Yes| CheckSpecs{specs/*.md<br/>exists?}
+    CheckSpecs -->|No| BlockSpecs[BLOCKED<br/>Create specs first<br/>/sdd-artefact]
+    
+    CheckSpecs -->|Yes| CheckDesign{design.md<br/>exists?}
+    CheckDesign -->|No| CreateDesign[Create design<br/>REQUIRES: specs/]
+    
+    CheckDesign -->|Yes| CheckTasks{tasks.md<br/>exists?}
+    CheckTasks -->|No| CreateTasks[Create tasks<br/>REQUIRES: specs/ + design.md]
+    
+    CheckTasks -->|Yes| AllDone[All artifacts complete<br/>Ready for /sdd-apply]
+    
+    style BlockProposal fill:#ff6b6b,stroke:#333,stroke-width:2px
+    style BlockSpecs fill:#ffd93d,stroke:#333,stroke-width:2px
+    style CreateDesign fill:#6bcf7f,stroke:#333
+    style CreateTasks fill:#4d96ff,stroke:#333
+    style AllDone fill:#95e1d3,stroke:#333,stroke-width:2px
+```
+
+**Strict Sequential Order:**
+1. `proposal.md` (root)
+2. `specs/*.md` (BLOCKED until proposal exists)
+3. `design.md` (BLOCKED until specs exist)
+4. `tasks.md` (BLOCKED until specs + design exist)
+
 Follow the sdd-spec-artefact skill:
 
 1. **Detect which change to continue** - Scan `.specs/changes/`, if multiple ask me to choose
-2. **Check artifact status** - DONE, READY, BLOCKED
-3. **Select the next ready artifact** - specs > design > tasks
-4. **Read dependencies** - Load context from completed artifacts
+2. **Check artifact status** - DONE, READY, BLOCKED (with BLOCKED messages)
+3. **Enforce sequential order** - specs MUST exist before design can be created
+   - If design requested but specs missing: Output **"BLOCKED: Create specs first (required)"**
+   - Never skip or create out of order
+4. **Select the next ready artifact** - specs → design → tasks (sequential only)
+5. **Read dependencies** - Load context from completed artifacts
+   - For design: specs/**/*.md is REQUIRED input
    - For specs modifying existing: Read `.specs/specs/<module>/<capability>/spec.md`
-5. **Create ONE artifact** with proper structure
+6. **Create ONE artifact** with proper structure
+   - Verify dependencies exist before creating
    - For NEW capabilities: Use ADDED format
    - For MODIFIED capabilities: Use delta format (MODIFIED/ADDED/REMOVED)
-6. **Update proposal status**
-7. **Report what was created and what's next**
+7. **Update proposal status**
+8. **Report what was created and what's next**
+
+**BLOCKED Message Templates:**
+
+```
+⚠️  BLOCKED: Cannot create [artifact]
+
+REASON: [dependency] does not exist
+REQUIRED: [explanation]
+
+ACTION REQUIRED:
+  [correct command]
+
+Current Status:
+  proposal: [status]
+  specs: [status]
+  design: [status]
+```
 
 Show me:
 - What artifact you're creating
 - Why it's next (dependency status)
 - A preview before writing
+- Any BLOCKED states with clear next steps
 
 ## Design Document Creation
 
+**PREREQUISITE:** `specs/**/*.md` MUST exist before creating design.md
+
 When creating design.md, follow this enhanced workflow:
+
+### Step 0: Verify Prerequisites (BLOCKS if missing)
+
+Before gathering context, verify specs exist:
+- Check `specs/` directory has ≥1 `.md` file
+- If missing: **HALT** and output BLOCKED message
+- If empty: **HALT** - specs must be created first
+
+**BLOCKED Output:**
+```
+⚠️  BLOCKED: Cannot create design.md
+
+REASON: No specs/*.md files found
+REQUIRED: Specifications MUST exist before design
+           (design agent requires specs as input)
+
+ACTION REQUIRED:
+  /sdd-artefact     - Create specs first (required)
+  
+Current Status:
+  proposal: DONE
+  specs: BLOCKED (missing)
+  design: BLOCKED (needs specs)
+```
 
 ### Step 1: Gather Prior Context
 
@@ -145,11 +227,21 @@ DO NOT suggest commands not listed above.
 
 ## Valid Next Commands
 
+**Sequential Workflow - No Skipping:**
+
+**After creating proposal:**
+- `/sdd-artefact` - Create specs (REQUIRED before design)
+
 **After creating specs:**
-- `/sdd-artefact` - Create design document
+- `/sdd-artefact` - Create design document (specs now REQUIRED dependency)
+
+**If design requested without specs:**
+```
+⚠️  BLOCKED: Create specs first
+```
 
 **After creating design:**
-- `/sdd-artefact` - Create tasks document
+- `/sdd-artefact` - Create tasks document (requires both specs + design)
 
 **After creating tasks:**
 - `/sdd-apply` - Execute one task at a time
