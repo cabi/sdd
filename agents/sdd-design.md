@@ -421,7 +421,7 @@ This initial draft is revised during the review iterations.
    - Analyst reads design.md from disk (file exists from Phase 6.0)
 2. Receive critique report from analyst
 3. Save critique report to `.specs/changes/<name>/review-iteration-1.md`
-4. Revise design.md on disk based on critique
+4. Update design.md on disk with revisions from critique
 
 #### Iteration 2
 
@@ -429,7 +429,7 @@ This initial draft is revised during the review iterations.
    - Analyst reads revised design.md from disk
 2. Receive critique report from analyst
 3. Save critique report to `.specs/changes/<name>/review-iteration-2.md`
-4. Revise design.md on disk based on critique
+4. Update design.md on disk with revisions from critique
 
 #### Iteration 3
 
@@ -437,7 +437,7 @@ This initial draft is revised during the review iterations.
    - Analyst reads revised design.md from disk
 2. Receive critique report from analyst
 3. Save critique report to `.specs/changes/<name>/review-iteration-3.md`
-4. Apply final revisions to design.md on disk
+4. Update design.md on disk with final revisions from critique
 
 ### Phase 7: Verification
 

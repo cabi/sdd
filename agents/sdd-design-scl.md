@@ -367,7 +367,7 @@ FOR iteration = 1 to 3:
     verdict: critique.verdict
   })
   
-  // Revise design.md on disk if needed
+  // Update design.md on disk with revisions from critique
   IF critique.verdict !== 'APPROVE' OR iteration < 3:
     current_design = REVISE(READ(design.md), critique.issues)
     WRITE(design.md, current_design)  // Update file for next iteration
