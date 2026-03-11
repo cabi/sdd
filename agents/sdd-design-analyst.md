@@ -46,7 +46,7 @@ You will receive:
 
 ### Required
 - **Design Document**: Path to the design.md being reviewed
-- **Iteration Number**: Which review iteration (1, 2, or 3)
+- **Iteration Number**: Which review iteration (1 through 5)
 
 ### Optional Context
 - **Requirements**: specs/**/*.md for requirement coverage check
@@ -163,6 +163,17 @@ IF migration_plan_exists:
   CHECK data_migration_addressed
   CHECK feature_flags_considered
   CHECK breaking_changes_identified
+```
+
+### 8. Severity Reclassification Guardrail
+
+```
+FOR each issue initially considered MINOR:
+  IF impacts_security(issue) OR
+     impacts_compliance(issue) OR
+     impacts_data_integrity(issue) OR
+     impacts_requirement_coverage(issue):
+    RECLASSIFY to MAJOR or CRITICAL
 ```
 
 ## Review Output Format
@@ -356,6 +367,11 @@ An issue is MINOR if:
 - Diagram could be simplified
 - A nice-to-have enhancement exists
 - Minor inconsistency in formatting
+- It does NOT impact security, compliance, data integrity, or requirement coverage
+
+### Minor Documentation Rule
+
+If any MIN-* issues remain by final iteration, they **MUST** be documented by the design agent with rationale and follow-up in Design Iteration History and/or Open Questions.
 
 ## Success Criteria
 

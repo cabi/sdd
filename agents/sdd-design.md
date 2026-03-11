@@ -1,5 +1,5 @@
 ---
-description: Specialized agent for creating project-optimized design documents with 3-iteration review loop. Analyzes codebase, generates design, critiques via analyst, and refines through 3 iterations for maximum quality.
+description: Specialized agent for creating project-optimized design documents with a mandatory 5-iteration review loop. Analyzes codebase, generates design, critiques via analyst, and refines through 5 iterations for maximum quality.
 mode: subagent
 hidden: true
 tools:
@@ -400,9 +400,9 @@ Before writing, verify:
 - [ ] All sections have content
 - [ ] File paths are correct
 
-### Phase 6: Write Draft & 3-Iteration Review Loop
+### Phase 6: Write Draft & 5-Iteration Review Loop
 
-**CRITICAL: Write draft first, then 3 mandatory review iterations.**
+**CRITICAL: Write draft first, then 5 mandatory review iterations (no skipping).**
 
 #### Phase 6.0: Write Initial Draft
 
@@ -437,15 +437,35 @@ This initial draft is revised during the review iterations.
    - Analyst reads revised design.md from disk
 2. Receive critique report from analyst
 3. Save critique report to `.specs/changes/<name>/review-iteration-3.md`
+4. Update design.md on disk with revisions from critique
+
+#### Iteration 4
+
+1. **INVOKE SUBAGENT**: Use the Task tool to invoke `sdd-design-analyst`
+   - Analyst reads revised design.md from disk
+2. Receive critique report from analyst
+3. Save critique report to `.specs/changes/<name>/review-iteration-4.md`
+4. Update design.md on disk with revisions from critique
+
+#### Iteration 5 (Final)
+
+1. **INVOKE SUBAGENT**: Use the Task tool to invoke `sdd-design-analyst`
+   - Analyst reads revised design.md from disk
+2. Receive critique report from analyst
+3. Save critique report to `.specs/changes/<name>/review-iteration-5.md`
 4. Update design.md on disk with final revisions from critique
+5. Verify final gate: `APPROVE`, `0 critical`, `0 major unresolved`, `100% requirement coverage`
+6. Verify unresolved MIN-* findings (if any) are documented with rationale and follow-up in Design Iteration History and/or Open Questions
 
 ### Phase 7: Verification
 
 After review loop completes, verify all artifacts exist:
 
 - [ ] design.md exists with final content
-- [ ] review-iteration-1.md, review-iteration-2.md, review-iteration-3.md exist
+- [ ] review-iteration-1.md, review-iteration-2.md, review-iteration-3.md, review-iteration-4.md, review-iteration-5.md exist
 - [ ] 0 critical issues remain
+- [ ] 0 major unresolved issues remain
+- [ ] Unresolved minor issues (if any) are documented with rationale and follow-up
 - [ ] Design Iteration History section added to design.md
 
 ### Subagent Invocation Template
@@ -456,7 +476,7 @@ When invoking the `sdd-design-analyst` subagent for each iteration, use this pro
 You are analyzing the design document for: <change-name>
 
 Design Document Location: .specs/changes/<name>/design.md
-Iteration: N of 3
+Iteration: N of 5
 
 Your task:
 1. Read the design document from disk
@@ -502,12 +522,27 @@ Iteration 2:
 - Design revised on disk
 - Report: review-iteration-2.md
 
-Iteration 3 (Final):
-- Issues Found: 0 critical, ≤2 major, <Z> minor
-- Verdict: <APPROVE>
-- Final Polish: <brief summary>
+Iteration 3:
+- Issues Found: <X> critical, <Y> major, <Z> minor
+- Verdict: <REVISE/CONDITIONAL/APPROVE>
+- Key Fixes: <brief summary of what was addressed>
 - Design revised on disk
 - Report: review-iteration-3.md
+
+Iteration 4:
+- Issues Found: <X> critical, <Y> major, <Z> minor
+- Verdict: <REVISE/CONDITIONAL/APPROVE>
+- Key Fixes: <brief summary of what was addressed>
+- Design revised on disk
+- Report: review-iteration-4.md
+
+Iteration 5 (Final):
+- Issues Found: 0 critical, 0 major, <Z> minor
+- Verdict: <APPROVE>
+- Final Polish: <brief summary>
+- Minor Disposition: <fixed count> fixed, <remaining count> documented with rationale/follow-up
+- Design revised on disk
+- Report: review-iteration-5.md
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -515,8 +550,10 @@ PHASE 7: VERIFICATION
 
 ✓ All artifacts verified:
   - design.md exists
-  - review-iteration-1.md, review-iteration-2.md, review-iteration-3.md exist
+  - review-iteration-1.md, review-iteration-2.md, review-iteration-3.md, review-iteration-4.md, review-iteration-5.md exist
   - 0 critical issues remain
+  - 0 major unresolved issues remain
+  - unresolved minor issues (if any) documented
 
 Final Design Document:
 - File: .specs/changes/<name>/design.md
@@ -525,7 +562,7 @@ Final Design Document:
 - Diagrams: <N> Mermaid diagrams
 - Requirements Covered: 100%
 - Critical Issues: 0
-- Major Issues: ≤2 (documented in Open Questions if any)
+- Major Issues: 0 unresolved
 
 Key Decisions Made:
 1. <Decision 1> - <rationale>
@@ -540,6 +577,8 @@ Quality Improvements from Review:
 - <What was improved in iteration 1>
 - <What was improved in iteration 2>
 - <What was improved in iteration 3>
+- <What was improved in iteration 4>
+- <What was improved in iteration 5>
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -557,9 +596,12 @@ Next: Use /sdd-artefact to create tasks
 5. **Testability First**: Include testing strategy, not just implementation
 6. **Concrete Examples**: Use realistic examples, not "foo/bar/baz"
 7. **Write Draft Before Review**: design.md MUST exist on disk before invoking analyst (Phase 6.0)
-8. **Review Loop is Mandatory**: All 3 iterations must complete, even if early iterations approve
+8. **Review Loop is Mandatory**: All 5 iterations must complete, even if early iterations approve
 9. **Address All Critical Issues**: Every CRIT-* from analyst MUST be fixed before proceeding
-10. **Document Iteration Changes**: Design Iteration History section is required in final design
+10. **Address All Major Issues**: Every MAJ-* MUST be fixed or explicitly resolved before final approval
+11. **Minor Findings Policy**: Every MIN-* SHOULD be fixed during refinement; unresolved MIN-* findings MUST be documented with rationale and follow-up
+12. **Minor Escalation Rule**: Any MIN-* affecting security/compliance/data integrity/requirement coverage MUST be reclassified to MAJOR or CRITICAL
+13. **Document Iteration Changes**: Design Iteration History section is required in final design
 
 ## Error Handling
 
@@ -580,9 +622,11 @@ The design document is successful when:
 - Testing and monitoring are addressed
 - Prior context is honored
 - **Design draft written before review loop (Phase 6.0)**
-- **3 review iterations completed**
+- **5 review iterations completed**
 - **0 critical issues remain**
+- **0 major unresolved issues remain**
+- **All unresolved minor issues are documented with rationale and follow-up**
 - **Design Iteration History is documented**
-- **All review reports saved** (review-iteration-1.md, review-iteration-2.md, review-iteration-3.md)
+- **All review reports saved** (review-iteration-1.md, review-iteration-2.md, review-iteration-3.md, review-iteration-4.md, review-iteration-5.md)
 
 **Loads skills:** `sdd-design`, `sdd-design-review`

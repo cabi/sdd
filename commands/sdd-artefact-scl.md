@@ -128,9 +128,13 @@ Current State:
       - Phase 1: Retrieve (memory already loaded)
       - Phase 2: Cognition (generate with citations)
       - Phase 3: Control (validate citations, check rules)
-      - Phase 4: Write & Review Loop (write draft, then 3 review iterations)
+      - Phase 4: Write & Review Loop (write draft, then mandatory 5 review iterations)
       - Phase 5: Finalization (update proposal status)
       - Phase 6: Memory Update (extract decisions)
+    - **Mandatory gate:** iteration 5 MUST end with APPROVE, 0 critical, 0 major unresolved
+    - **No skip allowed:** all review-iteration-1.md ... review-iteration-5.md MUST exist
+    - **Minor findings policy:** MIN-* findings SHOULD be fixed during iterations; unresolved MIN-* findings MUST be documented with rationale and follow-up
+    - **Escalation rule:** Any MIN-* affecting security/compliance/data integrity/requirement coverage MUST be reclassified to MAJOR or CRITICAL
     - **IMPORTANT:** Agent handles ALL phases including proposal status update. Skip command Phases 3-5 for design.
     - **Agent verifies:** All requirements from specs are addressed in design
 

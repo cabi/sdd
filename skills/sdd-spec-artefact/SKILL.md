@@ -192,57 +192,29 @@ The system SHALL <behavior>.
 
 **Requires:** `specs/*.md` MUST exist (BLOCKED otherwise)
 **Require skill:** `sdd-design`
+**Agent:** `sdd-design`
 
-Create `.specs/changes/<name>/design.md`:
+Create `.specs/changes/<name>/design.md` via the design agent.
 
-```markdown
-# Design: <spec-name>
-
-## Context
-<Background, current state, constraints, stakeholders>
-
-## Goals / Non-Goals
-
-### Goals
-- <What this design achieves>
-
-### Non-Goals
-- <Explicitly excluded from this design>
-
-## Architecture
-<High-level system design. Include diagrams if helpful.>
-
-## Decisions
-
-### Decision: <title>
-**Context:** <situation requiring decision>
-**Options Considered:**
-1. <Option 1> - Pros: <benefits> / Cons: <drawbacks>
-2. <Option 2> - Pros: <benefits> / Cons: <drawbacks>
-**Decision:** <chosen option>
-**Rationale:** <why this was selected>
-
-## Components
-<Description of key components and their responsibilities>
-
-## Data Models
-<Schema changes, new models, migrations needed>
-
-## Risks / Trade-offs
-| Risk | Mitigation |
-|------|------------|
-| <risk> | <mitigation> |
-
-## Migration Plan
-<Steps to deploy, rollback strategy>
-
-## Open Questions
-- <Outstanding decisions to resolve>
-```
+**MANDATORY refinement process (cannot be skipped):**
+1. Write initial design draft to disk
+2. Run `sdd-design-analyst` review iterations 1..5
+3. Save each critique report:
+   - `review-iteration-1.md`
+   - `review-iteration-2.md`
+   - `review-iteration-3.md`
+   - `review-iteration-4.md`
+   - `review-iteration-5.md`
+4. Revise design.md after each iteration
+5. Continue through all 5 iterations even if early approval occurs
+6. Final gate (iteration 5): `APPROVE`, `0 critical`, `0 major unresolved`, `100% requirement coverage`
+7. MIN-* findings SHOULD be fixed during refinement; unresolved MIN-* findings MUST be documented with rationale and follow-up
+8. Any MIN-* affecting security/compliance/data integrity/requirement coverage MUST be reclassified to MAJOR or CRITICAL
 
 **Prerequisites Check:**
 - If `specs/` directory is empty: **BLOCKED** - Output "BLOCKED: Create specs first (required)"
-- Design agent will verify all requirements from specs are addressed
+- Design agent MUST verify all requirements from specs are addressed
+- Design is BLOCKED until all five review reports exist
 
 #### Creating tasks
 

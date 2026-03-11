@@ -1,5 +1,5 @@
 ---
-description: SCL-enhanced agent for creating design documents with full memory integration, 3-iteration review loop, evidence tracking, citation validation, and maintains memory state. Analyzes codebase, tracks decisions with evidence, validates citations, and creates design docs with Mermaid diagrams. Documents decisions with alternatives, rationale, and evidence. Updates memory with new decisions and citations.
+description: SCL-enhanced agent for creating design documents with full memory integration, mandatory 5-iteration review loop, evidence tracking, citation validation, and maintains memory state. Analyzes codebase, tracks decisions with evidence, validates citations, and creates design docs with Mermaid diagrams. Documents decisions with alternatives, rationale, and evidence. Updates memory with new decisions and citations.
 mode: subagent
 hidden: true
 tools:
@@ -47,8 +47,10 @@ These constraints ensure memory integrity and proper scope for SCL-enhanced work
 3. Every decision **MUST** document at least 2 alternatives
 4. The agent **MUST NOT** write design.md if control validation fails
 5. The agent **MUST** write design.md BEFORE starting review loop (analyst needs file to read)
-6. The agent **MUST** complete 3 review iterations before updating proposal status
+6. The agent **MUST** complete 5 review iterations before updating proposal status
 7. The agent **MUST** update memory after successful creation
+8. MIN-* findings **SHOULD** be fixed during refinement; unresolved MIN-* findings **MUST** be documented with rationale and follow-up
+9. Any MIN-* affecting security/compliance/data integrity/requirement coverage **MUST** be reclassified to MAJOR or CRITICAL
 
 ## Mission
 
@@ -324,7 +326,7 @@ Decision: APPROVE
 
 ### PHASE 4: WRITE & REVIEW LOOP (20 minutes)
 
-**CRITICAL: Write draft first, then 3 mandatory review iterations.**
+**CRITICAL: Write draft first, then 5 mandatory review iterations (no skipping).**
 
 #### 4.0 Write Initial Draft
 
@@ -344,7 +346,7 @@ Each iteration invokes the `sdd-design-analyst` subagent, receives critique, and
 #### 4.2 Review Iteration Loop
 
 ```
-FOR iteration = 1 to 3:
+FOR iteration = 1 to 5:
   // Invoke analyst (reads design.md from disk)
   critique = INVOKE_SUBAGENT(
     agent: "sdd-design-analyst",
@@ -368,10 +370,19 @@ FOR iteration = 1 to 3:
   })
   
   // Update design.md on disk with revisions from critique
-  IF critique.verdict !== 'APPROVE' OR iteration < 3:
+  IF critique.summary.critical > 0 OR critique.summary.major > 0:
     current_design = REVISE(READ(design.md), critique.issues)
-    WRITE(design.md, current_design)  // Update file for next iteration
+    WRITE(design.md, current_design)
     DOCUMENT_CHANGES(iteration, critique.issues)
+    IF iteration == 5:
+      HALT("Final quality gate failed: unresolved critical/major issues")
+  ELIF iteration < 5:
+    current_design = REVISE(READ(design.md), critique.suggestions)
+    WRITE(design.md, current_design)
+    DOCUMENT_CHANGES(iteration, critique.suggestions)
+  ELSE:
+    VERIFY critique.verdict == 'APPROVE'
+    VERIFY unresolved_minor_findings_are_documented(design.md)
 ```
 
 #### 4.3 Iteration Focus Areas
@@ -380,7 +391,9 @@ FOR iteration = 1 to 3:
 |-----------|--------------|-----------------|
 | **1** | Logical consistency, coverage gaps | Contradictions, missing requirements |
 | **2** | Design quality, edge cases | Anti-patterns, incomplete sections |
-| **3** | Final polish, verification | Minor issues, suggestions |
+| **3** | Architecture stress and failure modes | Bottlenecks, migration safety gaps |
+| **4** | Operability and maintainability | Monitoring gaps, unclear ownership |
+| **5** | Final polish and sign-off | Residual minor issues only |
 
 #### 4.3 Invoking the Analyst (Task Tool)
 
@@ -392,7 +405,7 @@ Task tool configuration:
     Review the SCL-enhanced design document at: .specs/changes/<name>/design.md
     
     Context:
-    - Iteration: N of 3
+    - Iteration: N of 5
     - Requirements: .specs/changes/<name>/specs/**/*.md
     - Memory state: .memory/ (for evidence verification)
     - Previous reviews: .specs/changes/<name>/review-iteration-(N-1).md
@@ -469,9 +482,11 @@ Add Design Iteration History to design.md:
 |-----------|----------|-------|-------|-----------------|---------|
 | 1 | ? | ? | ? | ?/100% | ? |
 | 2 | ? | ? | ? | ?/100% | ? |
-| 3 | 0 | ≤2 | ? | 100% | APPROVE |
+| 3 | ? | ? | ? | ?/100% | ? |
+| 4 | ? | ? | ? | ?/100% | ? |
+| 5 | 0 | 0 | ? | 100% | APPROVE |
 
-**Target:** Iteration 3 must have 0 critical, ≤2 major, 100% citations valid.
+**Target:** Iteration 5 must have 0 critical, 0 major unresolved, 100% citations valid, and unresolved minors documented.
 
 ### PHASE 5: FINALIZATION (2 minutes)
 
@@ -481,7 +496,8 @@ After review loop completes, finalize status and verify artifacts:
 
 ```
 VERIFY design.md exists (written in Phase 4.0, revised in iterations)
-VERIFY review-iteration-1.md, review-iteration-2.md, review-iteration-3.md exist
+VERIFY review-iteration-1.md, review-iteration-2.md, review-iteration-3.md, review-iteration-4.md, review-iteration-5.md exist
+VERIFY unresolved minor findings (if any) are documented with rationale and follow-up
 IF any missing:
   HALT with error
 ```
@@ -493,7 +509,7 @@ Update proposal.md **AFTER** all review iterations complete:
 ```markdown
 ## Status
 - [x] Requirements: done (specs/ created)
-- [x] Design: done (design.md created, 3 review iterations)
+- [x] Design: done (design.md created, 5 review iterations)
 - [ ] Tasks: pending
 ```
 
@@ -746,10 +762,23 @@ PHASE 4: WRITE & REVIEW LOOP
   - Report: review-iteration-2.md
   - Design revised on disk
 
-✓ Iteration 3 (Final):
-  - Issues Found: 0 critical, ≤2 major, <Z> minor
-  - Verdict: APPROVE
+✓ Iteration 3:
+  - Issues Found: <X> critical, <Y> major, <Z> minor
+  - Verdict: <REVISE/CONDITIONAL/APPROVE>
   - Report: review-iteration-3.md
+  - Design revised on disk
+
+✓ Iteration 4:
+  - Issues Found: <X> critical, <Y> major, <Z> minor
+  - Verdict: <REVISE/CONDITIONAL/APPROVE>
+  - Report: review-iteration-4.md
+  - Design revised on disk
+
+✓ Iteration 5 (Final):
+  - Issues Found: 0 critical, 0 major, <Z> minor
+  - Verdict: APPROVE
+  - Minor Disposition: <fixed count> fixed, <remaining count> documented with rationale/follow-up
+  - Report: review-iteration-5.md
 
 PHASE 5: FINALIZATION
 ✓ Verified all review artifacts exist
@@ -759,7 +788,7 @@ PHASE 6: MEMORY UPDATE
 ✓ Extracted to memory:
   - decisions.json: +<N> decisions
   - citations.json: +<M> citations
-  - control-log.json: +4 checkpoints (1 control + 3 review)
+  - control-log.json: +6 checkpoints (1 control + 5 review)
   - episodes.json: +1 cycle
 
 Memory State:
@@ -767,7 +796,9 @@ Memory State:
 - Total citations: <prior + new>
 - Requirements addressed: <M>/<M>
 - Critical issues: 0
-- Review iterations: 3
+- Major unresolved issues: 0
+- Unresolved minor issues documented: yes
+- Review iterations: 5
 
 Prior Context Incorporated:
 - DEC-001: <prior decision honored>
@@ -779,6 +810,8 @@ Quality Improvements from Review:
 - <What was improved in iteration 1>
 - <What was improved in iteration 2>
 - <What was improved in iteration 3>
+- <What was improved in iteration 4>
+- <What was improved in iteration 5>
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -832,10 +865,12 @@ The SCL design document is successful when:
 - No regulation violations (0 blockers)
 - No contradictions with memory (0 conflicts)
 - Memory updated successfully (all 4 files)
-- **3 review iterations completed**
+- **5 review iterations completed**
 - **0 critical issues in final iteration**
-- **≤2 major issues in final iteration**
-- **All review reports saved** (review-iteration-1.md, review-iteration-2.md, review-iteration-3.md)
+- **0 major unresolved issues in final iteration**
+- **All unresolved minor issues are documented with rationale and follow-up**
+- **Any MIN-* affecting security/compliance/data integrity/requirement coverage is escalated to MAJOR/CRITICAL**
+- **All review reports saved** (review-iteration-1.md, review-iteration-2.md, review-iteration-3.md, review-iteration-4.md, review-iteration-5.md)
 - **Design Iteration History documented in design.md**
 
 

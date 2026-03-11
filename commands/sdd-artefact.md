@@ -172,6 +172,14 @@ The design agent will:
    - Migration Plan
    - Open Questions
 5. Respect prior context (decisions, preferences, constraints)
+6. Run a **mandatory 5-iteration refinement loop** with `sdd-design-analyst`
+   - Write initial draft first
+   - Run iterations 1 through 5 (no skipping)
+   - Save every critique report (`review-iteration-1.md` ... `review-iteration-5.md`)
+   - Revise design.md after each iteration
+   - Continue all 5 iterations even if earlier iterations approve
+   - Reclassify any MINOR issue that impacts security/compliance/data integrity/requirement coverage to MAJOR or CRITICAL
+   - Reach final quality gate in iteration 5 before completion
 
 ### Step 4: Verify Design Document
 
@@ -180,17 +188,47 @@ After agent completion:
 - Check all sections are populated
 - Confirm Mermaid diagrams are present
 - Verify prior context was incorporated
+- Verify review artifacts exist:
+  - `review-iteration-1.md`
+  - `review-iteration-2.md`
+  - `review-iteration-3.md`
+  - `review-iteration-4.md`
+  - `review-iteration-5.md`
+- Verify iteration 5 verdict is APPROVE
+- Verify 0 critical and 0 major unresolved issues in final design
+- Minor findings SHOULD be fixed during refinement iterations
+- Verify unresolved minor findings (if any) are documented in design.md with rationale and follow-up
+- Verify all requirements from `specs/**/*.md` are covered in design.md
+
+**BLOCKED Output (if review loop incomplete):**
+```
+⚠️  BLOCKED: Cannot mark design as complete
+
+REASON: Mandatory 5-iteration refinement loop not fully completed
+
+REQUIRED:
+  - review-iteration-1.md ... review-iteration-5.md must exist
+  - iteration 5 verdict must be APPROVE
+  - final design must have 0 critical and 0 major unresolved issues
+  - unresolved minor findings (if any) must be documented with rationale and follow-up
+
+ACTION REQUIRED:
+  /sdd-artefact     - Re-run design phase refinement
+
+Current Status:
+  design: BLOCKED (refinement loop incomplete)
+```
 
 ### Step 5: Update Proposal Status
 
-**NOTE:** This step runs AFTER the design agent returns (which is AFTER the 3-iteration review loop completes). The agent does not update proposal status - this command handles it.
+**NOTE:** This step runs AFTER the design agent returns (which is AFTER the mandatory 5-iteration review loop completes). The agent does not update proposal status - this command handles it.
 
 Update the Status section in `proposal.md`:
 
 ```markdown
 ## Status
 - [x] Requirements: done (specs/ created)
-- [x] Design: done (design.md created)
+- [x] Design: done (design.md created, 5 review iterations)
 - [ ] Tasks: pending
 ```
 
@@ -255,4 +293,4 @@ DO NOT suggest commands not listed above.
 - ❌ `/sdd-tasks` (skill, loaded by this command)
 
 **Loads skills:** `sdd-spec-artefact`, `sdd-requirements`, `sdd-design`, `sdd-tasks`
-**Loads agents:** `sdd-design-agent` (for design phase)
+**Loads agents:** `sdd-design` (for design phase)

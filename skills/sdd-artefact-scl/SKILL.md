@@ -229,9 +229,17 @@ The system SHALL <behavior>.
 The system **MUST** create `.specs/changes/<name>/design.md` via the SCL design agent:
 
 **Agent Workflow (handled entirely by sdd-design-scl):**
-1. Phase 4: Write draft design.md → 3 review iterations → revise after each
+1. Phase 4: Write draft design.md → mandatory 5 review iterations (no skipping) → revise after each
 2. Phase 5: Finalization → Update proposal status (AFTER all reviews)
 3. Phase 6: Memory update
+
+**Final quality gate (iteration 5) MUST satisfy:**
+- Verdict: `APPROVE`
+- Critical issues: `0`
+- Major unresolved issues: `0`
+- Unresolved minor issues (if any): documented with rationale and follow-up
+- Review artifacts: `review-iteration-1.md` ... `review-iteration-5.md`
+- Any MIN-* affecting security/compliance/data integrity/requirement coverage: **MUST** be escalated to MAJOR or CRITICAL
 
 **The command MUST NOT update proposal status for design artifacts.**
 
@@ -479,7 +487,7 @@ ELSE:
 
 ### Step 4.2: Update Proposal Status (Non-Design Artifacts Only)
 
-**IMPORTANT for Design Artifacts:** When creating a design document via the `sdd-design-scl` agent, the agent handles ALL phases including proposal status update as part of its review-finalization workflow (Phase 5 after the 3-iteration review loop completes).
+**IMPORTANT for Design Artifacts:** When creating a design document via the `sdd-design-scl` agent, the agent handles ALL phases including proposal status update as part of its review-finalization workflow (Phase 5 after the mandatory 5-iteration review loop completes).
 
 The command **MUST NOT** update proposal status for design artifacts - this would lead to premature status updates before reviews are complete.
 
