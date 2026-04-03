@@ -40,6 +40,27 @@ _Insight: _To be filled_
 _Default: No deadline (Recommended)_
 _Insight: _To be filled_
 
+#### Batch 2.5: Constraints & Boundaries
+
+**Q5a:** Are there compliance or regulatory requirements?
+**A:** _To be filled (None/GDPR/Accessibility/Security/Industry-specific)_
+**Default: None (Recommended)_
+_Insight: _To be filled_
+
+**Q5b:** Does this change depend on or affect external systems?
+**A:** _To be filled (None/Existing APIs/Database/Third-party services/Auth)_
+**Default: None (Recommended)_
+_Insight: _To be filled_
+
+**Q5c:** Are there behaviors that must be preserved unchanged?
+**A:** _To be filled (No restrictions/Backward compatible/Data compatibility/Specific behaviors)_
+**Default: No restrictions (Recommended)_
+_Insight: _To be filled_
+
+**Q5d:** Any specific details about the constraints selected above?
+**A:** _To be filled during exploration (open-ended response)_
+_Insight: _To be filled_
+
 #### Batch 3: Success & Risk
 
 **Q5:** Could this break existing functionality?
@@ -59,12 +80,15 @@ _Insight: _To be filled_
 
 #### Technical Constraints
 <!-- Systems, performance, tech stack limitations -->
+<!-- Integration dependencies (APIs, databases, third-party services) -->
+<!-- Behavioral boundaries (backward compatibility, data compatibility) -->
 
 #### Business Constraints
-<!-- Timeline, budget, compliance, stakeholders -->
+<!-- Timeline, stakeholders -->
 
 #### External Constraints
-<!-- Third-party, regulatory, environmental -->
+<!-- Regulatory, compliance, accessibility -->
+<!-- GDPR, WCAG, SOC2, HIPAA, PCI-DSS, industry-specific -->
 
 ### Scope Boundaries
 

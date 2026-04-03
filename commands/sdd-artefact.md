@@ -181,7 +181,7 @@ The design agent will:
    - Reclassify any MINOR issue that impacts security/compliance/data integrity/requirement coverage to MAJOR or CRITICAL
    - Reach final quality gate in iteration 5 before completion
 
-### Step 4: Verify Design Document
+### Step 4b: Verify Design Document
 
 After agent completion:
 - Verify design.md exists with substantive content
@@ -219,6 +219,121 @@ Current Status:
   design: BLOCKED (refinement loop incomplete)
 ```
 
+---
+
+## Task Document Creation
+
+**PREREQUISITE:** `specs/**/*.md` AND `design.md` MUST exist before creating tasks.md
+
+When creating tasks.md, follow this enhanced workflow:
+
+### Step 0: Verify Prerequisites (BLOCKS if missing)
+
+Before gathering context, verify specs and design exist:
+- Check `specs/` directory has ≥1 `.md` file
+- Check `design.md` exists with substantive content
+- If either missing: **HALT** and output BLOCKED message
+
+**BLOCKED Output:**
+```
+⚠️  BLOCKED: Cannot create tasks.md
+
+REASON: <specs/design.md> not found
+REQUIRED: Specifications AND design MUST exist before tasks
+          (task agent requires specs and design as input)
+
+ACTION REQUIRED:
+  /sdd-artefact     - Create missing artifacts first
+
+Current Status:
+  proposal: DONE
+  specs: <status>
+  design: <status>
+  tasks: BLOCKED (needs specs + design)
+```
+
+### Step 1: Gather Prior Context
+
+Before launching the task agent, collect context from earlier phases:
+
+**From proposal.md:**
+- Parse scope and goals
+- Extract constraints
+- Note priority indicators
+
+**From specs/**/*.md:**
+- Extract all requirements with IDs
+- Note priority markers
+- Identify dependencies between requirements
+
+**From design.md:**
+- Extract components and interfaces
+- Extract decisions and implementation implications
+- Extract data models and schema changes
+- Extract API changes
+- Extract migration plan
+- Extract testing strategy
+
+### Step 2: Launch Task Agent
+
+**Agent:** `sdd-task`
+
+Launch the task agent with:
+- File paths to read (proposal.md, specs/**/*.md, design.md)
+- Expected output location (.specs/changes/<name>/tasks.md)
+
+The task agent will:
+1. Read all source documents
+2. Analyze codebase (detect structure, existing files, patterns)
+3. Generate tasks with proper grouping, sizing, and sequencing
+4. Write initial tasks.md to disk
+5. Run a **mandatory 3-iteration refinement loop** with `sdd-task-analyst`
+   - Write initial draft first
+   - Run iterations 1 through 3 (no skipping)
+   - Save every critique report (`task-review-iteration-1.md` ... `task-review-iteration-3.md`)
+   - Revise tasks.md after each iteration
+   - Continue all 3 iterations even if earlier iterations approve
+   - Reclassify any MINOR issue that impacts implementation correctness or parallel safety to MAJOR or CRITICAL
+   - Reach final quality gate in iteration 3 before completion
+
+### Step 3: Verify Tasks Document
+
+After agent completion:
+- Verify tasks.md exists with substantive content
+- Check all groups have _Meta fields
+- Verify requirement coverage (100%)
+- Verify design element coverage (100%)
+- Verify dependency graph is valid (no cycles)
+- Verify review artifacts exist:
+  - `task-review-iteration-1.md`
+  - `task-review-iteration-2.md`
+  - `task-review-iteration-3.md`
+- Verify iteration 3 verdict is APPROVE
+- Verify 0 critical and 0 major unresolved issues in final tasks
+- Minor findings SHOULD be fixed during refinement iterations
+- Verify unresolved minor findings (if any) are documented in tasks.md with rationale and follow-up
+- Verify Task Iteration History section exists in tasks.md
+
+**BLOCKED Output (if review loop incomplete):**
+```
+⚠️  BLOCKED: Cannot mark tasks as complete
+
+REASON: Mandatory 3-iteration refinement loop not fully completed
+
+REQUIRED:
+  - task-review-iteration-1.md ... task-review-iteration-3.md must exist
+  - iteration 3 verdict must be APPROVE
+  - final tasks must have 0 critical and 0 major unresolved issues
+  - unresolved minor findings (if any) must be documented with rationale and follow-up
+  - Task Iteration History must be present in tasks.md
+
+ACTION REQUIRED:
+  /sdd-artefact     - Re-run task phase refinement
+
+Current Status:
+  tasks: BLOCKED (refinement loop incomplete)
+```
+
 ### Step 5: Update Proposal Status
 
 **NOTE:** This step runs AFTER the design agent returns (which is AFTER the mandatory 5-iteration review loop completes). The agent does not update proposal status - this command handles it.
@@ -230,6 +345,14 @@ Update the Status section in `proposal.md`:
 - [x] Requirements: done (specs/ created)
 - [x] Design: done (design.md created, 5 review iterations)
 - [ ] Tasks: pending
+```
+
+**After design creation:**
+```markdown
+## Status
+- [x] Requirements: done (specs/ created)
+- [x] Design: done (design.md created, 5 review iterations)
+- [x] Tasks: done (tasks.md created, 3 review iterations)
 ```
 
 After creating, report status. Then output ONLY the relevant next step based on what was just completed:
@@ -291,6 +414,7 @@ DO NOT suggest commands not listed above.
 - ❌ `/sdd-requirements` (skill, loaded by this command)
 - ❌ `/sdd-design` (agent, invoked by this command)
 - ❌ `/sdd-tasks` (skill, loaded by this command)
+- ❌ `/sdd-task-review` (skill, loaded by task agent)
 
-**Loads skills:** `sdd-spec-artefact`, `sdd-requirements`, `sdd-design`, `sdd-tasks`
-**Loads agents:** `sdd-design` (for design phase)
+**Loads skills:** `sdd-spec-artefact`, `sdd-requirements`, `sdd-design`, `sdd-tasks`, `sdd-task-review`
+**Loads agents:** `sdd-design` (for design phase), `sdd-task` (for task phase)

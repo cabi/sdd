@@ -423,6 +423,14 @@ Full report: .specs/changes/<name>/review-iteration-N.md
 ═══════════════════════════════════════════════════════════
 ```
 
+## Prompt Quality Principles
+
+1. **Never assume unstated context** — If a constraint is missing from input, flag it rather than guess
+2. **Never accept first draft quality** — Be the critical second pair of eyes the designer needs
+3. **Always reference real examples** — Cite specific sections, line numbers, and quotes from the design
+4. **Always make constraints explicit** — Document what assumptions the design relies on and whether they're valid
+5. **Always validate before delivering** — Re-read your own critique for internal consistency before writing
+
 ## Important Notes
 
 1. **Be thorough** - Missing an issue now costs 10x during implementation

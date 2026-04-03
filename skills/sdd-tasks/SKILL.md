@@ -385,6 +385,41 @@ Tasks are tracked via checkboxes:
 Tasks: 4/12 complete (33%)
 ```
 
+## Mandatory Review Process
+
+After creating the initial task breakdown, tasks **MUST** go through a 3-iteration review loop with the `sdd-task-analyst` agent.
+
+See `sdd-task-review` skill for full protocol details.
+
+**Review loop summary:**
+1. Write initial tasks.md to disk
+2. Invoke `sdd-task-analyst` for iteration 1 → save `task-review-iteration-1.md` → revise
+3. Invoke `sdd-task-analyst` for iteration 2 → save `task-review-iteration-2.md` → revise
+4. Invoke `sdd-task-analyst` for iteration 3 → save `task-review-iteration-3.md` → finalize
+5. Final gate: APPROVE, 0 critical, 0 major unresolved, 100% requirement and design coverage
+
+**This review loop is automatically performed by the `sdd-task` agent.**
+
+## Task Iteration History
+
+After the review loop, tasks.md **MUST** include a change log section:
+
+```markdown
+## Task Iteration History
+
+### Iteration 3 → Final (Current)
+**Issues Addressed:** X minor, 0 critical, 0 major
+- MIN-001: <brief description of what was addressed>
+
+### Iteration 2 → 3
+**Issues Addressed:** X major, 0 critical
+- MAJ-001: <brief description of what was addressed>
+
+### Iteration 1 → 2
+**Issues Addressed:** X critical, Y major
+- CRIT-001: <brief description of what was addressed>
+```
+
 ## Process
 
 1. **Analyze design** - Extract components, decisions, flows
@@ -394,6 +429,8 @@ Tasks: 4/12 complete (33%)
 5. **Size tasks** - Break into 2-4 hour chunks
 6. **Add traceability** - Link to requirements, file hints
 7. **Validate** - Check against checklist
+8. **Review loop** - 3 iterations with sdd-task-analyst (mandatory)
+9. **Document history** - Add Task Iteration History section
 
 ## Execution Modes
 

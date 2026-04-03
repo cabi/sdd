@@ -40,18 +40,22 @@ Help me think through an idea or problem and capture the exploration context.
 
 5. **Run exploration interview**:
    - Invoke `sdd-interview` skill
-   - Ask structured questions using `question` tool in 3 batches:
-     - **Fast-path option**: "Use all recommended defaults?" (skip Batches 1-2 if yes)
-     - **Batch 1**: Problem type, primary audience
-     - **Batch 2**: Scope areas (multi-select), timeline
-     - **Batch 3**: Breaking change risk, success criteria (open-ended)
+   - Ask structured questions using `question` tool in 4 batches:
+      - **Fast-path option**: "Use all recommended defaults?" (skip Batches 1-2.5 if yes)
+      - **Batch 1**: Problem type, primary audience
+      - **Batch 2**: Scope areas (multi-select), timeline
+      - **Batch 2.5**: Compliance requirements, integration dependencies, behavioral constraints
+      - **Batch 3**: Breaking change risk, success criteria (open-ended)
    - After answers received, update context-log.md:
-     - Map problem type → Goals Identified
-     - Map audience → Domain Knowledge
-     - Map scope areas → Scope Boundaries (In Scope/Out of Scope)
-     - Map timeline → Business Constraints
-     - Map breaking risk → Risks Identified
-     - Map success criteria → Goals Identified (refined)
+      - Map problem type → Goals Identified
+      - Map audience → Domain Knowledge
+      - Map scope areas → Scope Boundaries (In Scope/Out of Scope)
+      - Map timeline → Business Constraints
+      - Map compliance → External Constraints
+      - Map integrations → Technical Constraints
+      - Map behavior boundaries → Technical Constraints
+      - Map breaking risk → Risks Identified
+      - Map success criteria → Goals Identified (refined)
    - Populate all sections: Goals, Constraints, Scope, Options, Risks, Domain Knowledge
    - Show completion summary and prompt for /sdd-propose
 

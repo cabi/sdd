@@ -219,7 +219,29 @@ Create `.specs/changes/<name>/design.md` via the design agent.
 #### Creating tasks
 
 **Require skill:** `sdd-tasks`
-Create `.specs/changes/<name>/tasks.md`:
+**Agent:** `sdd-task`
+
+Create `.specs/changes/<name>/tasks.md` via the task agent.
+
+**MANDATORY refinement process (cannot be skipped):**
+1. Write initial tasks draft to disk
+2. Run `sdd-task-analyst` review iterations 1..3
+3. Save each critique report:
+   - `task-review-iteration-1.md`
+   - `task-review-iteration-2.md`
+   - `task-review-iteration-3.md`
+4. Revise tasks.md after each iteration
+5. Continue through all 3 iterations even if early approval occurs
+6. Final gate (iteration 3): `APPROVE`, `0 critical`, `0 major unresolved`, `100% requirement coverage`, `100% design element coverage`
+7. MIN-* findings SHOULD be fixed during refinement; unresolved MIN-* findings MUST be documented with rationale and follow-up
+8. Any MIN-* affecting implementation correctness or parallel safety MUST be reclassified to MAJOR or CRITICAL
+
+**Prerequisites Check:**
+- If `specs/` directory is empty: **BLOCKED** - Output "BLOCKED: Create specs first (required)"
+- If `design.md` does not exist: **BLOCKED** - Output "BLOCKED: Create design first (required)"
+- Task agent MUST verify all requirements from specs are covered by tasks
+- Task agent MUST verify all components from design are covered by tasks
+- Tasks are BLOCKED until all three review reports exist
 
 ```markdown
 # Tasks: <spec-name>
@@ -299,5 +321,9 @@ Next: Use /sdd-artefact to create design
 - [ ] Tasks properly sequenced
 - [ ] Each task is actionable
 - [ ] Requirement references included
+- [ ] Task review loop completed (3 iterations)
+- [ ] 0 critical issues in final tasks
+- [ ] 0 major unresolved issues in final tasks
+- [ ] Task Iteration History documented
 
 **Loads skill:** `sdd-design`

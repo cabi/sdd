@@ -118,6 +118,15 @@ Logging: [e.g., winston, pino, structlog]
 - Note integration points
 ```
 
+**Reference Pattern Mining:**
+```
+- Find the best existing implementation of similar functionality
+- Extract 1-2 reference patterns with file paths
+- Note coding style, error handling approach, naming conventions
+- Use these as calibration examples in the design output
+- Example: "Follow the pattern in src/auth/service.ts for error handling"
+```
+
 ### Phase 3: Design Document Generation (15 minutes)
 
 Create design.md with these sections:
@@ -222,6 +231,14 @@ flowchart LR
 2. **Option B**
    - Pros: <benefits>
    - Cons: <drawbacks>
+
+**Trade-Off Comparison:**
+
+| Criterion | Option A | Option B |
+|-----------|----------|----------|
+| <Criterion 1> | <Assessment> | <Assessment> |
+| <Criterion 2> | <Assessment> | <Assessment> |
+| <Criterion 3> | <Assessment> | <Assessment> |
 
 **Decision:** <Chosen option>
 
@@ -399,6 +416,13 @@ Before writing, verify:
 - [ ] Diagrams render correctly
 - [ ] All sections have content
 - [ ] File paths are correct
+
+**Constraint Validation:**
+- [ ] Every constraint from proposal.md is addressed in the design
+- [ ] Compliance requirements (GDPR, accessibility, etc.) have explicit design coverage
+- [ ] Integration dependencies are reflected in architecture and component design
+- [ ] Behavioral boundaries (backward compatibility, data compatibility) are honored
+- [ ] Any constraint not addressed is flagged as an Open Question
 
 ### Phase 6: Write Draft & 5-Iteration Review Loop
 
@@ -592,16 +616,25 @@ Next: Use /sdd-artefact to create tasks
 1. **Respect Prior Context**: All prior decisions and user preferences must be reflected in the design
 2. **Detect, Don't Assume**: Use actual codebase analysis, not generic templates
 3. **Diagram Clarity**: Mermaid diagrams should be simple and readable
-4. **Decision Depth**: Document at least 2 alternatives per decision
+4. **Decision Depth**: Document at least 2 alternatives per decision with trade-off comparison table
 5. **Testability First**: Include testing strategy, not just implementation
 6. **Concrete Examples**: Use realistic examples, not "foo/bar/baz"
-7. **Write Draft Before Review**: design.md MUST exist on disk before invoking analyst (Phase 6.0)
+7. **Reference Real Code**: Mine codebase for reference patterns and cite specific files as examples
+8. **Write Draft Before Review**: design.md MUST exist on disk before invoking analyst (Phase 6.0)
 8. **Review Loop is Mandatory**: All 5 iterations must complete, even if early iterations approve
 9. **Address All Critical Issues**: Every CRIT-* from analyst MUST be fixed before proceeding
 10. **Address All Major Issues**: Every MAJ-* MUST be fixed or explicitly resolved before final approval
 11. **Minor Findings Policy**: Every MIN-* SHOULD be fixed during refinement; unresolved MIN-* findings MUST be documented with rationale and follow-up
 12. **Minor Escalation Rule**: Any MIN-* affecting security/compliance/data integrity/requirement coverage MUST be reclassified to MAJOR or CRITICAL
 13. **Document Iteration Changes**: Design Iteration History section is required in final design
+
+## Prompt Quality Principles
+
+1. **Never assume unstated context** — If a constraint is missing from input, flag it rather than guess
+2. **Never accept first draft quality** — Self-critique before the analyst sees it
+3. **Always reference real examples** — Cite specific files, patterns, and existing code
+4. **Always make constraints explicit** — Document what you assumed and why
+5. **Always validate before delivering** — Run your own quality checks before writing output
 
 ## Error Handling
 

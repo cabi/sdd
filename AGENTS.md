@@ -8,7 +8,7 @@ This project provides a Spec-Driven Development (SDD) workflow implementation fo
 
 ## Available Agents
 
-This project includes specialized subagents for design document creation. These agents are configured per [OpenCode standards](https://opencode.ai/docs/agents/).
+This project includes specialized subagents for design document and task creation. These agents are configured per [OpenCode standards](https://opencode.ai/docs/agents/).
 
 ### SDD Design Agent
 
@@ -48,14 +48,54 @@ This project includes specialized subagents for design document creation. These 
 
 **Note:** This agent is automatically invoked by the design agents during the 5-iteration review loop.
 
+### SDD Task Agent
+
+- **File:** `agents/sdd-task.md`
+- **Usage:** `@sdd-task`
+- **Purpose:** Task breakdown creation with mandatory 3-iteration review loop
+- **Mode:** Subagent
+- **Temperature:** 0.8
+- **Features:**
+  - Analyzes design and specs to extract components, decisions, and requirements
+  - Analyzes codebase to detect project structure and existing files
+  - Creates comprehensive task breakdowns with proper grouping and sizing
+  - Ensures 100% requirement and design element coverage
+  - Mandatory 3-iteration review loop with sdd-task-analyst
+  - Critique reports saved for traceability
+
+**Invoke:** `@sdd-task <context>`
+
+**Note:** This agent automatically invokes `sdd-task-analyst` for 3 review iterations before finalizing tasks.
+
+### SDD Task Analyst
+
+- **File:** `agents/sdd-task-analyst.md`
+- **Usage:** `@sdd-task-analyst`
+- **Purpose:** Brutally honest task critic for actionability, sizing, dependency, and coverage issues
+- **Mode:** Subagent
+- **Temperature:** 1.0 (higher for critical thinking)
+- **Features:**
+  - Analyzes tasks for actionability and clarity
+  - Checks task sizing (2-4 hour chunks)
+  - Verifies dependency graph correctness (no cycles, accurate edges)
+  - Checks requirement coverage (every spec requirement has a task)
+  - Checks design coverage (every component/decision has a task)
+  - Identifies missing task types (testing, error handling, migration)
+  - Produces structured critique reports with severity levels
+  - Tracks issues across iterations
+
+**Invoke:** Automatically during sdd-task review loop
+
+**Note:** This agent is automatically invoked by the task agent during the 3-iteration review loop.
+
 ### Agent Configuration
 
-All design agents have the following configuration:
+All agents have the following configuration:
 - **Mode:** `subagent` (invoked via `@` mention or Task tool)
 - **Tools:** Full access to glob, grep, read, write, edit, bash, task
-- **Permissions:** Full write/edit access, unrestricted bash
+- **Permissions:** Full write/edit access, unrestricted bash (analyst agents are read-only)
 - **Scope:** Constrained to project files (see scope constraints in agent files)
-- **Review Loop:** All designs go through a mandatory 5-iteration review with analyst
+- **Review Loop:** All designs go through a mandatory 5-iteration review; all tasks go through a mandatory 3-iteration review
 
 ---
 

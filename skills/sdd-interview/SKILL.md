@@ -98,6 +98,11 @@ Divide questions into 3 batches to reduce cognitive load:
 - Scope areas affected (API/Database/UI/etc. - multiple select)
 - Timeline expectations
 
+**Batch 2.5: Constraints & Boundaries** (3 questions)
+- Compliance / regulatory requirements
+- Integration dependencies
+- Behavioral constraints (backward compatibility, existing behavior to preserve)
+
 **Batch 3: Success & Risk** (1 question + open-ended)
 - Breaking change risk
 - Success criteria (open-ended)
@@ -190,6 +195,54 @@ After this batch, ask the open-ended question:
 (Free-form text response)
 ```
 
+#### Batch 2.5: Constraints & Boundaries
+
+```json
+[
+  {
+    "header": "Compliance",
+    "question": "Are there compliance or regulatory requirements?",
+    "multiple": true,
+    "options": [
+      {"label": "None (Recommended)", "description": "No special compliance needs"},
+      {"label": "GDPR / Data privacy", "description": "EU data protection, consent, right to erasure"},
+      {"label": "Accessibility (WCAG)", "description": "Web Content Accessibility Guidelines"},
+      {"label": "Security / Audit", "description": "SOC2, HIPAA, PCI-DSS, or similar"},
+      {"label": "Industry-specific", "description": "Domain regulations (financial, medical, etc.)"}
+    ]
+  },
+  {
+    "header": "Integrations",
+    "question": "Does this change depend on or affect external systems?",
+    "multiple": true,
+    "options": [
+      {"label": "None (Recommended)", "description": "Self-contained change"},
+      {"label": "Existing APIs", "description": "Must integrate with internal or external APIs"},
+      {"label": "Database / storage", "description": "Schema changes, data migration, new tables"},
+      {"label": "Third-party services", "description": "Payment, email, analytics, etc."},
+      {"label": "Authentication / SSO", "description": "Login, roles, permissions integration"}
+    ]
+  },
+  {
+    "header": "Behavior Boundaries",
+    "question": "Are there behaviors that must be preserved unchanged?",
+    "options": [
+      {"label": "No restrictions (Recommended)", "description": "Free to change any behavior in scope"},
+      {"label": "Backward compatible", "description": "Existing API contracts must not change"},
+      {"label": "Data compatibility", "description": "Existing data must remain valid and accessible"},
+      {"label": "Specific behaviors", "description": "Certain features must work exactly as before"}
+    ]
+  }
+]
+```
+
+After this batch, ask the follow-up:
+```
+**Constraint Details:** Any specific details about the constraints selected above?
+For example: which APIs, what data formats, which behaviors must be preserved?
+(Free-form text response)
+```
+
 ### Extracting Context-Log Data
 
 After receiving answers, extract and populate context-log.md:
@@ -202,7 +255,13 @@ After receiving answers, extract and populate context-log.md:
    - Scope areas → Scope Boundaries (In Scope)
    - Timeline → Business Constraints
 
-3. **From Batch 3:**
+3. **From Batch 2.5:**
+   - Compliance selections → External Constraints (regulatory)
+   - Integration dependencies → Technical Constraints (systems, APIs, protocols)
+   - Behavior boundaries → Technical Constraints (backward compatibility, data compatibility)
+   - Constraint details → Constraints Discovered (specifics under each category)
+
+4. **From Batch 3:**
    - Breaking risk → Risks Identified
    - Success criteria → Goals Identified (refined)
 
