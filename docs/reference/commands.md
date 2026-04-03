@@ -1,6 +1,6 @@
 # Commands Reference
 
-All 20 SDD commands organized by workflow phase.
+All 12 SDD commands organized by workflow phase.
 
 ## Create Phase
 
@@ -49,42 +49,6 @@ Run once per project to create the `.specs/` directory structure.
 
 ---
 
-### `/sdd-init-scl`
-
-Initialize project with SCL structure.
-
-**Creates:** `.specs/` structure + `.memory/` template
-
-**Usage:**
-```
-/sdd-init-scl
-```
-
-Prepares project for SCL-enhanced workflow from the start.
-
----
-
-### `/sdd-init-memory`
-
-Initialize SCL memory structure and harvest knowledge from proposal.
-
-**Creates:** `.memory/` directory, `regulation.md`
-
-**Usage:**
-```
-/sdd-init-memory [change-name]
-```
-
-Creates memory structure and automatically harvests knowledge from proposal.md:
-- Goals → requirements.json (functional requirements)
-- Constraints → requirements.json (constraint requirements)
-- Context Log → episodes.json (exploration episodes)
-- Exploration Notes → episodes.json (options/risks)
-
-Re-harvesting: If memory exists, updates requirements/episodes from changed proposal while preserving decisions.json.
-
----
-
 ## Develop Phase
 
 ### `/sdd-artefact`
@@ -99,21 +63,6 @@ Create the next ready artifact incrementally.
 ```
 
 Creates artifacts in order: specs → design → tasks. Only creates the next ready artifact.
-
----
-
-### `/sdd-artefact-scl`
-
-Create artifact with SCL memory tracking.
-
-**Creates:** Artifact + memory updates
-
-**Usage:**
-```
-/sdd-artefact-scl
-```
-
-Follows SCL 5-phase loop: Retrieve → Cognition → Control → Action → Memory Write.
 
 ---
 
@@ -216,32 +165,6 @@ Groups execute in dependency order. Each group dispatched to a subagent with str
 
 ---
 
-### `/sdd-apply-group-scl`
-
-Execute group with SCL memory context.
-
-**Usage:**
-```
-/sdd-apply-group-scl <N>
-```
-
-Before dispatch: loads memory, verifies preconditions, generates scope constraints. After completion: verifies scope, updates memory.
-
----
-
-### `/sdd-apply-all-scl`
-
-Execute all groups with SCL memory persistence.
-
-**Usage:**
-```
-/sdd-apply-all-scl
-```
-
-Full parallel execution with memory context injected into each subagent.
-
----
-
 ## Verify Phase
 
 ### `/sdd-verify`
@@ -256,37 +179,6 @@ Verify implementation matches spec.
 ```
 
 Checks requirements coverage, scenario coverage, and test status.
-
----
-
-### `/sdd-verify-scl`
-
-Verify with SCL memory tracing.
-
-**Usage:**
-```
-/sdd-verify-scl
-```
-
-Full verification including:
-- Requirement verification with memory tracing
-- Decision compliance check
-- Citation integrity verification
-- Memory consistency check
-- Goal fidelity score
-
----
-
-### `/sdd-memory-status`
-
-Inspect SCL memory state.
-
-**Usage:**
-```
-/sdd-memory-status <change-name>
-```
-
-Shows decisions, requirements, citations, control log, and episodes.
 
 ---
 
@@ -309,24 +201,17 @@ Verifies completion, creates summary, moves to archive, merges deltas into `.spe
 
 ## Command Summary Table
 
-| Command | Phase | SCL | Purpose |
-|---------|-------|-----|---------|
-| `/sdd-explore` | Create | No | Explore idea, create context-log |
-| `/sdd-propose` | Create | No | Create proposal from context-log |
-| `/sdd-init` | Create | No | Initialize project |
-| `/sdd-init-scl` | Create | Yes | Initialize with SCL |
-| `/sdd-init-memory` | Create | Yes | Initialize memory + harvest knowledge |
-| `/sdd-artefact` | Develop | No | Create next artifact |
-| `/sdd-artefact-scl` | Develop | Yes | Create with memory tracking |
-| `/sdd-ff` | Develop | No | Fast-forward all artifacts |
-| `/sdd-status` | Develop | No | Check progress |
-| `/sdd-reverse` | Develop | No | Extract specs from code |
-| `/sdd-apply` | Implement | No | One task at a time |
-| `/sdd-apply-group` | Implement | No | Execute group N |
-| `/sdd-apply-all` | Implement | No | Execute all groups |
-| `/sdd-apply-group-scl` | Implement | Yes | Group with memory context |
-| `/sdd-apply-all-scl` | Implement | Yes | All groups with persistence |
-| `/sdd-verify` | Verify | No | Verify implementation |
-| `/sdd-verify-scl` | Verify | Yes | Verify with memory tracing |
-| `/sdd-memory-status` | Verify | Yes | Inspect memory state |
-| `/sdd-archive` | Complete | No | Complete and archive |
+| Command | Phase | Purpose |
+|---------|-------|---------|
+| `/sdd-explore` | Create | Explore idea, create context-log |
+| `/sdd-propose` | Create | Create proposal from context-log |
+| `/sdd-init` | Create | Initialize project |
+| `/sdd-artefact` | Develop | Create next artifact |
+| `/sdd-ff` | Develop | Fast-forward all artifacts |
+| `/sdd-status` | Develop | Check progress |
+| `/sdd-reverse` | Develop | Extract specs from code |
+| `/sdd-apply` | Implement | One task at a time |
+| `/sdd-apply-group` | Implement | Execute group N |
+| `/sdd-apply-all` | Implement | Execute all groups |
+| `/sdd-verify` | Verify | Verify implementation |
+| `/sdd-archive` | Complete | Complete and archive |

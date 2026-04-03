@@ -132,19 +132,16 @@ Context log preserved at: context-log.md
 ## Valid Next Commands
 
 **After creating a proposal:**
-- `/sdd-init-memory` - Initialize SCL memory structure and harvest knowledge from proposal
-- `/sdd-artefact-scl` - Skip memory initialization, create requirements directly (SCL workflow)
-- `/sdd-artefact` - Legacy workflow without SCL memory
+- `/sdd-artefact` - Create requirements (specs) from proposal
 - `/sdd-status` - Check current progress
 
 **Do NOT use these as commands (they are skills/agents):**
 - ❌ `/sdd-requirements` (skill, loaded by /sdd-artefact)
 - ❌ `/sdd-design` (agent, invoked by /sdd-artefact)
-- ❌ `/sdd-design-scl` (agent, invoked by /sdd-artefact-scl)
 
 **Recommended path:**
 ```
-/sdd-init-memory → /sdd-artefact-scl
+/sdd-artefact
 ```
 
 **Loads skills:** `sdd-spec-create`

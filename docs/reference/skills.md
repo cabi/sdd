@@ -1,6 +1,6 @@
 # Skills Reference
 
-All 15 SDD skills organized by purpose.
+All 11 SDD skills organized by purpose.
 
 ## Exploration & Spec Creation Skills
 
@@ -167,109 +167,17 @@ Scans existing codebase to detect capabilities and generate specification files.
 
 ---
 
-## SCL Skills
-
-### `sdd-memory`
-
-Memory module with JSON schemas and harvesting operations.
-
-**Used by:** SCL commands
-
-**Provides:**
-- `decisions.json` schema
-- `requirements.json` schema
-- `citations.json` schema
-- `control-log.json` schema
-- `episodes.json` schema
-- `MEM.harvest_from_proposal()` operation
-
-**Purpose:**
-Defines the structure for SCL memory persistence and provides harvesting from proposal.md:
-
-**Harvesting Rules:**
-- Goals → requirements.json (type: functional)
-- Constraints → requirements.json (type: constraint)
-- Context Log → episodes.json (phase: exploration)
-- Exploration Notes → episodes.json (judgments)
-- Preserves decisions.json (design phase owns this)
-
-Each schema tracks specific aspects:
-- Decisions: choices made with alternatives and rationale
-- Requirements: harvested from proposal + extracted from specs with status
-- Citations: links between code and requirements
-- Control-log: validation checkpoints
-- Episodes: exploration history + cycle-by-cycle execution
-
----
-
-### `sdd-control`
-
-Control and validation module.
-
-**Used by:** SCL commands
-
-**Functions:**
-- `precondition_check()` - Verify conditions before action
-- `scope_verify()` - Check file boundaries
-- `citation_validate()` - Verify citation integrity
-
-**Purpose:**
-Implements normative control for SCL workflow. Validates before executing actions.
-
----
-
-### `sdd-artefact-scl`
-
-SCL-enhanced artifact creation.
-
-**Used by:** `/sdd-artefact-scl`
-
-**Purpose:**
-Creates artifacts with SCL 5-phase loop:
-
-1. **Retrieve** - Load memory context
-2. **Cognition** - Generate artifact content
-3. **Control** - Validate citations, check regulation
-4. **Action** - Write files
-5. **Memory Write** - Update decisions, requirements, citations
-
----
-
-### `sdd-tasks-scl`
-
-SCL-enhanced task breakdown.
-
-**Used by:** `/sdd-artefact-scl`
-
-**Purpose:**
-Generates tasks with SCL-specific metadata:
-
-```markdown
-- [ ] 2.1 <Task description>
-  - _Requirements: REQ-ID (per specs/capability/spec.md#L<N>)_
-  - _Evidence: design.md#decision-name_
-  - _Creates: path/to/file.ts_
-  - _Validation: <testable criteria>_
-  - _Memory Write: requirements.json#REQ-ID.status ← "implemented"_
-```
-
----
-
 ## Skill Summary Table
 
-| Skill | Purpose | SCL | Used By |
-|-------|---------|-----|---------|
-| `sdd-interview` | Clarify requirements | No | `/sdd-explore` |
-| `sdd-spec-create` | Create proposal.md | No | `/sdd-propose` |
-| `sdd-spec-artefact` | Create artifacts | No | `/sdd-artefact` |
-| `sdd-spec-archive` | Archive completed | No | `/sdd-archive` |
-| `sdd-requirements` | EARS format guide | No | Referenced |
-| `sdd-design` | Design doc guide | No | Referenced |
-| `sdd-tasks` | Task breakdown guide | No | Referenced |
-| `sdd-spec-apply` | Implement tasks | No | `/sdd-apply` |
-| `sdd-verify` | Verify implementation | No | `/sdd-verify` |
-| `sdd-reverse` | Extract specs from code | No | `/sdd-reverse` |
-| `sdd-memory` | Memory schemas + harvesting | Yes | SCL commands |
-| `sdd-control` | Control/validation | Yes | SCL commands |
-| `sdd-artefact-scl` | SCL artifact creation | Yes | `/sdd-artefact-scl` |
-| `sdd-tasks-scl` | SCL task breakdown | Yes | `/sdd-artefact-scl` |
+| Skill | Purpose | Used By |
+|-------|---------|---------|
+| `sdd-interview` | Clarify requirements | `/sdd-explore` |
+| `sdd-spec-create` | Create proposal.md | `/sdd-propose` |
+| `sdd-spec-artefact` | Create artifacts | `/sdd-artefact` |
+| `sdd-spec-archive` | Archive completed | `/sdd-archive` |
+| `sdd-requirements` | EARS format guide | Referenced |
+| `sdd-design` | Design doc guide | Referenced |
+| `sdd-tasks` | Task breakdown guide | Referenced |
+| `sdd-spec-apply` | Implement tasks | `/sdd-apply` |
+| `sdd-verify` | Verify implementation | `/sdd-verify` |
+| `sdd-reverse` | Extract specs from code | `/sdd-reverse` |

@@ -202,30 +202,9 @@ After completion, inform the user:
 
 Next steps:
 1. Review the proposal
-2. Use `/sdd-init-memory` to create memory structure and harvest knowledge
-3. Use `/sdd-artefact-scl` to create requirements (specs)
-4. Use /sdd-status to check progress anytime
+2. Use `/sdd-artefact` to create requirements (specs)
+3. Use /sdd-status to check progress anytime
 ```
-
-## Harvesting from Proposal
-
-The proposal template is structured for easy knowledge extraction by `/sdd-init-memory`:
-
-| Section | Target | Type | Extraction |
-|---------|--------|------|-----------|
-| Goals | requirements.json | functional | "Goal X" → REQ-FUNC-NNN |
-| Constraints | requirements.json | constraint | "Constraint X" → REQ-CONST-NNN |
-| Context Log | episodes.json | exploration | Q&A pairs → exploration episodes |
-| Exploration Notes | episodes.json | options | Options/risks → judgments |
-
-**Why This Structure Matters:**
-
-- **Goals** define WHAT we're achieving (design decides HOW)
-- **Constraints** limit design choices (must be respected)
-- **Context Log** preserves exploration reasoning (why we're doing this)
-- **Exploration Notes** capture options considered (not decided yet)
-
-The design phase will populate `decisions.json` with technical choices made within these constraints.
 
 ## Directory Structure
 

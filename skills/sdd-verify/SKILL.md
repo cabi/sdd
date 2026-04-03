@@ -357,10 +357,9 @@ Spec drift detected. Consider updating specs or implementation.
 # New feature
 /sdd-explore
 /sdd-propose
-/sdd-init-memory
-/sdd-artefact-scl
-/sdd-apply-group-scl
-/sdd-verify-scl           # ← Check before archive
+/sdd-artefact
+/sdd-apply-group
+/sdd-verify              # ← Check before archive
 /sdd-archive
 
 # Existing code

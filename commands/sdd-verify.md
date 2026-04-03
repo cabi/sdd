@@ -92,4 +92,3 @@ Verify that the implementation matches the spec requirements.
 
 **Do NOT suggest:**
 - ❌ `/sdd-artefact` (already completed)
-- ❌ `/sdd-init-memory` (already completed)

@@ -261,27 +261,6 @@ The review loop is automatically invoked when:
 
 No separate command needed - review is always performed.
 
-### SCL-Enhanced Integration
-
-For SCL-enhanced workflow:
-
-```javascript
-// In sdd-design-scl agent
-PHASE 3: CONTROL
-  // Existing validation
-  ✓ Citation validation
-  ✓ Regulation compliance
-  
-  // NEW: Review loop
-  FOR iteration = 1 to 5:
-    critique = await invokeAnalyst(design, iteration)
-    MEM.write({ type: "control-log", checkpoint: `review-iteration-${iteration}` })
-    
-    IF critique.verdict !== 'APPROVE' OR iteration < 5:
-      design = reviseDesign(design, critique)
-      MEM.write({ type: "decisions", updates: design.newDecisions })
-```
-
 ## Analyst Agent Behavior
 
 The `sdd-design-analyst` agent:

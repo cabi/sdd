@@ -2,7 +2,7 @@
 
 ## Project: SDD Workflow for OpenCode
 
-This project provides a Spec-Driven Development (SDD) workflow implementation for OpenCode with optional SCL (Structured Cognitive Loop) enhancements.
+This project provides a Spec-Driven Development (SDD) workflow implementation for OpenCode.
 
 ---
 
@@ -48,26 +48,6 @@ This project includes specialized subagents for design document creation. These 
 
 **Note:** This agent is automatically invoked by the design agents during the 5-iteration review loop.
 
-### SDD Design Agent (SCL-Enhanced)
-
-- **File:** `agents/sdd-design-scl.md`
-- **Usage:** `@sdd-design-scl`
-- **Purpose:** Memory-integrated design with evidence tracking, mandatory 5-iteration review loop, citation validation, and control checkpoints
-- **Mode:** Subagent
-- **Temperature:** 0.2
-- **Features:**
-  - 6-phase SCL workflow (Retrieve → Cognition → Control → Review Loop → Action → Memory Update)
-  - Mandatory 5-iteration review loop with analyst critique
-  - Memory persistence across artifact creation
-  - Evidential grounding - all claims cite sources
-  - Citation validation and consistency checks
-  - RFC2119 compliance (MUST/SHOULD/MAY)
-  - Automatic memory state updates
-
-**Invoke:** `@sdd-design-scl <context>`
-
-**Note:** This agent automatically invokes `sdd-design-analyst` for 5 review iterations before finalizing design.
-
 ### Agent Configuration
 
 All design agents have the following configuration:
@@ -79,77 +59,7 @@ All design agents have the following configuration:
 
 ---
 
-## SCL-Enhanced Workflow (RECOMMENDED)
-
-The SCL-enhanced workflow provides superior reliability through:
-- **Memory persistence** across artifact creation and task execution
-- **Evidential grounding** - all claims MUST cite sources
-- **Normative control** - explicit validation before action
-- **Scope enforcement** - subagents constrained to allowed files
-
-### SCL Core Principles (RFC2119)
-
-1. The system **MUST** maintain memory state in `.memory/` directory
-2. Every requirement **MUST** cite its source
-3. Every decision **MUST** document alternatives considered
-4. Every task **MUST** reference at least one requirement
-5. The system **MUST** validate before executing actions
-
-### SCL Commands
-
-The SCL-enhanced workflow starts with exploration, then creates a proposal with context preservation:
-
-```
-# Exploration & Planning
-/sdd-explore [name]          # Explore idea, create context-log
-/sdd-propose <name>          # Create proposal from context-log
-
-# Memory Initialization
-/sdd-init-memory             # Initialize memory + harvest from proposal
-
-# Create artifacts with memory tracking
-/sdd-artefact-scl
-
-# Execute tasks with memory context
-/sdd-apply-group-scl N
-/sdd-apply-all-scl
-
-# Verify with memory tracing
-/sdd-verify-scl
-
-# Inspect memory state
-/sdd-memory-status [change-name]
-```
-
-### SCL Directory Structure
-
-```
-.specs/changes/<change-name>/
-├── context-log.md            # Exploration context (Q&A, goals, constraints)
-├── proposal.md               # Formal proposal with Context Log section
-├── specs/<capability>/spec.md
-├── design.md
-├── tasks.md
-├── .memory/                    # SCL Memory Module
-│   ├── decisions.json          # All decisions with evidence
-│   ├── requirements.json       # Requirement index (harvested from proposal)
-│   ├── citations.json          # Citation graph
-│   ├── control-log.json        # Validation checkpoints
-│   └── episodes.json           # Cycle-by-cycle history
-└── regulation.md               # Epistemic Constitution
-```
-
-### Regulation.md (Epistemic Constitution)
-
-Every SCL-enhanced change **MUST** include a `regulation.md` defining:
-- Evidential rules (how to cite sources)
-- Scope rules (what files may be modified)
-- Validation rules (how completion is verified)
-- Memory rules (how state is maintained)
-
----
-
-## Standard SDD Workflow (Legacy)
+## SDD Workflow
 
 ### When to Use SDD
 
@@ -206,11 +116,9 @@ Every SCL-enhanced change **MUST** include a `regulation.md` defining:
 ### Starting New Work
 
 ```
-# New feature (SCL-enhanced - RECOMMENDED)
+# New feature
 /sdd-explore [name]     # Explore idea, create context-log
 /sdd-propose <name>     # Create proposal from context-log
-/sdd-init-memory        # Initialize memory + harvest knowledge
-/sdd-artefact-scl       # Create artifacts with memory tracking
 
 # Existing codebase (brownfield)
 /sdd-reverse src/<module>/
@@ -220,7 +128,6 @@ Every SCL-enhanced change **MUST** include a `regulation.md` defining:
 
 ```
 /sdd-artefact      # Create next artifact incrementally
-/sdd-artefact-scl  # Create with memory tracking (SCL)
 /sdd-ff            # Fast-forward all artifacts at once
 /sdd-status        # Check current progress
 ```
@@ -230,16 +137,13 @@ Every SCL-enhanced change **MUST** include a `regulation.md` defining:
 ```
 /sdd-apply              # One task at a time
 /sdd-apply-group N      # Execute group N via subagent
-/sdd-apply-group-scl N  # Execute with memory context (SCL)
 /sdd-apply-all          # Execute all groups via subagents
-/sdd-apply-all-scl      # Execute all with memory context (SCL)
 ```
 
 ### Completion
 
 ```
 /sdd-verify        # Verify implementation matches spec
-/sdd-verify-scl    # Verify with memory tracing (SCL)
 /sdd-archive       # Merge deltas and archive
 ```
 
@@ -434,17 +338,6 @@ mkdir -p .specs/specs .specs/changes .specs/archive
 | Verify | `/sdd-verify` | Verification report |
 | Archive | `/sdd-archive` | Merged to `.specs/specs/` |
 
-**SCL-Enhanced (Recommended):**
-| Phase | Command | Output |
-|-------|---------|--------|
-| Explore | `/sdd-explore` | context-log.md |
-| Plan | `/sdd-propose` | proposal.md with Context Log |
-| Init Memory | `/sdd-init-memory` | .memory/ + harvested knowledge |
-| Develop | `/sdd-artefact-scl` | specs, design, tasks with memory |
-| Implement | `/sdd-apply-group-scl` | Code + memory updates |
-| Verify | `/sdd-verify-scl` | Verification with memory tracing |
-| Archive | `/sdd-archive` | Merged to `.specs/specs/` |
-
 ---
 
 ## Philosophy
@@ -466,156 +359,9 @@ mkdir -p .specs/specs .specs/changes .specs/archive
 
 ---
 
-## SCL-Enhanced Task Format
-
-When using SCL-enhanced workflow, tasks **MUST** include:
-
-```markdown
-- [ ] N.M <Task description>
-  - _Requirements: REQ-ID (per specs/capability/spec.md#L<N>)_
-  - _Evidence: design.md#decision-name_
-  - _Creates: path/to/file.ts_ | _Modifies: path/to/file.ts_
-  - _Validation: <testable criteria>_
-  - _Memory Write: requirements.json#REQ-ID.status ← "implemented"_
-```
-
-### Task Group with SCL Context
-
-```markdown
-## 2. Core Implementation
-_Meta: parallel-safe, depends on: 1_
-
-### Preconditions
-- [ ] Group 1 complete
-- [ ] Required files exist
-
-### Memory Context for Subagent
-```json
-{
-  "decisions": ["DEC-001", "DEC-002"],
-  "requirements": ["AUTH-001", "AUTH-002"],
-  "constraints": {
-    "allowed_files": ["src/auth/**/*"],
-    "must_cite": ["design.md#*", "specs/**/spec.md#*"]
-  }
-}
-```
-
-### Tasks
-- [ ] 2.1 Implement password hashing
-  ...
-```
-
----
-
-## Subagent Context Injection (SCL)
-
-When dispatching subagents in SCL mode, the following context **MUST** be injected:
-
-### Required Context Components
-
-1. **Decisions** - Relevant design decisions with sources
-2. **Requirements** - Requirements for the task group
-3. **Prior Outcomes** - What was done in previous groups
-4. **Constraints** - Allowed/blocked files, required citations
-5. **Regulation** - Applicable rules from regulation.md
-
-### Subagent Prompt Template
-
-```
-You are executing Group N: <Group Name> of <spec-name>.
-
-## Memory Context (from prior work)
-
-### Decisions You MUST Follow
-<list with sources>
-
-### Requirements You MUST Satisfy  
-<list with sources>
-
-### Prior Work Outcomes
-<what was done>
-
-## Constraints (YOU MUST NOT VIOLATE)
-
-### Allowed Files
-You MAY only create/modify: <list>
-
-### Blocked Files
-You MUST NOT touch: <list>
-
-### Required Citations
-Every file MUST include:
-// Implements: REQ-ID (per specs/.../spec.md#L<N>)
-
-## Your Tasks
-<task list>
-
-## Completion Criteria
-You MUST:
-1. Complete ALL tasks
-2. Verify all files exist
-3. Ensure all tests pass
-4. Output "GROUP N COMPLETE" as final line
-```
-
----
-
-## Mitigation of Separate Context Limitations
-
-SCL addresses the fundamental limitation of subagent context isolation:
-
-### Problem: Context Isolation
-
-Subagents operate in isolated contexts and cannot:
-- Access decisions made in prior groups
-- Know what files were created previously
-- Understand the reasoning behind design choices
-
-### SCL Solution: External Memory
-
-1. **Before dispatch**: Load memory state, inject into prompt
-2. **During execution**: Subagent has full context from memory
-3. **After completion**: Write outcomes back to memory
-
-### Memory Operations
-
-| Operation | Purpose | Timing |
-|-----------|---------|--------|
-| `MEM.read()` | Load prior decisions, requirements | Before subagent dispatch |
-| `MEM.write()` | Record new decisions, citations | After artifact creation |
-| `CONTROL.evaluate()` | Validate proposals | Before action execution |
-| `CONTROL.verify_scope()` | Check file boundaries | After subagent completion |
-
-### Example Memory Context
-
-```json
-{
-  "group_id": 2,
-  "memory": {
-    "decisions": [
-      {"id": "DEC-001", "chosen": "JWT", "source": "design.md#L78"}
-    ],
-    "requirements": [
-      {"id": "AUTH-001", "description": "Passwords SHALL be hashed"}
-    ],
-    "prior_outcomes": {
-      "files_created": ["src/models/User.ts"],
-      "decisions_made": ["Use interface over class"]
-    }
-  },
-  "constraints": {
-    "allowed_files": ["src/auth/**/*.ts"],
-    "blocked_files": ["src/core/*"]
-  }
-}
-```
-
----
-
 ## RFC2119 Compliance
 
-All SCL-enhanced artifacts, commands, and skills use RFC2119 keywords:
+All SDD artifacts, commands, and skills use RFC2119 keywords:
 
 | Keyword | Meaning |
 |---------|---------|
