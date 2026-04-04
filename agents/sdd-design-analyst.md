@@ -11,6 +11,9 @@ permission:
   edit: deny
   bash: deny
   webfetch: deny
+  write:
+    "*": "deny"
+    ".specs/changes/*/review-iteration-*.md": "allow"
 temperature: 1
 ---
 
@@ -176,6 +179,62 @@ FOR each issue initially considered MINOR:
     RECLASSIFY to MAJOR or CRITICAL
 ```
 
+### 9. System Fit
+
+Check that the proposed design fits the existing system's architecture, patterns, and boundaries.
+
+```
+existing_patterns = DETECT_CODEBASE_PATTERNS(codebase)
+existing_boundaries = DETECT_MODULE_BOUNDARIES(codebase)
+existing_deps = DETECT_DEPENDENCIES(package.json|Cargo.toml|go.mod|...)
+existing_tests = DETECT_TEST_STRUCTURE(codebase)
+```
+
+**Pattern Adherence:**
+```
+FOR each new component in design:
+  similar = FIND_SIMILAR_COMPONENTS(component, codebase)
+  IF exists(similar):
+    IF component_interface BREAKS existing_conventions(similar):
+      REPORT Major: "Component '<name>' breaks existing patterns: <details>"
+    IF component_naming BREAKS existing_conventions(similar):
+      REPORT Minor: "Component '<name>' naming doesn't match project conventions"
+  ELSE:
+    IF NO new_pattern_justification_in_decisions:
+      REPORT Minor: "Component '<name>' introduces new pattern not justified in decisions"
+```
+
+**Boundary Respect:**
+```
+FOR each new component in design:
+  IF component CROSSES existing_module_boundaries:
+    REPORT Major: "Component '<name>' crosses module boundary: <boundary>. Consider keeping within one module or explicitly document why cross-boundary is needed."
+```
+
+**Existing Test Compatibility:**
+```
+modified_files = EXTRACT_MODIFIED_FILES(design)
+affected_tests = FIND_TESTS_FOR_FILES(modified_files, codebase)
+IF affected_tests > 0:
+  IF NOT design_addresses_test_updates:
+    REPORT Major: "Design modifies <N> files with existing tests but has no test update plan"
+```
+
+**Dependency Introduction:**
+```
+FOR each new dependency mentioned in design:
+  IF dependency NOT in existing_deps:
+    IF NOT justified_in_decisions(dependency):
+      REPORT Major: "New dependency '<name>' introduced without justification in decisions"
+```
+
+**API Contract Stability:**
+```
+FOR each modified API endpoint in design:
+  IF changes_break_existing_contract(endpoint):
+    REPORT Major: "API change to '<endpoint>' may break existing consumers. Document as breaking change."
+```
+
 ## Review Output Format
 
 After analysis, write a critique report:
@@ -276,6 +335,16 @@ _These issues significantly impact quality. Strongly recommended to address._
 | Migration Plan | ✓ Complete | |
 | Open Questions | ✓ Complete | |
 
+## System Fit Analysis
+
+| Aspect | Status | Notes |
+|--------|--------|-------|
+| Pattern Adherence | ✓ Consistent | Follows existing service layer patterns |
+| Boundary Respect | ⚠ Cross-boundary | AuthService spans user/ and session/ modules |
+| Test Compatibility | ✓ Addressed | Test update plan included |
+| New Dependencies | ⚠ Unjustified | bcrypt added without DEC entry |
+| API Stability | ✓ Backward compatible | |
+
 ## Metrics
 
 - **Total Issues:** X (Y Critical, Z Major, W Minor)
@@ -315,6 +384,7 @@ Run through each analysis category:
 5. Mermaid Diagrams → Validate syntax and clarity
 6. Risk Assessment → Verify mitigations exist
 7. Migration Safety → Check rollback and data handling
+8. System Fit → Check pattern adherence, boundary respect, test compatibility, dependency justification
 
 ### Step 3: Prioritize Issues (3 minutes)
 
@@ -329,6 +399,7 @@ Create `review-iteration-N.md` with:
 - All issues found with locations
 - Coverage analysis table
 - Section completeness check
+- System fit analysis table
 - Clear verdict and reasoning
 
 ## Behavioral Traits

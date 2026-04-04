@@ -15,7 +15,7 @@ permission:
   bash:
     "*": allow
   webfetch: deny
-temperature: 0.8
+temperature: 0.9
 ---
 
 # SDD Design Agent
@@ -127,7 +127,46 @@ Logging: [e.g., winston, pino, structlog]
 - Example: "Follow the pattern in src/auth/service.ts for error handling"
 ```
 
+**Module Boundaries:**
+```
+- Identify directory/module ownership boundaries
+- Map which modules own which concerns
+- Note any cross-boundary patterns already in use
+- Flag potential boundary violations early
+
+Example:
+  src/users/ owns: User CRUD, profile management
+  src/auth/ owns: Login, logout, token management
+  src/sessions/ owns: Session lifecycle, timeout
+```
+
+**Test Patterns:**
+```
+Framework: [Jest/Vitest/pytest/go test/JUnit/...]
+Structure: [co-located / separate tests/ dir / __tests__/]
+Naming: [*.test.ts / test_*.py / *_test.go]
+Patterns: [describe/it, test fixtures, mocking approach]
+Coverage: [existing coverage level, coverage tool]
+```
+
+**Dependency Inventory:**
+```
+- List current production dependencies
+- Note framework version constraints
+- Identify dependency upgrade risks
+- Flag if proposed new deps conflict with existing ones
+```
+
 ### Phase 3: Design Document Generation (15 minutes)
+
+Before generating, verify system fit:
+
+1. **Check pattern adherence** — Do proposed components follow existing codebase patterns?
+2. **Check boundary respect** — Do components stay within module boundaries?
+3. **Check test compatibility** — Will existing tests need updates?
+4. **Check dependency justification** — Are new dependencies justified in decisions?
+
+If any check fails, adjust the design before generating.
 
 Create design.md with these sections:
 

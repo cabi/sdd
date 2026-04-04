@@ -86,12 +86,74 @@ Every task links to requirements:
 - [ ] 1.1 Create registration route
   - _Requirements: user-registration_
   - _Creates: src/routes/register.ts_
+  - _Tests: 4.1_
 ```
 
 This means:
 - You know why code exists
 - Changes can assess impact
-- Documentation stays current
+ - Documentation stays current
+ - Tests are explicitly linked to implementations
+
+### Test Traceability
+
+Every requirement scenario **SHOULD** have a corresponding test. Tasks use bidirectional `_Tests:` references:
+
+```markdown
+- [ ] 2.1 Implement AuthService
+  - _Requirements: AUTH-001_
+  - _Tests: 4.1_
+
+- [ ] 4.1 Test AuthService
+  - _Requirements: AUTH-001_
+  - _Tests: 2.1
+```
+
+This ensures:
+- Every EARS scenario has test coverage
+- Implementation changes don't break tests silently
+- Test gaps are caught during verification
+
+---
+
+### System Fit
+
+Changes should fit the existing system's architecture, not fight it it The design review process checks:
+
+- **Pattern adherence** — Does implementation follow existing codebase patterns?
+- **Boundary respect** — Do changes stay within module boundaries?
+- **Test compatibility** — Are existing tests updated (not broken)?
+- **Dependency justification** — Are new dependencies documented in decisions?
+- **API stability** — Are API changes backward compatible?
+
+These checks ensure changes survive the full development loop and still fit the system.
+- Every implementation has corresponding tests
+
+### Test Traceability
+
+Every EARS scenario **SHOULD** have a corresponding test. The framework enforces bidirectional `_Tests:` references linking implementation tasks to test tasks:
+
+```markdown
+- [ ] 2.1 Implement AuthService.login()
+  - _Tests: 4.1_
+- [ ] 4.1 Test AuthService.login()
+  - _Tests: 2.1_
+```
+
+This ensures:
+- No requirement scenario goes untested
+- Test coverage is traceable from spec to code
+- Gap detection is automated during verification
+
+### System Fit
+
+Every change **SHOULD** fit the existing system. The framework checks:
+
+- **Pattern adherence** — Does the change follow existing codebase patterns?
+- **Boundary respect** — Does the change stay within module boundaries?
+- **Test compatibility** — Are existing tests updated (not broken)?
+- **Dependency justification** — Are new dependencies documented in decisions?
+- **API stability** — Are API changes backward compatible?
 
 ---
 
@@ -180,7 +242,9 @@ This means:
 
 ---
 
-## Spec-Reality Divergence
+### Spec-Reality Divergence
+
+
 
 If implementation reveals spec gaps:
 
@@ -194,6 +258,8 @@ This prevents specs from drifting from reality.
 ---
 
 ## Verification
+
+
 
 Before archiving, verify:
 

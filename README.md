@@ -92,7 +92,7 @@ mkdir -p .specs/specs .specs/changes .specs/archive
 | `/sdd-verify` | Verify implementation |
 | `/sdd-archive` | Complete and archive |
 
-### Skills (9)
+### Skills (14)
 
 | Skill | Purpose |
 |-------|---------|
@@ -102,9 +102,13 @@ mkdir -p .specs/specs .specs/changes .specs/archive
 | `sdd-spec-archive` | Archive completed specs |
 | `sdd-requirements` | EARS format requirements guide |
 | `sdd-design` | Technical design documentation |
+| `sdd-design-review` | 5-iteration design review loop |
 | `sdd-tasks` | Task breakdown and sequencing |
+| `sdd-task-review` | 3-iteration task review loop |
+| `sdd-testing` | Test strategy & traceability |
 | `sdd-reverse` | Extract specs from existing code |
 | `sdd-verify` | Verify implementation matches specs |
+| `sdd-interview` | Structured exploration Q&A |
 
 ---
 

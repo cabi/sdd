@@ -99,6 +99,17 @@ For each capability being verified:
 │   - Unit tests: Found in tests/auth/                         │
 │   - Missing: No test for "rate limited" scenario             │
 │                                                              │
+│ Test Traceability:                                          │
+│   AUTH-001: successful-login → tests/auth/login.test.ts     │
+│   AUTH-001: invalid-password → tests/auth/login.test.ts     │
+│   AUTH-002: token-expiry  → ✗ NO TEST                         │
+│                                                              │
+│ System Fit:                                                  │
+│   ✓ Pattern: Follows existing service layer patterns         │
+│   ✓ Boundaries: Stays within auth/ module                  │
+│   ⚠ Dependencies: bcrypt not in existing deps              │
+│   ✓ API Stability: All endpoints backward compatible        │
+│                                                              │
 │ RECOMMENDATION: Implement missing rate-limiting features     │
 │                 before archiving.                            │
 │                                                              │
@@ -109,6 +120,20 @@ Overall: 85% implemented
 [1] Show details for partial implementations
 [2] Continue anyway (acknowledge gaps)
 [3] Stop - I need to fix these first
+```
+
+**System Fit Verification:**
+
+````
+┌──────────────────────────────────────────────────────────────────┐
+│ SYSTEM FIT:                                                   │
+│ ✓ Pattern Adherence: Follows existing service layer pattern   │
+│ ⚠ Boundary: AuthService spans user/ and session/ modules      │
+│ ✓ Tests: 3 existing tests updated, 0 broken                   │
+│ ⚠ Dependency: bcrypt not in existing deps (justified: DEC-003)│
+└──────────────────────────────────────────────────────────────────────┘
+
+```
 ```
 
 ---
@@ -137,11 +162,23 @@ Overall: 85% implemented
 
 ### Test Coverage Checks
 
+ | Check | Description |
+|-------|-------------|
+| **Scenario → Test** | Each EARS scenario has corresponding test |
+| **Test exists** | Test files referenced in tasks exist |
+| **Test passes** | Tests actually pass (when runnable) |
+| **Test quality** | Tests verify behavior, not just coverage |
+| **_Tests: bidirectional** | Implementation and test tasks have bidirectional _Tests: refs |
+
+### System Fit Checks
+
 | Check | Description |
 |-------|-------------|
-| **Scenario → Test** | Each scenario has corresponding test |
-| **Test passes** | Tests actually pass |
-| **Test quality** | Tests verify behavior, not just coverage |
+| **Pattern adherence** | Implementation follows existing codebase patterns |
+| **Boundary respect** | Changes stay within module boundaries |
+| **Existing tests updated** | Modified files with tests have test update plan |
+| **Dependency justified** | New dependencies documented in design decisions |
+| **API stability** | API changes are backward compatible or documented |
 
 ---
 
@@ -161,6 +198,37 @@ Overall: 85% implemented
 - Trace execution paths
 - Identify gaps
 
+### Method 2.5: Test Traceability Matrix (Standard+)
+
+Build a matrix mapping every EARS scenario to its test:
+
+1. **Parse specs** for all requirements and scenarios
+2. **Parse tasks.md** for `_Tests:` bidirectional references
+3. **Search codebase** for test files matching task file hints
+4. **Build matrix**:
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│ TEST TRACEABILITY MATRIX                                      │
+├──────────┬──────────────────┬───────────┬────────────────────┤
+│ Req      │ Scenario         │ Test Task │ Test File          │
+├──────────┼──────────────────┼───────────┼────────────────────┤
+│ AUTH-001 │ successful-login │ 4.1       │ tests/auth/login.t │
+│ AUTH-001 │ invalid-password │ 4.1       │ tests/auth/login.t │
+│ AUTH-001 │ account-locked   │ 4.1       │ tests/auth/login.t │
+│ AUTH-002 │ token-generated  │ 4.2       │ tests/auth/token.t │
+│ AUTH-002 │ token-expired    │ —         │ ✗ NO TEST FOUND    │
+│ AUTH-002 │ token-refreshed  │ 4.2       │ tests/auth/token.t │
+└──────────┴──────────────────┴───────────┴────────────────────┘
+
+Coverage: 5/6 scenarios tested (83%)
+Missing: token-expired (AUTH-002)
+```
+
+5. **Flag gaps**:
+   - Critical scenarios without tests → **BLOCKING** (cannot archive)
+   - Non-critical scenarios without tests → **ADVISORY** (warning)
+
 ### Method 3: Test Execution (Deep)
 
 - Run existing tests
@@ -175,7 +243,7 @@ For comprehensive verification, dispatch subagents:
 ```markdown
 # Subagent Prompt for Verification
 
-Verify that this code implements the spec requirements.
+Verify that this code implements the spec requirements AND fits the existing system.
 
 ## SPEC REQUIREMENTS
 
@@ -191,6 +259,13 @@ For each requirement:
 1. Check if code implements it
 2. Check if all scenarios are handled
 3. Identify any gaps or inconsistencies
+
+Additionally, check system fit:
+4. Does implementation follow existing codebase patterns?
+5. Does implementation respect module boundaries?
+6. Were existing tests updated (not broken)?
+7. Are new dependencies justified in design decisions?
+8. Do API changes maintain backward compatibility?
 
 ## OUTPUT FORMAT
 
@@ -275,6 +350,8 @@ AI: Running pre-archive verification...
 │ Requirements: 5 IMPLEMENTED, 0 PARTIAL, 0 MISSING            │
 │ Scenarios: 12 COVERED, 0 MISSING                             │
 │ Tests: All passing                                           │
+│ Test Traceability: 100% scenarios mapped to tests            │
+│ System Fit: All checks passed                                │
 └──────────────────────────────────────────────────────────────┘
 
 ✓ Verification passed. Ready to archive.

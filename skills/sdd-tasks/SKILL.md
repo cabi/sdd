@@ -42,7 +42,15 @@ _Meta: parallel-safe, depends on: 1_
 - [ ] X.Y <Task description>
   - _Requirements: <requirement-id>_
   - _Creates: <path>_ or _Modifies: <path>_
+  - _Tests: <task-ref>_ (for implementation tasks with test counterparts)
 ```
+
+**Test traceability field:**
+
+| Field | Direction | When to Use |
+|-------|-----------|-------------|
+| `_Tests: N.M` on implementation task | Impl → Test | Every implementation task that adds/changes behavior |
+| `_Tests: N.M` on test task | Test → Impl | Every test task references what it tests |
 
 **Group metadata (for batch execution):**
 
@@ -66,11 +74,13 @@ _Meta: sequential, foundation for all groups_
 |-------|---------|
 | `_Creates: path_` | New file created (safe for parallel) |
 | `_Modifies: path_` | Existing file modified (check for conflicts) |
+| `_Tests: task-ref_` | Bidirectional link between implementation and test tasks |
 
 These fields enable:
 - Dependency-aware execution ordering
 - Parallel group dispatch where safe
 - Scope constraints for subagents
+- Test traceability (implementation ↔ test bidirectional mapping)
 - File modification verification
 
 ## Section Organization
@@ -92,6 +102,7 @@ These fields enable:
 ## 2. Service Layer
 ## 3. API Layer
 ## 4. UI Layer
+## 5. Testing (per-component unit + integration)
 ```
 
 **Pattern 3: By Feature Slice**
@@ -99,6 +110,43 @@ These fields enable:
 ## 1. Authentication (End-to-End)
 ## 2. Session Management (End-to-End)
 ## 3. Password Reset (End-to-End)
+```
+
+### Testing Group Requirements
+
+Every task breakdown **MUST** include test tasks. Use one of these approaches:
+
+**Dedicated Testing Group** (recommended default):
+```markdown
+## 4. Testing
+_Meta: sequential, depends on: 1, 2, 3_
+
+- [ ] 4.1 Unit tests for AuthService
+  - _Requirements: AUTH-001, AUTH-002_
+  - _Creates: tests/auth/service/AuthService.test.ts_
+  - _Tests: 2.1_
+```
+
+**Inline Test Tasks** (feature-slice organization):
+```markdown
+## 2. Core Implementation
+- [ ] 2.1 Implement AuthService
+  - _Tests: 2.2_
+- [ ] 2.2 Test AuthService
+  - _Tests: 2.1_
+```
+
+**Hybrid** (unit tests inline, integration tests separate):
+```markdown
+## 2. Core Implementation
+- [ ] 2.1 Implement AuthService
+  - _Tests: 2.2_
+- [ ] 2.2 Test AuthService (unit)
+  - _Tests: 2.1_
+
+## 5. Integration Testing
+_Meta: depends on: 2, 3_
+- [ ] 5.1 Test full auth flow (integration)
 ```
 
 ## Sequencing Strategies
@@ -212,16 +260,19 @@ Combine strategies as needed.
   - Create src/auth/utils/hash.ts
   - Use bcrypt with cost factor 12
   - _Requirements: password-security-001_
+  - _Tests: 4.1_
 
 - [ ] 2.2 Implement token generation service
   - Create src/auth/service/TokenService.ts
   - JWT with 1-hour expiry
   - _Requirements: session-management-001_
+  - _Tests: 4.2_
 
 - [ ] 2.3 Create authentication service
   - Create src/auth/service/AuthService.ts
   - Implement login, logout, validate methods
   - _Requirements: authentication-001, authentication-002_
+  - _Tests: 4.3_
 ```
 
 ### API Tasks
@@ -249,18 +300,25 @@ Combine strategies as needed.
 
 ```markdown
 ## 4. Testing
+_Meta: sequential, depends on: 2, 3_
 
 - [ ] 4.1 Unit tests for password hashing
   - Test hash, verify, compare
   - _Requirements: password-security-001_
+  - _Creates: tests/auth/utils/hash.test.ts_
+  - _Tests: 2.1_
 
 - [ ] 4.2 Unit tests for token service
   - Test generation, validation, expiry
   - _Requirements: session-management-001_
+  - _Creates: tests/auth/service/TokenService.test.ts_
+  - _Tests: 2.2_
 
 - [ ] 4.3 Integration tests for auth flow
-  - Test login → access protected route → logout
+  - Test login -> access protected route -> logout
   - _Requirements: authentication-001_
+  - _Creates: tests/auth/integration/login-flow.test.ts_
+  - _Tests: 3.1, 3.3_
 ```
 
 ### Documentation Tasks
@@ -310,6 +368,11 @@ Before finalizing tasks:
 - [ ] Task sizes are appropriate (2-4 hours)
 - [ ] All requirements have at least one task reference
 - [ ] No tasks reference non-existent requirements
+- [ ] Every requirement scenario has at least one test task
+- [ ] Implementation tasks have `_Tests:` references to their test tasks
+- [ ] Test tasks have `_Tests:` references back to their implementation tasks
+- [ ] Error and edge case scenarios have dedicated test tasks
+- [ ] Multi-component changes have integration test tasks
 
 ## Common Mistakes
 
@@ -368,6 +431,55 @@ Before finalizing tasks:
 - [ ] 1.2 Implement password hashing
 - [ ] 1.3 Implement token generation
 - [ ] 1.4 Create login endpoint
+```
+
+### Missing Test Tasks
+
+❌ Bad:
+```markdown
+## 2. Core Implementation
+- [ ] 2.1 Implement AuthService
+- [ ] 2.2 Implement TokenService
+## 3. API Layer
+- [ ] 3.1 Create login endpoint
+## 4. Documentation
+- [ ] 4.1 Update API docs
+```
+
+✓ Good:
+```markdown
+## 2. Core Implementation
+- [ ] 2.1 Implement AuthService
+  - _Tests: 4.1_
+- [ ] 2.2 Implement TokenService
+  - _Tests: 4.2_
+## 3. API Layer
+- [ ] 3.1 Create login endpoint
+  - _Tests: 4.3_
+## 4. Testing
+_Meta: depends on: 2, 3_
+- [ ] 4.1 Test AuthService (unit)
+  - _Tests: 2.1_
+- [ ] 4.2 Test TokenService (unit)
+  - _Tests: 2.2_
+- [ ] 4.3 Test login flow (integration)
+  - _Tests: 3.1_
+```
+
+### Missing `_Tests:` Bidirectional References
+
+❌ Bad:
+```markdown
+- [ ] 2.1 Implement AuthService
+- [ ] 4.1 Test AuthService
+```
+
+✓ Good:
+```markdown
+- [ ] 2.1 Implement AuthService
+  - _Tests: 4.1_
+- [ ] 4.1 Test AuthService
+  - _Tests: 2.1_
 ```
 
 ## Progress Tracking

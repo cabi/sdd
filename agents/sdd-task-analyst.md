@@ -11,6 +11,9 @@ permission:
   edit: deny
   bash: deny
   webfetch: deny
+  write:
+    "*": "deny"
+    ".specs/changes/*/tasks-iteration-*.md": "allow"
 temperature: 1
 ---
 
@@ -199,7 +202,37 @@ FOR each task:
         REPORT Critical: "Task X.Y references non-existent requirement: <ref>"
 ```
 
-### 10. Severity Reclassification Guardrail
+### 10. Test Coverage
+
+Every requirement scenario **MUST** have a corresponding test task.
+
+```
+requirements = EXTRACT_ALL(specs/**/*.md)
+FOR each requirement:
+  scenarios = EXTRACT_SCENARIOS(requirement)
+  FOR each scenario:
+    IF NOT has_test_task_for_scenario(scenario, tasks.md):
+      REPORT Major: "Scenario '<name>' from REQ-<ID> has no test task coverage"
+
+implementation_tasks = FILTER(tasks, type == "implementation" AND creates_or_modifies_behavior)
+FOR each impl_task IN implementation_tasks:
+  IF NOT has_corresponding_test_task(impl_task, tasks.md):
+    REPORT Major: "Implementation task X.Y has no corresponding test task (missing _Tests reference)"
+  ELIF NOT has_bidirectional_tests_ref(impl_task, tasks.md):
+    REPORT Minor: "Task X.Y has _Tests reference but target task does not reference back"
+
+test_tasks = FILTER(tasks, type == "test")
+FOR each test_task IN test_tasks:
+  IF NOT has_corresponding_impl_task(test_task, tasks.md):
+    REPORT Major: "Test task X.Y has no corresponding implementation task (orphaned test)"
+  ELIF NOT has_bidirectional_tests_ref(test_task, tasks.md):
+    REPORT Minor: "Test task X.Y has _Tests reference but target task does not reference back"
+
+IF design_has_multi_component_changes AND NOT has_integration_test_tasks(tasks.md):
+  REPORT Major: "Design involves multi-component changes but no integration test tasks exist"
+```
+
+### 11. Severity Reclassification Guardrail
 
 ```
 FOR each issue initially considered MINOR:
@@ -235,7 +268,7 @@ _These issues block implementation. Must be resolved before proceeding._
 
 ### CRIT-001: <Issue Title>
 
-**Category:** Actionability | Sizing | Dependencies | Coverage | Sequencing | Traceability
+**Category:** Actionability | Sizing | Dependencies | Coverage | Sequencing | Traceability | Test Coverage
 **Location:** tasks.md#Group N, Task X.Y
 **Impact:** <What breaks during implementation if not fixed>
 
@@ -301,6 +334,22 @@ _These issues significantly impact implementation quality. Strongly recommended 
 | DEC-001 (JWT) | 2.2 | ✓ Covered |
 | User model migration | — | ✗ Missing |
 
+## Test Coverage Analysis
+
+| Requirement | Scenario | Test Task | Status |
+|-------------|----------|-----------|--------|
+| REQ-001 | successful-login | 4.1 | ✓ Covered |
+| REQ-001 | invalid-password | 4.1 | ✓ Covered |
+| REQ-001 | account-locked | — | ✗ Missing |
+| REQ-002 | token-generated | 4.2 | ✓ Covered |
+| REQ-002 | token-expired | — | ✗ Missing |
+
+| Impl Task | _Tests: Ref | Bidirectional | Status |
+|-----------|-------------|---------------|--------|
+| 2.1 | 4.1 | ✓ | Linked |
+| 2.2 | 4.2 | ✓ | Linked |
+| 2.3 | — | — | ✗ No test reference |
+
 ## Group Dependency Graph
 
 ```
@@ -324,6 +373,8 @@ Issues: <any dependency problems found>
 - **Total Issues:** X (Y Critical, Z Major, W Minor)
 - **Requirements Covered:** M/N (P%)
 - **Design Elements Covered:** Q/R (S%)
+- **Scenarios with Test Coverage:** S/T (U%)
+- **Impl Tasks with _Tests: References:** V/W (X%)
 - **Tasks Appropriately Sized:** A/B (C%)
 - **Dependency Graph Valid:** Yes/No
 

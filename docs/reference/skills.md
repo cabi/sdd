@@ -1,6 +1,6 @@
 # Skills Reference
 
-All 11 SDD skills organized by purpose.
+All 14 SDD skills organized by purpose.
 
 ## Exploration & Spec Creation Skills
 
@@ -110,6 +110,7 @@ Provides structure for task documents including:
 - Group organization with metadata
 - Task format with requirements references
 - Dependency tracking
+- Test traceability with `_Tests:` bidirectional references
 
 **Task Format:**
 ```markdown
@@ -119,6 +120,7 @@ _Meta: sequential, foundation_
 - [ ] 1.1 <Task description>
   - _Requirements: <ref>_
   - _Creates: <path>_
+  - _Tests: <task-ref>_
 ```
 
 ---
@@ -167,6 +169,48 @@ Scans existing codebase to detect capabilities and generate specification files.
 
 ---
 
+## Testing Skills
+
+### `sdd-testing`
+
+Test strategy and traceability for SDD.
+
+**Used by:** Referenced during task creation and verification
+
+**Purpose:**
+Maps EARS scenarios to test cases with a test traceability matrix. Provides:
+- Scenario → test mapping (happy path, error case, edge case)
+- `_Tests:` bidirectional reference format
+- Test naming conventions derived from requirement IDs
+- Test scaffolding patterns from EARS scenarios
+- Integration points for task creation, review, and verification
+
+---
+
+## Review Skills
+
+### `sdd-design-review`
+
+Design review loop protocol.
+
+**Used by:** Referenced during design creation (5-iteration mandatory review)
+
+**Purpose:**
+Defines the mandatory 5-iteration review loop where design is created, critiqued by `sdd-design-analyst`, and refined. Tracks iteration focus, metrics, and quality gates.
+
+---
+
+### `sdd-task-review`
+
+Task review loop protocol.
+
+**Used by:** Referenced during task creation (3-iteration mandatory review)
+
+**Purpose:**
+Defines the mandatory 3-iteration review loop where tasks are created, critiqued by `sdd-task-analyst`, and refined. Includes test coverage checks and `_Tests:` bidirectional reference validation.
+
+---
+
 ## Skill Summary Table
 
 | Skill | Purpose | Used By |
@@ -181,3 +225,9 @@ Scans existing codebase to detect capabilities and generate specification files.
 | `sdd-spec-apply` | Implement tasks | `/sdd-apply` |
 | `sdd-verify` | Verify implementation | `/sdd-verify` |
 | `sdd-reverse` | Extract specs from code | `/sdd-reverse` |
+| `sdd-testing` | Test strategy & traceability | Referenced |
+| `sdd-design-review` | Design review loop protocol | Referenced |
+| `sdd-task-review` | Task review loop protocol | Referenced |
+| `sdd-testing` | Test strategy & traceability | Referenced |
+| `sdd-design-review` | Design review loop protocol | Referenced |
+| `sdd-task-review` | Task review loop protocol | Referenced |

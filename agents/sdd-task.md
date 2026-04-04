@@ -15,7 +15,7 @@ permission:
   bash:
     "*": allow
   webfetch: deny
-temperature: 0.8
+temperature: 0.9
 ---
 
 # SDD Task Agent

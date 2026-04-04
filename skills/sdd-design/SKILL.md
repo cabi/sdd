@@ -392,6 +392,25 @@ Document testing strategy and observability:
 - Test session persistence
 - Test concurrent sessions
 
+### Scenario Test Mapping
+
+Map each EARS scenario to its test type and location:
+
+| Requirement | Scenario | Test Type | Test File |
+|-------------|----------|-----------|-----------|
+| AUTH-001 | successful-login | Integration | tests/auth/login.test.ts |
+| AUTH-001 | invalid-password | Unit | tests/auth/login.test.ts |
+| AUTH-001 | account-locked | Unit | tests/auth/login.test.ts |
+| AUTH-002 | token-generated | Unit | tests/auth/token.test.ts |
+| AUTH-002 | token-expired | Unit | tests/auth/token.test.ts |
+
+**Guidelines:**
+- Every `WHEN/THEN` scenario maps to at least one test
+- Error scenarios (`IF <error>`) have dedicated test cases
+- Edge cases (boundaries, empty inputs, limits) have dedicated test cases
+- Multi-component flows require integration tests
+- Test file paths follow project conventions (detect from existing tests)
+
 ### Monitoring
 
 **Metrics to Track:**
