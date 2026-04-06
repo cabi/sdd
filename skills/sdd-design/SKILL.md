@@ -493,6 +493,28 @@ Track unresolved decisions:
 **Resolution needed by:** <date or milestone>
 ```
 
+## Agent Modes
+
+The `sdd-design` agent operates in two modes, controlled by the orchestrator:
+
+### MODE="create"
+
+Initial design creation. The agent:
+1. Reads proposal.md, specs/**/*.md, and analyzes the codebase
+2. Generates a complete design.md with all 13 sections
+3. Writes design.md to disk
+
+### MODE="revise"
+
+Apply critique feedback. The agent:
+1. Reads the current design.md and the latest review-iteration-N.md
+2. Addresses all CRITICAL and MAJOR issues from the critique
+3. Fixes MINOR issues where possible
+4. Updates Design Iteration History
+5. Writes revised design.md to disk
+
+The review loop (alternating between analyst and design agent) is orchestrated by the `/sdd-artefact` command, not by the agent itself.
+
 ## Design Review Checklist
 
 - [ ] All requirements addressed

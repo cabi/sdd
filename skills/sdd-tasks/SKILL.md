@@ -499,18 +499,23 @@ Tasks: 4/12 complete (33%)
 
 ## Mandatory Review Process
 
-After creating the initial task breakdown, tasks **MUST** go through a 3-iteration review loop with the `sdd-task-analyst` agent.
+After creating the initial task breakdown, tasks **MUST** go through a 3-iteration review loop.
 
-See `sdd-task-review` skill for full protocol details.
+The review loop is orchestrated by the `/sdd-artefact` command (or `/sdd-ff`), which alternates between:
+- `@sdd-task-analyst` (critique) — produces `task-review-iteration-N.md`
+- `@sdd-task` with MODE="revise" (fix) — applies critique feedback to `tasks.md`
+
+The task agent operates in two modes:
+- **MODE="create"**: Generates the initial tasks.md from specs, design, and codebase analysis
+- **MODE="revise"**: Reads a critique report and applies fixes to tasks.md
+
+See `sdd-task-review` skill for full review protocol details.
 
 **Review loop summary:**
-1. Write initial tasks.md to disk
-2. Invoke `sdd-task-analyst` for iteration 1 → save `task-review-iteration-1.md` → revise
-3. Invoke `sdd-task-analyst` for iteration 2 → save `task-review-iteration-2.md` → revise
-4. Invoke `sdd-task-analyst` for iteration 3 → save `task-review-iteration-3.md` → finalize
-5. Final gate: APPROVE, 0 critical, 0 major unresolved, 100% requirement and design coverage
-
-**This review loop is automatically performed by the `sdd-task` agent.**
+1. Task agent creates initial tasks.md (MODE="create")
+2. Command runs 3 iterations:
+   - `@sdd-task-analyst` → `task-review-iteration-N.md` → `@sdd-task` MODE="revise" → revised tasks.md
+3. Final gate: APPROVE, 0 critical, 0 major unresolved, 100% requirement and design coverage
 
 ## Task Iteration History
 

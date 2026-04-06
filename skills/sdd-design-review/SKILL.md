@@ -21,55 +21,39 @@ This skill implements a mandatory 5-iteration review loop:
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │                    DESIGN REVIEW LOOP                            │
+│                  (orchestrated by /sdd-artefact)                  │
 │                                                                   │
 │  ┌──────────────────┐                                            │
-│  │  Create Design   │                                            │
-│  │    (v1)          │                                            │
+│  │  @sdd-design     │                                            │
+│  │  MODE=create     │                                            │
+│  │  → design.md v1  │                                            │
 │  └────────┬─────────┘                                            │
 │           │                                                       │
 │           ▼                                                       │
 │  ┌─────────────────────────────────────────────────────────────┐ │
 │  │  ITERATION 1                                                  │ │
-│  │  ┌───────────────┐    ┌────────────────┐                    │ │
-│  │  │ sdd-design-   │───►│ review-        │                    │ │
-│  │  │ analyst       │    │ iteration-1.md │                    │ │
-│  │  └───────────────┘    └───────┬────────┘                    │ │
+│  │  ┌─────────────────┐  ┌────────────────┐                    │ │
+│  │  │ @sdd-design-    │─►│ review-        │                    │ │
+│  │  │ analyst         │  │ iteration-1.md │                    │ │
+│  │  └─────────────────┘  └───────┬────────┘                    │ │
 │  │                               │                              │ │
-│  │                               ▼                              │ │
-│  │                     ┌──────────────────┐                    │ │
-│  │                     │ Revise Design    │                    │ │
-│  │                     │ (v2)             │                    │ │
-│  │                     └──────────────────┘                    │ │
+│  │  ┌─────────────────┐          │                              │ │
+│  │  │ @sdd-design     │◄─────────┘                              │ │
+│  │  │ MODE=revise     │                                         │ │
+│  │  │ → design.md v2  │                                         │ │
+│  │  └─────────────────┘                                         │ │
 │  └─────────────────────────────────────────────┬───────────────┘ │
 │                                                │                  │
 │                                                ▼                  │
 │  ┌─────────────────────────────────────────────────────────────┐ │
-│  │  ITERATION 2 (same process)                                  │ │
-│  │  ... → review-iteration-2.md → Design v3                     │ │
-│  └─────────────────────────────────────────────┬───────────────┘ │
-│                                                │                  │
-│                                                ▼                  │
-│  ┌─────────────────────────────────────────────────────────────┐ │
-│  │  ITERATION 3 (same process)                                  │ │
-│  │  ... → review-iteration-3.md → Design v4                     │ │
-│  └─────────────────────────────────────────────┬───────────────┘ │
-│                                                │                  │
-│                                                ▼                  │
-│  ┌─────────────────────────────────────────────────────────────┐ │
-│  │  ITERATION 4 (same process)                                  │ │
-│  │  ... → review-iteration-4.md → Design v5                     │ │
-│  └─────────────────────────────────────────────┬───────────────┘ │
-│                                                │                  │
-│                                                ▼                  │
-│  ┌─────────────────────────────────────────────────────────────┐ │
-│  │  ITERATION 5 (same process)                                  │ │
-│  │  ... → review-iteration-5.md → Design v6 (FINAL)             │ │
+│  │  ITERATION 2-5 (same pattern)                                │ │
+│  │  analyst → review-N.md → design agent revise → design.md    │ │
 │  └─────────────────────────────────────────────┬───────────────┘ │
 │                                                │                  │
 │                                                ▼                  │
 │                                     ┌──────────────────┐          │
-│                                     │ Write Final      │          │
-│                                     │ design.md        │          │
+│                                     │ Final design.md  │          │
+│                                     │ (after iter 5)   │          │
 │                                     └──────────────────┘          │
 └─────────────────────────────────────────────────────────────────┘
 ```
@@ -255,11 +239,20 @@ Iteration 5: 0 critical, 0 major, 2 minor → APPROVE
 
 ### Command Integration
 
-The review loop is automatically invoked when:
-- `/sdd-artefact` creates design.md
-- `sdd-design` agent is launched
+The review loop is orchestrated by `/sdd-artefact` (or `/sdd-ff`). The command:
 
-No separate command needed - review is always performed.
+1. Invokes `@sdd-design` with MODE="create" to generate the initial design
+2. Runs 5 iterations, each consisting of:
+   a. Invokes `@sdd-design-analyst` with ITERATION=N to produce a critique
+   b. Invokes `@sdd-design` with MODE="revise" and ITERATION=N to apply fixes
+3. After iteration 5, verifies the final gate (APPROVE, 0 critical, 0 major)
+
+No separate command needed - review is always performed automatically during design creation.
+
+### Agent Roles
+
+- **`@sdd-design`** (loads this skill): Creates initial design and applies revisions
+- **`@sdd-design-analyst`** (loads `sdd-design-review` skill): Produces critique reports
 
 ## Analyst Agent Behavior
 

@@ -21,43 +21,39 @@ This skill implements a mandatory 3-iteration review loop:
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │                    TASK REVIEW LOOP                              │
+│                  (orchestrated by /sdd-artefact)                  │
 │                                                                   │
 │  ┌──────────────────┐                                            │
-│  │  Create Tasks    │                                            │
-│  │    (v1)          │                                            │
+│  │  @sdd-task       │                                            │
+│  │  MODE=create     │                                            │
+│  │  → tasks.md v1   │                                            │
 │  └────────┬─────────┘                                            │
 │           │                                                       │
 │           ▼                                                       │
 │  ┌─────────────────────────────────────────────────────────────┐ │
 │  │  ITERATION 1                                                  │ │
-│  │  ┌───────────────┐    ┌─────────────────────┐               │ │
-│  │  │ sdd-task-     │───►│ task-review-        │               │ │
-│  │  │ analyst       │    │ iteration-1.md      │               │ │
-│  │  └───────────────┘    └───────┬─────────────┘               │ │
+│  │  ┌─────────────────┐  ┌─────────────────────┐               │ │
+│  │  │ @sdd-task-      │─►│ task-review-        │               │ │
+│  │  │ analyst         │  │ iteration-1.md      │               │ │
+│  │  └─────────────────┘  └───────┬─────────────┘               │ │
 │  │                               │                              │ │
-│  │                               ▼                              │ │
-│  │                     ┌──────────────────┐                    │ │
-│  │                     │ Revise Tasks     │                    │ │
-│  │                     │ (v2)             │                    │ │
-│  │                     └──────────────────┘                    │ │
+│  │  ┌─────────────────┐          │                              │ │
+│  │  │ @sdd-task       │◄─────────┘                              │ │
+│  │  │ MODE=revise     │                                         │ │
+│  │  │ → tasks.md v2   │                                         │ │
+│  │  └─────────────────┘                                         │ │
 │  └─────────────────────────────────────────────┬───────────────┘ │
 │                                                │                  │
 │                                                ▼                  │
 │  ┌─────────────────────────────────────────────────────────────┐ │
-│  │  ITERATION 2                                                  │ │
-│  │  ... → task-review-iteration-2.md → Tasks v3                 │ │
-│  └─────────────────────────────────────────────┬───────────────┘ │
-│                                                │                  │
-│                                                ▼                  │
-│  ┌─────────────────────────────────────────────────────────────┐ │
-│  │  ITERATION 3 (FINAL)                                          │ │
-│  │  ... → task-review-iteration-3.md → Tasks v4 (FINAL)         │ │
+│  │  ITERATION 2-3 (same pattern)                                │ │
+│  │  analyst → task-review-N.md → task agent revise → tasks.md  │ │
 │  └─────────────────────────────────────────────┬───────────────┘ │
 │                                                │                  │
 │                                                ▼                  │
 │                                     ┌──────────────────┐          │
-│                                     │ Write Final      │          │
-│                                     │ tasks.md         │          │
+│                                     │ Final tasks.md   │          │
+│                                     │ (after iter 3)   │          │
 │                                     └──────────────────┘          │
 └─────────────────────────────────────────────────────────────────┘
 ```
@@ -223,12 +219,20 @@ Iteration 3: 0 critical, 0 major, 1 minor → APPROVE
 
 ### Command Integration
 
-The review loop is automatically invoked when:
-- `/sdd-artefact` creates tasks.md
-- `/sdd-ff` fast-forwards through all artifacts
-- `sdd-task` agent is launched
+The review loop is orchestrated by `/sdd-artefact` (or `/sdd-ff`). The command:
 
-No separate command needed - review is always performed.
+1. Invokes `@sdd-task` with MODE="create" to generate the initial tasks
+2. Runs 3 iterations, each consisting of:
+   a. Invokes `@sdd-task-analyst` with ITERATION=N to produce a critique
+   b. Invokes `@sdd-task` with MODE="revise" and ITERATION=N to apply fixes
+3. After iteration 3, verifies the final gate (APPROVE, 0 critical, 0 major)
+
+No separate command needed - review is always performed automatically during task creation.
+
+### Agent Roles
+
+- **`@sdd-task`** (loads `sdd-tasks` skill): Creates initial tasks and applies revisions
+- **`@sdd-task-analyst`** (loads this skill): Produces critique reports
 
 ## Analyst Agent Behavior
 
@@ -237,7 +241,7 @@ The `sdd-task-analyst` agent:
 1. **Reads the tasks** and all context files (specs, design, proposal)
 2. **Performs systematic analysis** across all 10 categories
 3. **Prioritizes issues** by severity
-4. **Writes critique report** to `tasks-iteration-N.md`
+4. **Writes critique report** to `task-review-iteration-N.md`
 5. **Returns verdict** with reasoning
 
 ### Verdict Types

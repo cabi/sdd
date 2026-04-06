@@ -14,20 +14,20 @@ This project includes specialized subagents for design document and task creatio
 
 - **File:** `agents/sdd-design.md`
 - **Usage:** `@sdd-design`
-- **Purpose:** Standard design document creation with mandatory 5-iteration review loop
+- **Purpose:** Design document creation and revision
 - **Mode:** Subagent
-- **Temperature:** 0.3
+- **Temperature:** 0.9
 - **Features:**
   - Analyzes codebase to detect tech stack, patterns, and conventions
   - Creates comprehensive design documents with Mermaid diagrams
   - Documents decisions with alternatives and rationale
   - Respects prior context (decisions, preferences, Q&A)
-  - Mandatory 5-iteration review loop with sdd-design-analyst
-  - Critique reports saved for traceability
+  - Two modes: `create` (initial design) and `revise` (apply critique)
+  - Reads/writes design.md and review files autonomously
 
-**Invoke:** `@sdd-design <context>`
+**Invoke:** `@sdd-design` with CHANGE_DIR and MODE parameters
 
-**Note:** This agent automatically invokes `sdd-design-analyst` for 5 review iterations before finalizing design.
+**Note:** This agent does NOT run the review loop itself. The command orchestrator (`/sdd-artefact`) alternates between this agent and `sdd-design-analyst` for 5 iterations.
 
 ### SDD Design Analyst
 
@@ -35,7 +35,7 @@ This project includes specialized subagents for design document and task creatio
 - **Usage:** `@sdd-design-analyst`
 - **Purpose:** Brutally honest design critic for logical flaws, structural issues, and coverage gaps
 - **Mode:** Subagent
-- **Temperature:** 0.7 (higher for critical thinking)
+- **Temperature:** 1.0 (higher for critical thinking)
 - **Features:**
   - Analyzes designs for logical consistency
   - Checks structural completeness
@@ -44,28 +44,28 @@ This project includes specialized subagents for design document and task creatio
   - Produces structured critique reports with severity levels
   - Tracks issues across iterations
 
-**Invoke:** Automatically during sdd-design review loop
+**Invoke:** Automatically during design review loop (by `/sdd-artefact` command)
 
-**Note:** This agent is automatically invoked by the design agents during the 5-iteration review loop.
+**Note:** This agent is invoked by the command orchestrator during the 5-iteration design review loop.
 
 ### SDD Task Agent
 
 - **File:** `agents/sdd-task.md`
 - **Usage:** `@sdd-task`
-- **Purpose:** Task breakdown creation with mandatory 3-iteration review loop
+- **Purpose:** Task breakdown creation and revision
 - **Mode:** Subagent
-- **Temperature:** 0.8
+- **Temperature:** 0.9
 - **Features:**
   - Analyzes design and specs to extract components, decisions, and requirements
   - Analyzes codebase to detect project structure and existing files
   - Creates comprehensive task breakdowns with proper grouping and sizing
   - Ensures 100% requirement and design element coverage
-  - Mandatory 3-iteration review loop with sdd-task-analyst
-  - Critique reports saved for traceability
+  - Two modes: `create` (initial tasks) and `revise` (apply critique)
+  - Reads/writes tasks.md and review files autonomously
 
-**Invoke:** `@sdd-task <context>`
+**Invoke:** `@sdd-task` with CHANGE_DIR and MODE parameters
 
-**Note:** This agent automatically invokes `sdd-task-analyst` for 3 review iterations before finalizing tasks.
+**Note:** This agent does NOT run the review loop itself. The command orchestrator (`/sdd-artefact`) alternates between this agent and `sdd-task-analyst` for 3 iterations.
 
 ### SDD Task Analyst
 
@@ -84,18 +84,20 @@ This project includes specialized subagents for design document and task creatio
   - Produces structured critique reports with severity levels
   - Tracks issues across iterations
 
-**Invoke:** Automatically during sdd-task review loop
+**Invoke:** Automatically during task review loop (by `/sdd-artefact` command)
 
-**Note:** This agent is automatically invoked by the task agent during the 3-iteration review loop.
+**Note:** This agent is invoked by the command orchestrator during the 3-iteration task review loop.
 
 ### Agent Configuration
 
 All agents have the following configuration:
 - **Mode:** `subagent` (invoked via `@` mention or Task tool)
-- **Tools:** Full access to glob, grep, read, write, edit, bash, task
-- **Permissions:** Full write/edit access, unrestricted bash (analyst agents are read-only)
+- **Tools:** Full access to glob, grep, read, write, edit, bash (creator agents); read + write (analyst agents)
+- **Permissions:** Full write/edit access, unrestricted bash (analyst agents are read-only except review files)
 - **Scope:** Constrained to project files (see scope constraints in agent files)
-- **Review Loop:** All designs go through a mandatory 5-iteration review; all tasks go through a mandatory 3-iteration review
+- **Modes:** Creator agents support `create` (initial) and `revise` (apply critique) modes
+- **Review Loop:** Orchestrated by `/sdd-artefact` command — alternates between creator and analyst agents
+- **Interface:** Agents receive CHANGE_DIR, MODE, and ITERATION parameters; they read/write files autonomously
 
 ---
 

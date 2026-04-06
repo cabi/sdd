@@ -79,11 +79,11 @@ Show me:
 - A preview before writing
 - Any BLOCKED states with clear next steps
 
-## Design Document Creation
+---
+
+## Design Document Creation (Orchestrated Review Loop)
 
 **PREREQUISITE:** `specs/**/*.md` MUST exist before creating design.md
-
-When creating design.md, follow this enhanced workflow:
 
 ### Step 0: Verify Prerequisites (BLOCKS if missing)
 
@@ -144,56 +144,116 @@ Context Package:
 - Q&A Responses: [relevant answers]
 ```
 
-### Step 3: Launch Design Agent
+### Step 3: Create Initial Design
 
-**Agent:** `sdd-design`
+**Agent:** `@sdd-design` (MODE=create)
 
-Launch the design agent with:
-- Context package (from Step 2)
-- File paths to read (proposal.md, specs/**/*.md)
-- Expected output location (.specs/changes/<name>/design.md)
+Invoke the design agent with:
+```
+CHANGE_DIR=".specs/changes/<name>"
+MODE="create"
+```
+
+The agent will:
+1. Read proposal.md, specs/**/*.md from CHANGE_DIR
+2. Analyze codebase (detect tech stack, patterns, conventions)
+3. Generate design.md with all required sections
+4. Write initial draft to `{CHANGE_DIR}/design.md`
+5. Return completion summary
+
+Wait for agent to complete before proceeding to Step 4.
+
+### Step 4: Design Review Loop (5 iterations, MANDATORY)
+
+**This loop is orchestrated HERE — the command alternates between analyst and designer.**
+
+The loop **MUST** complete all 5 iterations. Even if early iterations return APPROVE, continue through iteration 5.
+
+**FOR iteration = 1 to 5:**
+
+#### Step 4a: Invoke Design Analyst
+
+**Agent:** `@sdd-design-analyst`
+
+Invoke with:
+```
+CHANGE_DIR=".specs/changes/<name>"
+ITERATION={iteration}
+```
+
+The analyst will:
+1. Read design.md from CHANGE_DIR
+2. Read specs/**/*.md, proposal.md from CHANGE_DIR
+3. Read review-iteration-{iteration-1}.md (if iteration > 1) from CHANGE_DIR
+4. Perform systematic analysis
+5. Write critique to `{CHANGE_DIR}/review-iteration-{iteration}.md`
+6. Return verdict (REVISE/CONDITIONAL/APPROVE) and issue counts
+
+Wait for analyst to complete.
+
+#### Step 4a-verify: Confirm Design Review File Exists
+
+After the analyst returns, **you MUST verify** the review file was written:
+
+1. Check that `{CHANGE_DIR}/review-iteration-{iteration}.md` exists using the glob or read tool
+2. If the file **EXISTS** and has content: proceed to Step 4b
+3. If the file is **MISSING** or empty:
+   - Re-invoke `@sdd-design-analyst` with the same parameters PLUS this explicit instruction:
+     ```
+     CRITICAL: Your review file was NOT written in the previous attempt.
+     You MUST write the file FIRST before producing any output text.
+     File path: {CHANGE_DIR}/review-iteration-{iteration}.md
+     Refer to the "File Write Gate" section in your agent instructions.
+     ```
+   - Retry up to **2 times**
+   - If still missing after retries: **HALT** and output:
+     ```
+     ERROR: Design analyst failed to write review-iteration-{iteration}.md after 3 attempts.
+     Manual intervention required.
+     ```
+   - Do NOT proceed to Step 4b until the file exists
+
+#### Step 4b: Invoke Design Agent (Revise)
+
+**Agent:** `@sdd-design` (MODE=revise)
+
+Invoke with:
+```
+CHANGE_DIR=".specs/changes/<name>"
+MODE="revise"
+ITERATION={iteration}
+```
 
 The design agent will:
-1. Read all source documents
-2. Analyze codebase (detect tech stack, patterns, conventions)
-3. Find similar existing features
-4. Generate design.md with:
-   - Problem Statement
-   - Context (with detected constraints)
-   - Goals / Non-Goals
-   - Existing Solution (if modification)
-   - Architecture (with Mermaid diagrams)
-   - Decisions (with alternatives)
-   - Components
-   - Data Models
-   - API Changes
-   - Testability, Monitoring & Alerting
-   - Risks / Trade-offs
-   - Migration Plan
-   - Open Questions
-5. Respect prior context (decisions, preferences, constraints)
-6. Run a **mandatory 5-iteration refinement loop** with `sdd-design-analyst`
-   - Write initial draft first
-   - Run iterations 1 through 5 (no skipping)
-   - Save every critique report (`review-iteration-1.md` ... `review-iteration-5.md`)
-   - Revise design.md after each iteration
-   - Continue all 5 iterations even if earlier iterations approve
-   - Reclassify any MINOR issue that impacts security/compliance/data integrity/requirement coverage to MAJOR or CRITICAL
-   - Reach final quality gate in iteration 5 before completion
+1. Read design.md and review-iteration-{iteration}.md from CHANGE_DIR
+2. Read specs/**/*.md, proposal.md from CHANGE_DIR
+3. Apply all CRITICAL and MAJOR fixes from critique
+4. Fix MINOR issues where possible
+5. Update Design Iteration History in design.md
+6. Write revised design.md to CHANGE_DIR
+7. Return revision summary
 
-### Step 4b: Verify Design Document
+Wait for agent to complete.
 
-After agent completion:
-- Verify design.md exists with substantive content
+#### Step 4c: Log Iteration Progress
+
+After each iteration, report:
+```
+Iteration {N}:
+  Analyst: <X> critical, <Y> major, <Z> minor — Verdict: <VERDICT>
+  Designer: Revised design.md — Key fixes: <summary>
+  Report: review-iteration-{N}.md
+```
+
+### Step 5: Verify Design Document
+
+After the 5-iteration loop completes, verify:
+- design.md exists with substantive content
 - Check all sections are populated
 - Confirm Mermaid diagrams are present
 - Verify prior context was incorporated
 - Verify review artifacts exist:
-  - `review-iteration-1.md`
-  - `review-iteration-2.md`
-  - `review-iteration-3.md`
-  - `review-iteration-4.md`
-  - `review-iteration-5.md`
+  - `review-iteration-1.md` through `review-iteration-5.md`
 - Verify iteration 5 verdict is APPROVE
 - Verify 0 critical and 0 major unresolved issues in final design
 - Minor findings SHOULD be fixed during refinement iterations
@@ -219,13 +279,32 @@ Current Status:
   design: BLOCKED (refinement loop incomplete)
 ```
 
+### Step 6: Update Proposal Status
+
+Update the Status section in `proposal.md`:
+
+```markdown
+## Status
+- [x] Requirements: done (specs/ created)
+- [x] Design: done (design.md created, 5 review iterations)
+- [ ] Tasks: pending
+```
+
+### Step 7: Report Design Creation
+
+Report what was created and iteration progress, then output:
+
+```
+---
+Next: Use /sdd-artefact to create tasks
+---
+```
+
 ---
 
-## Task Document Creation
+## Task Document Creation (Orchestrated Review Loop)
 
 **PREREQUISITE:** `specs/**/*.md` AND `design.md` MUST exist before creating tasks.md
-
-When creating tasks.md, follow this enhanced workflow:
 
 ### Step 0: Verify Prerequisites (BLOCKS if missing)
 
@@ -240,7 +319,7 @@ Before gathering context, verify specs and design exist:
 
 REASON: <specs/design.md> not found
 REQUIRED: Specifications AND design MUST exist before tasks
-          (task agent requires specs and design as input)
+           (task agent requires specs and design as input)
 
 ACTION REQUIRED:
   /sdd-artefact     - Create missing artifacts first
@@ -274,40 +353,117 @@ Before launching the task agent, collect context from earlier phases:
 - Extract migration plan
 - Extract testing strategy
 
-### Step 2: Launch Task Agent
+### Step 2: Create Initial Tasks
 
-**Agent:** `sdd-task`
+**Agent:** `@sdd-task` (MODE=create)
 
-Launch the task agent with:
-- File paths to read (proposal.md, specs/**/*.md, design.md)
-- Expected output location (.specs/changes/<name>/tasks.md)
+Invoke the task agent with:
+```
+CHANGE_DIR=".specs/changes/<name>"
+MODE="create"
+```
 
-The task agent will:
-1. Read all source documents
+The agent will:
+1. Read proposal.md, specs/**/*.md, design.md from CHANGE_DIR
 2. Analyze codebase (detect structure, existing files, patterns)
 3. Generate tasks with proper grouping, sizing, and sequencing
-4. Write initial tasks.md to disk
-5. Run a **mandatory 3-iteration refinement loop** with `sdd-task-analyst`
-   - Write initial draft first
-   - Run iterations 1 through 3 (no skipping)
-   - Save every critique report (`task-review-iteration-1.md` ... `task-review-iteration-3.md`)
-   - Revise tasks.md after each iteration
-   - Continue all 3 iterations even if earlier iterations approve
-   - Reclassify any MINOR issue that impacts implementation correctness or parallel safety to MAJOR or CRITICAL
-   - Reach final quality gate in iteration 3 before completion
+4. Write initial draft to `{CHANGE_DIR}/tasks.md`
+5. Return completion summary
 
-### Step 3: Verify Tasks Document
+Wait for agent to complete before proceeding to Step 3.
 
-After agent completion:
-- Verify tasks.md exists with substantive content
+### Step 3: Task Review Loop (3 iterations, MANDATORY)
+
+**This loop is orchestrated HERE — the command alternates between analyst and task agent.**
+
+The loop **MUST** complete all 3 iterations. Even if early iterations return APPROVE, continue through iteration 3.
+
+**FOR iteration = 1 to 3:**
+
+#### Step 3a: Invoke Task Analyst
+
+**Agent:** `@sdd-task-analyst`
+
+Invoke with:
+```
+CHANGE_DIR=".specs/changes/<name>"
+ITERATION={iteration}
+```
+
+The analyst will:
+1. Read tasks.md from CHANGE_DIR
+2. Read specs/**/*.md, design.md, proposal.md from CHANGE_DIR
+3. Read task-review-iteration-{iteration-1}.md (if iteration > 1) from CHANGE_DIR
+4. Perform systematic analysis
+5. Write critique to `{CHANGE_DIR}/task-review-iteration-{iteration}.md`
+6. Return verdict (REVISE/CONDITIONAL/APPROVE) and issue counts
+
+Wait for analyst to complete.
+
+#### Step 3a-verify: Confirm Task Review File Exists
+
+After the analyst returns, **you MUST verify** the review file was written:
+
+1. Check that `{CHANGE_DIR}/task-review-iteration-{iteration}.md` exists using the glob or read tool
+2. If the file **EXISTS** and has content: proceed to Step 3b
+3. If the file is **MISSING** or empty:
+   - Re-invoke `@sdd-task-analyst` with the same parameters PLUS this explicit instruction:
+     ```
+     CRITICAL: Your review file was NOT written in the previous attempt.
+     You MUST write the file FIRST before producing any output text.
+     File path: {CHANGE_DIR}/task-review-iteration-{iteration}.md
+     Refer to the "File Write Gate" section in your agent instructions.
+     ```
+   - Retry up to **2 times**
+   - If still missing after retries: **HALT** and output:
+     ```
+     ERROR: Task analyst failed to write task-review-iteration-{iteration}.md after 3 attempts.
+     Manual intervention required.
+     ```
+   - Do NOT proceed to Step 3b until the file exists
+
+#### Step 3b: Invoke Task Agent (Revise)
+
+**Agent:** `@sdd-task` (MODE=revise)
+
+Invoke with:
+```
+CHANGE_DIR=".specs/changes/<name>"
+MODE="revise"
+ITERATION={iteration}
+```
+
+The task agent will:
+1. Read tasks.md and task-review-iteration-{iteration}.md from CHANGE_DIR
+2. Read specs/**/*.md, design.md, proposal.md from CHANGE_DIR
+3. Apply all CRITICAL and MAJOR fixes from critique
+4. Fix MINOR issues where possible
+5. Update Task Iteration History in tasks.md
+6. Write revised tasks.md to CHANGE_DIR
+7. Return revision summary
+
+Wait for agent to complete.
+
+#### Step 3c: Log Iteration Progress
+
+After each iteration, report:
+```
+Iteration {N}:
+  Analyst: <X> critical, <Y> major, <Z> minor — Verdict: <VERDICT>
+  Task Agent: Revised tasks.md — Key fixes: <summary>
+  Report: task-review-iteration-{N}.md
+```
+
+### Step 4: Verify Tasks Document
+
+After the 3-iteration loop completes, verify:
+- tasks.md exists with substantive content
 - Check all groups have _Meta fields
 - Verify requirement coverage (100%)
 - Verify design element coverage (100%)
 - Verify dependency graph is valid (no cycles)
 - Verify review artifacts exist:
-  - `task-review-iteration-1.md`
-  - `task-review-iteration-2.md`
-  - `task-review-iteration-3.md`
+  - `task-review-iteration-1.md` through `task-review-iteration-3.md`
 - Verify iteration 3 verdict is APPROVE
 - Verify 0 critical and 0 major unresolved issues in final tasks
 - Minor findings SHOULD be fixed during refinement iterations
@@ -336,18 +492,8 @@ Current Status:
 
 ### Step 5: Update Proposal Status
 
-**NOTE:** This step runs AFTER the design agent returns (which is AFTER the mandatory 5-iteration review loop completes). The agent does not update proposal status - this command handles it.
-
 Update the Status section in `proposal.md`:
 
-```markdown
-## Status
-- [x] Requirements: done (specs/ created)
-- [x] Design: done (design.md created, 5 review iterations)
-- [ ] Tasks: pending
-```
-
-**After design creation:**
 ```markdown
 ## Status
 - [x] Requirements: done (specs/ created)
@@ -355,7 +501,27 @@ Update the Status section in `proposal.md`:
 - [x] Tasks: done (tasks.md created, 3 review iterations)
 ```
 
-After creating, report status. Then output ONLY the relevant next step based on what was just completed:
+### Step 6: Report Task Creation
+
+After creating, report status. Then output:
+
+```
+---
+Next Steps:
+  /sdd-apply        - Execute one task at a time
+  /sdd-apply-group N - Execute group N
+  /sdd-apply-all     - Execute all groups
+---
+```
+
+DO NOT show options that don't apply to the current state.
+DO NOT suggest commands not listed above.
+
+---
+
+## Status Reporting
+
+After any artifact creation, report what was created and what's next:
 
 **If specs were just created:**
 ```
@@ -415,6 +581,7 @@ DO NOT suggest commands not listed above.
 - ❌ `/sdd-design` (agent, invoked by this command)
 - ❌ `/sdd-tasks` (skill, loaded by this command)
 - ❌ `/sdd-task-review` (skill, loaded by task agent)
+- ❌ `/sdd-design-review` (skill, loaded by design analyst)
 
-**Loads skills:** `sdd-spec-artefact`, `sdd-requirements`, `sdd-design`, `sdd-tasks`, `sdd-task-review`
-**Loads agents:** `sdd-design` (for design phase), `sdd-task` (for task phase)
+**Loads skills:** `sdd-spec-artefact`
+**Loads agents:** `sdd-design` (design phase), `sdd-design-analyst` (design review), `sdd-task` (task phase), `sdd-task-analyst` (task review)

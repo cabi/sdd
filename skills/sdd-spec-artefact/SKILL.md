@@ -191,25 +191,19 @@ The system SHALL <behavior>.
 #### Creating design
 
 **Requires:** `specs/*.md` MUST exist (BLOCKED otherwise)
-**Require skill:** `sdd-design`
+**Require skill:** `sdd-design` (loaded by agent)
 **Agent:** `sdd-design`
 
 Create `.specs/changes/<name>/design.md` via the design agent.
 
-**MANDATORY refinement process (cannot be skipped):**
-1. Write initial design draft to disk
-2. Run `sdd-design-analyst` review iterations 1..5
-3. Save each critique report:
-   - `review-iteration-1.md`
-   - `review-iteration-2.md`
-   - `review-iteration-3.md`
-   - `review-iteration-4.md`
-   - `review-iteration-5.md`
-4. Revise design.md after each iteration
-5. Continue through all 5 iterations even if early approval occurs
-6. Final gate (iteration 5): `APPROVE`, `0 critical`, `0 major unresolved`, `100% requirement coverage`
-7. MIN-* findings SHOULD be fixed during refinement; unresolved MIN-* findings MUST be documented with rationale and follow-up
-8. Any MIN-* affecting security/compliance/data integrity/requirement coverage MUST be reclassified to MAJOR or CRITICAL
+The `/sdd-artefact` command orchestrates a 5-iteration review loop:
+1. Invokes `@sdd-design` with MODE="create" → writes initial design.md
+2. For each iteration 1..5:
+   a. Invokes `@sdd-design-analyst` with ITERATION=N → writes review-iteration-N.md
+   b. Invokes `@sdd-design` with MODE="revise" ITERATION=N → revises design.md
+3. Final gate (iteration 5): `APPROVE`, `0 critical`, `0 major unresolved`, `100% requirement coverage`
+4. MIN-* findings SHOULD be fixed during refinement; unresolved MIN-* findings MUST be documented with rationale and follow-up
+5. Any MIN-* affecting security/compliance/data integrity/requirement coverage MUST be reclassified to MAJOR or CRITICAL
 
 **Prerequisites Check:**
 - If `specs/` directory is empty: **BLOCKED** - Output "BLOCKED: Create specs first (required)"
@@ -218,23 +212,19 @@ Create `.specs/changes/<name>/design.md` via the design agent.
 
 #### Creating tasks
 
-**Require skill:** `sdd-tasks`
+**Require skill:** `sdd-tasks` (loaded by agent)
 **Agent:** `sdd-task`
 
 Create `.specs/changes/<name>/tasks.md` via the task agent.
 
-**MANDATORY refinement process (cannot be skipped):**
-1. Write initial tasks draft to disk
-2. Run `sdd-task-analyst` review iterations 1..3
-3. Save each critique report:
-   - `task-review-iteration-1.md`
-   - `task-review-iteration-2.md`
-   - `task-review-iteration-3.md`
-4. Revise tasks.md after each iteration
-5. Continue through all 3 iterations even if early approval occurs
-6. Final gate (iteration 3): `APPROVE`, `0 critical`, `0 major unresolved`, `100% requirement coverage`, `100% design element coverage`
-7. MIN-* findings SHOULD be fixed during refinement; unresolved MIN-* findings MUST be documented with rationale and follow-up
-8. Any MIN-* affecting implementation correctness or parallel safety MUST be reclassified to MAJOR or CRITICAL
+The `/sdd-artefact` command orchestrates a 3-iteration review loop:
+1. Invokes `@sdd-task` with MODE="create" → writes initial tasks.md
+2. For each iteration 1..3:
+   a. Invokes `@sdd-task-analyst` with ITERATION=N → writes task-review-iteration-N.md
+   b. Invokes `@sdd-task` with MODE="revise" ITERATION=N → revises tasks.md
+3. Final gate (iteration 3): `APPROVE`, `0 critical`, `0 major unresolved`, `100% requirement coverage`, `100% design element coverage`
+4. MIN-* findings SHOULD be fixed during refinement; unresolved MIN-* findings MUST be documented with rationale and follow-up
+5. Any MIN-* affecting implementation correctness or parallel safety MUST be reclassified to MAJOR or CRITICAL
 
 **Prerequisites Check:**
 - If `specs/` directory is empty: **BLOCKED** - Output "BLOCKED: Create specs first (required)"
@@ -326,4 +316,4 @@ Next: Use /sdd-artefact to create design
 - [ ] 0 major unresolved issues in final tasks
 - [ ] Task Iteration History documented
 
-**Loads skill:** `sdd-design`
+**Loads skill:** `sdd-spec-artefact` (used by command only)

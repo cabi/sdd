@@ -13,10 +13,17 @@ Use when I have a clear picture of what I want to build and want to skip the inc
 2. **Load proposal** - Read the context
 3. **Create ALL artifacts in sequence:**
    - specs/ (requirements)
-   - design.md (technical approach + 5-iteration review)
-   - tasks.md (implementation checklist + 3-iteration review)
+   - design.md (technical approach + 5-iteration review loop orchestrated here)
+   - tasks.md (implementation checklist + 3-iteration review loop orchestrated here)
 4. **Update proposal status** - Mark all complete
 5. **Report what was created**
+
+**Review loop orchestration:**
+The command orchestrates review loops by alternating between agents:
+- Design: `@sdd-design` (create/revise) ↔ `@sdd-design-analyst` (critique) — 5 iterations
+- Tasks: `@sdd-task` (create/revise) ↔ `@sdd-task-analyst` (critique) — 3 iterations
+
+Agents receive file paths only (CHANGE_DIR, MODE, ITERATION) and read/write files autonomously.
 
 **Warning:** This creates everything at once (including mandatory review loops for both design and tasks). For complex features, use `/sdd-artefact` to allow review between artifacts.
 
