@@ -21,6 +21,13 @@ Verify that the implementation matches the spec requirements.
    - Specific spec in `.specs/specs/`
    - All specs
 
+1.5. **Detect change type (for current change):**
+   - Read `proposal.md` from change directory
+   - Extract `change_type` from "Change Type" section
+   - If `change_type` ∈ {removal, rebuild}: switch to Migration Verification mode
+   - If `change_type` ∈ {addition, modification, refactor}: use Standard Verification mode
+   - If not found: default to Standard Verification mode
+
 2. **Load requirements:**
    - Parse spec for requirements and scenarios
    - Identify expected files from metadata
@@ -50,31 +57,28 @@ Verify that the implementation matches the spec requirements.
 
    - [ ] Does every EARS scenario have a corresponding test?
 
-   **Design Fidelity:**
-   - [ ] Does implementation follow the architecture from design?
-   - [ ] Were decisions honored? (If deviated, is it documented?)
-   - [ ] Are component interfaces as designed?
-   - [ ] Do data models match the schema from design?
+    **Design Fidelity:**
+    - [ ] Does implementation follow the architecture from design?
+    - [ ] Were decisions honored? (If deviated, is it documented?)
+    - [ ] Are component interfaces as designed?
+    - [ ] Do data models match the schema from design?
+    - [ ] Does implementation follow existing codebase patterns?
+    - [ ] Does implementation respect module boundaries?
 
-   - [ ] Does implementation follow existing codebase patterns?
-   - [ ] Does implementation respect module boundaries?
+    **Constraint Verification:**
+    - [ ] Are compliance requirements (GDPR, accessibility, etc.) implemented?
+    - [ ] Are integration dependencies working as specified?
+    - [ ] **Standard mode:** Are behavioral boundaries (backward compatibility, data compatibility) respected?
+    - [ ] **Migration mode:** Are removed behaviors documented? Is migration path tested?
+    - [ ] Are all constraints from proposal.md addressed?
 
-   **Constraint Verification:**
-   - [ ] Are compliance requirements (GDPR, accessibility, etc.) implemented?
-   - [ ] Are integration dependencies working as specified?
-   - [ ] Are behavioral boundaries (backward compatibility, data compatibility) respected?
-   - [ ] Are all constraints from proposal.md addressed?
+    **System Fit:**
+    - [ ] Were existing tests updated (not broken)?
+    - [ ] Are new dependencies justified in design decisions?
+    - [ ] **Standard mode:** Do API changes maintain backward compatibility?
+    - [ ] **Migration mode:** Are all REMOVED requirements fully removed from codebase? Is migration path implemented and tested?
 
-   **System Fit:**
-   - [ ] Does implementation follow existing codebase patterns?
-   - [ ] Does implementation respect module boundaries?
-   - [ ] Were existing tests updated (not broken)?
-   - [ ] Are new dependencies justified in design decisions?
-   - [ ] Do API changes maintain backward compatibility?
-
-   - [ ] Are new dependencies documented in decisions?
-
- 5. **Build test traceability matrix:**
+  5. **Build test traceability matrix:**
    For each EARS scenario in specs:
    - Find corresponding test file in codebase
    - Check if test file references the correct scenario

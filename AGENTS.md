@@ -199,6 +199,24 @@ All agents have the following configuration:
 2. **Ask about scope** - Is this a new capability or modifying existing?
 3. **Choose appropriate workflow** - Full spec, micro-spec, or skip
 
+### Change Types
+
+Every proposal has a `change_type` that affects downstream behavior:
+
+| Type | Meaning | Verification Mode |
+|------|---------|-------------------|
+| `addition` | New capabilities, no existing behavior changed | Standard |
+| `modification` | Extending existing capabilities | Standard |
+| `refactor` | Internal restructuring, same external behavior | Standard |
+| `removal` | Removing deprecated capabilities | Migration |
+| `rebuild` | Replacing existing behavior with fundamentally different approach | Migration |
+
+**Migration verification mode** (for `removal`/`rebuild`) replaces backward compatibility checks with:
+- Removal documented (every REMOVED requirement has Reason + Migration)
+- Migration path tested
+- Dead code removed
+- No dangling references in codebase or other specs
+
 ### During Spec Creation
 
 1. **Use EARS format** for requirements:
@@ -262,9 +280,41 @@ When dispatching subagents for task groups:
 3. **Required completion signal** - Must output "GROUP N COMPLETE"
 4. **Stop conditions** - "DO NOT start next group"
 
+### Sunset & Migration Groups
+
+For `change_type: removal` or `change_type: rebuild`, the task breakdown MUST include a "Sunset & Migration" group as the last group:
+
+```markdown
+## N. Sunset & Migration
+_Meta: sequential, depends on: <all implementation groups>_
+
+- [ ] N.1 Remove deprecated <feature>
+  - _Requirements: <removed-req>_
+  - _Removes: src/legacy/<module>_
+  - _Migrates: /api/v1/old → /api/v2/new_
+```
+
+Additional task metadata for removal tasks:
+
+| Field | Purpose |
+|-------|---------|
+| `_Removes: path_` | File or module being deleted |
+| `_Migrates: from → to_` | Migration path for consumers |
+
 ---
 
 ## Spec Format Standards
+
+### Change Type
+
+```markdown
+## Change Type
+
+**Type:** addition | modification | refactor | removal | rebuild
+**Breaking:** yes | no
+**Migration Required:** yes | no
+**Migration Path:** <description or "N/A">
+```
 
 ### Requirements
 
@@ -297,6 +347,14 @@ _Meta: sequential, foundation_
 - [ ] 1.1 <Task description>
   - _Requirements: <ref>_
   - _Creates: <path>_
+
+## N. Sunset & Migration
+_Meta: sequential, depends on: <all implementation groups>_
+
+- [ ] N.1 Remove deprecated <feature>
+  - _Requirements: <removed-req>_
+  - _Removes: <path>_
+  - _Migrates: <from> → <to>_
 ```
 
 ---
@@ -310,6 +368,14 @@ Always verify:
 - [ ] All scenarios are handled
 - [ ] Tests exist for critical paths
 - [ ] No critical gaps remain
+
+**For change_type removal/rebuild, additionally verify:**
+- [ ] Every REMOVED requirement has Reason and Migration documented
+- [ ] Sunset group tasks are all complete
+- [ ] Dead code removed (_Removes: files no longer exist)
+- [ ] No dangling references to removed capabilities in codebase
+- [ ] No other specs reference removed capabilities
+- [ ] Migration paths have test coverage
 
 ### Critical vs Non-Critical Gaps
 
@@ -334,6 +400,14 @@ If implementation reveals spec gaps:
 2. **UPDATE** the spec with new understanding
 3. **DOCUMENT** why change was needed
 4. **CONTINUE** with implementation
+
+### Removal Divergence
+
+If during a removal/rebuild, downstream consumers are discovered that weren't in the spec:
+1. **DOCUMENT** each discovered consumer
+2. **DECIDE** per consumer: update now, add to sunset group, or document as known exception
+3. **UPDATE** tasks if new cleanup tasks needed
+4. **CONTINUE** with sunset group execution
 
 ### Verification Failures
 

@@ -108,6 +108,9 @@ You are executing ONE task group from an SDD specification.
 You may ONLY create/modify these files:
 {ALLOWED_FILES_LIST}
 
+You may ONLY delete these files (if explicitly listed in _Removes: hints):
+{REMOVES_FILES_LIST}
+
 You may ONLY modify checkboxes in:
 .specs/changes/{SPEC_NAME}/tasks.md
 
@@ -117,6 +120,9 @@ You may ONLY modify checkboxes in:
 2. Follow the design decisions from context
 3. Reference requirement IDs in code comments
 4. Only modify files in your allowed list
+5. For _Removes: tasks: delete the target file entirely (or replace with deprecation stub if design specifies)
+6. For _Migrates: tasks: implement the migration path and ensure old references are updated
+7. After removing files, verify no remaining imports/references point to deleted code
 
 ## COMPLETION REQUIREMENT
 
@@ -127,6 +133,7 @@ GROUP {GROUP_NUMBER} COMPLETE
 Completed: {TASK_LIST}
 Files created: {list}
 Files modified: {list}
+Files removed: {list}
 ---
 
 Then STOP. Do not offer to continue. Do not suggest next steps.
@@ -138,10 +145,12 @@ Do not output anything after this signal.
 ```
 1. Parse subagent output for "GROUP N COMPLETE" signal
 2. Extract completed tasks list
-3. Extract files created/modified
-4. Verify tasks.md checkboxes match expected
-5. Verify files modified are in allowed list
-6. If mismatch → warn user, may need review
+3. Extract files created/modified/removed
+4. For _Removes: tasks: verify target files no longer exist (or contain only deprecation stubs)
+5. Verify tasks.md checkboxes match expected
+6. Verify files modified are in allowed list
+7. Verify files removed match _Removes: hints in tasks
+8. If mismatch → warn user, may need review
 ```
 
 ### When to Use

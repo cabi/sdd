@@ -127,7 +127,9 @@ Include a "Use all defaults" option at the start:
       {"label": "New feature (Recommended)", "description": "Adding new functionality"},
       {"label": "Bug fix", "description": "Fixing broken behavior"},
       {"label": "Enhancement", "description": "Improving existing feature"},
-      {"label": "Refactor", "description": "Code cleanup without behavior change"}
+      {"label": "Refactor", "description": "Code cleanup without behavior change"},
+      {"label": "Removal", "description": "Removing deprecated features, APIs, or modules"},
+      {"label": "Rebuild", "description": "Replacing existing implementation with fundamentally different approach"}
     ]
   },
   {
@@ -249,6 +251,13 @@ After receiving answers, extract and populate context-log.md:
 
 1. **From Batch 1:**
    - Problem type → Goals Identified
+   - Problem type → Change Type:
+     - "New feature" → `addition`
+     - "Enhancement" → `modification`
+     - "Bug fix" → `modification`
+     - "Refactor" → `refactor`
+     - "Removal" → `removal`
+     - "Rebuild" → `rebuild`
    - Audience → Domain Knowledge
 
 2. **From Batch 2:**
@@ -263,9 +272,18 @@ After receiving answers, extract and populate context-log.md:
 
 4. **From Batch 3:**
    - Breaking risk → Risks Identified
+   - Breaking risk → Breaking flag:
+     - "No" → `breaking: no`
+     - "Unsure" → `breaking: no` (investigate during design)
+     - "Yes" → `breaking: yes` + `migration_required: yes`
    - Success criteria → Goals Identified (refined)
 
-4. **Inferred Data:**
+5. **Change Type Derivation:**
+   - If problem type is "Removal" or "Rebuild": automatically set `breaking: yes` and `migration_required: yes`
+   - If problem type is "Refactor": set `breaking: no` unless Batch 3 breaking risk is "Yes"
+   - If problem type is "New feature" or "Enhancement": set `breaking: no` unless Batch 3 breaking risk is "Yes"
+
+6. **Inferred Data:**
    - Scope areas NOT selected → Scope Boundaries (Out of Scope)
    - Timeline urgency → Technical Constraints (if urgent)
 

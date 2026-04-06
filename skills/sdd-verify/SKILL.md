@@ -36,6 +36,16 @@ Verify that implementation matches specifications.
 
 ### Step 1: Select What to Verify
 
+**Change Type Detection:**
+
+Before verification, read `proposal.md` from the change directory and extract `change_type`:
+
+```
+If change_type ∈ {removal, rebuild}: use Migration Verification mode
+If change_type ∈ {addition, modification, refactor}: use Standard Verification mode (current behavior)
+If change_type not found: default to Standard Verification mode
+```
+
 ```
 /sdd-verify
 
@@ -180,6 +190,52 @@ Overall: 85% implemented
 | **Dependency justified** | New dependencies documented in design decisions |
 | **API stability** | API changes are backward compatible or documented |
 
+### Migration Verification Checks (for change_type: removal or rebuild)
+
+**How to detect:** Read `proposal.md` → extract `change_type`. If `change_type` is `removal` or `rebuild`, use these checks INSTEAD of standard System Fit backward compatibility checks.
+
+| Check | Description |
+|-------|-------------|
+| **Removal documented** | Every REMOVED requirement has Reason and Migration fields in specs |
+| **Migration path exists** | For each REMOVED requirement, a migration path is documented |
+| **Dead code removed** | Code referenced by `_Removes:` tasks is actually gone |
+| **Tests updated** | Tests for removed behavior are removed or updated for new behavior |
+| **Deprecation notices** | If phased removal: deprecation warnings exist where old code was called |
+| **Spec consistency** | No other specs in `.specs/specs/` reference the removed capability |
+| **Downstream consumers** | No code in the codebase still calls removed functions/modules/APIs |
+| **Migration tested** | Migration path has dedicated test tasks and tests exist |
+
+**Report format for migration verification:**
+
+```
+┌──────────────────────────────────────────────────────────────────┐
+│ MIGRATION VERIFICATION: remove-legacy-auth                        │
+├──────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│ Removed Requirements: 3 total                                    │
+│                                                                  │
+│ ✓ DOCUMENTED (3)                                                │
+│   • legacy-login: Reason documented, migration to /auth/v2       │
+│   • legacy-token: Reason documented, migration to JWT            │
+│   • legacy-session: Reason documented, migration to Redis sess.  │
+│                                                                  │
+│ ✓ CODE REMOVED (3)                                               │
+│   • src/api/routes/legacy-auth.ts → DELETED                     │
+│   • src/auth/LegacyAuthService.ts → DELETED                      │
+│   • src/auth/legacy/ → DELETED                                   │
+│                                                                  │
+│ ✓ MIGRATION PATHS TESTED (3/3)                                   │
+│   • legacy-login → tests/migration/login.test.ts                 │
+│   • legacy-token → tests/migration/token.test.ts                 │
+│   • legacy-session → tests/migration/session.test.ts             │
+│                                                                  │
+│ ⚠ DOWNSTREAM CONSUMERS (1 remaining)                             │
+│   • src/admin/legacy-dashboard.ts still imports LegacyAuthService│
+│   → ACTION: Add to sunset group or document as known exception   │
+│                                                                  │
+└──────────────────────────────────────────────────────────────────┘
+```
+
 ---
 
 ## Verification Methods
@@ -265,7 +321,9 @@ Additionally, check system fit:
 5. Does implementation respect module boundaries?
 6. Were existing tests updated (not broken)?
 7. Are new dependencies justified in design decisions?
-8. Do API changes maintain backward compatibility?
+8. **For change_type addition/modification/refactor:** Do API changes maintain backward compatibility?
+   **For change_type removal/rebuild:** Is migration path documented and tested? Are removed behaviors gone from codebase?
+   **If change_type not specified:** Check backward compatibility (standard mode).
 
 ## OUTPUT FORMAT
 

@@ -264,6 +264,15 @@ The `/sdd-artefact` command orchestrates a 3-iteration review loop:
 - Order by dependency (what must be done first?)
 - Reference specific requirements for traceability
 
+**Sunset & Migration Group (for change_type: removal or rebuild):**
+- If proposal has `change_type: removal` or `change_type: rebuild`:
+  - Include a "Sunset & Migration" group as the LAST group
+  - Every REMOVED requirement MUST have a corresponding task in this group
+  - Tasks MUST use `_Removes:` and `_Migrates:` hints
+  - The group MUST depend on all implementation groups
+- If proposal has `change_type: addition` or `modification`:
+  - No sunset group needed (unless specific removals are part of the change)
+
 ### Step 5: Update Proposal Status
 
 Update the Status section in `proposal.md`:

@@ -2,6 +2,9 @@
 
 Created: {{TIMESTAMP}}
 Status: exploring
+Change Type: _To be filled (addition|modification|refactor|removal|rebuild)_
+Breaking: _To be filled (yes|no)_
+Migration Required: _To be filled (yes|no)_
 
 ---
 
@@ -82,6 +85,12 @@ _Insight: _To be filled_
 <!-- Systems, performance, tech stack limitations -->
 <!-- Integration dependencies (APIs, databases, third-party services) -->
 <!-- Behavioral boundaries (backward compatibility, data compatibility) -->
+
+#### Migration Considerations
+<!-- For change_type: removal or rebuild -->
+<!-- What existing behavior is being replaced? -->
+<!-- What is the migration path for consumers? -->
+<!-- Are there downstream dependencies that will break? -->
 
 #### Business Constraints
 <!-- Timeline, stakeholders -->

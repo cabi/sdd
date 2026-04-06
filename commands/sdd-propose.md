@@ -17,14 +17,26 @@ Create the formal proposal document from the exploration context.
    - Scan `.specs/specs/` for related capabilities
    - If found: Ask if this modifies existing or is new
 
-3. **Extract from context-log**:
-   - Goals → Goals section
-   - Constraints → Constraints section
-   - Q&A → Context Log section
-   - Scope → Scope section
-   - Options → Exploration Notes section
+ 3. **Extract from context-log**:
+    - Goals → Goals section
+    - Constraints → Constraints section
+    - Q&A → Context Log section
+    - Scope → Scope section
+    - Options → Exploration Notes section
+    - Change Type → Change Type section
+    - Breaking + Migration Required → Change Type section
+    - Removed capabilities (if any) → Removed Capabilities section
 
-4. **Create proposal.md** with structured sections:
+5. **Extract change type from context-log**:
+    - Read `Change Type:` from context-log.md
+    - Read `Breaking:` from context-log.md
+    - Read `Migration Required:` from context-log.md
+    - If not set (e.g. older context-log): derive from "What Changes" content
+      - If only "New Capabilities" → `addition`
+      - If "Modified Capabilities" present → `modification`
+      - Default: `modification`
+
+6. **Create proposal.md** with structured sections:
 
    ```markdown
    # Proposal: <change-name>
@@ -50,18 +62,31 @@ Create the formal proposal document from the exploration context.
    ### External Constraints
    - <from context-log>
    
-   ## What Changes
-   <!-- Capabilities being added/modified/removed -->
-   <Derived from goals>
-   
-   ## Capabilities
+    ## What Changes
+    <!-- Capabilities being added/modified/removed -->
+    <Derived from goals>
+
+    ## Change Type
+
+    **Type:** <addition|modification|refactor|removal|rebuild>
+    **Breaking:** <yes|no>
+    **Migration Required:** <yes|no>
+    **Migration Path:** <description or "N/A">
+
+    ## Capabilities
    
    ### New Capabilities
    - `<name>`: <description>
    
-   ### Modified Capabilities
-   - `<name>`: <what's changing>
-     - Existing spec: <path>
+    ### Modified Capabilities
+    - `<name>`: <what's changing>
+      - Existing spec: <path>
+
+    ### Removed Capabilities
+    <!-- Only for change_type: removal or rebuild -->
+    - `<name>`: <what's being removed>
+      - Existing spec: <path>
+      - Migration: <how consumers should adapt>
    
    ## Impact
    <!-- Affected systems, APIs, dependencies -->

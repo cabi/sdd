@@ -113,6 +113,27 @@ Create `.specs/changes/<spec-name>/proposal.md` with structured sections for har
 ## What Changes
 <Bullet list of changes. Be specific about new capabilities, modifications, or removals. Mark breaking changes with **BREAKING**.>
 
+## Change Type
+
+**Type:** addition | modification | refactor | removal | rebuild
+**Breaking:** yes | no
+**Migration Required:** yes | no
+**Migration Path:** <description or "N/A">
+
+<!--
+Type definitions:
+- addition: New capabilities, no existing behavior changed
+- modification: Extending existing capabilities
+- refactor: Internal restructuring, same external behavior
+- removal: Removing deprecated capabilities
+- rebuild: Replacing existing behavior with fundamentally different approach
+
+When type is removal or rebuild:
+- Every bullet in "What Changes" MUST link to a REMOVED requirement in specs
+- Migration Path MUST describe how consumers transition
+- Breaking is implicitly "yes" — set explicitly for clarity
+-->
+
 ## Capabilities
 
 ### New Capabilities

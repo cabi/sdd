@@ -46,16 +46,18 @@ Help me think through an idea or problem and capture the exploration context.
       - **Batch 2**: Scope areas (multi-select), timeline
       - **Batch 2.5**: Compliance requirements, integration dependencies, behavioral constraints
       - **Batch 3**: Breaking change risk, success criteria (open-ended)
-   - After answers received, update context-log.md:
-      - Map problem type → Goals Identified
-      - Map audience → Domain Knowledge
-      - Map scope areas → Scope Boundaries (In Scope/Out of Scope)
-      - Map timeline → Business Constraints
-      - Map compliance → External Constraints
-      - Map integrations → Technical Constraints
-      - Map behavior boundaries → Technical Constraints
-      - Map breaking risk → Risks Identified
-      - Map success criteria → Goals Identified (refined)
+    - After answers received, update context-log.md:
+       - Map problem type → Goals Identified
+       - Map problem type → Change Type (addition/modification/refactor/removal/rebuild)
+       - Map audience → Domain Knowledge
+       - Map scope areas → Scope Boundaries (In Scope/Out of Scope)
+       - Map timeline → Business Constraints
+       - Map compliance → External Constraints
+       - Map integrations → Technical Constraints
+       - Map behavior boundaries → Technical Constraints
+       - Map breaking risk → Risks Identified + Breaking flag
+       - Map breaking risk → Migration Required flag (yes if risk="Yes" or type=removal/rebuild)
+       - Map success criteria → Goals Identified (refined)
    - Populate all sections: Goals, Constraints, Scope, Options, Risks, Domain Knowledge
    - Show completion summary and prompt for /sdd-propose
 

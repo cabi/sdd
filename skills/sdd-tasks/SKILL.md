@@ -41,7 +41,8 @@ _Meta: parallel-safe, depends on: 1_
 ```markdown
 - [ ] X.Y <Task description>
   - _Requirements: <requirement-id>_
-  - _Creates: <path>_ or _Modifies: <path>_
+  - _Creates: <path>_ or _Modifies: <path>_ or _Removes: <path>_
+  - _Migrates: <from> → <to>_ (for removal/migration tasks)
   - _Tests: <task-ref>_ (for implementation tasks with test counterparts)
 ```
 
@@ -74,6 +75,8 @@ _Meta: sequential, foundation for all groups_
 |-------|---------|
 | `_Creates: path_` | New file created (safe for parallel) |
 | `_Modifies: path_` | Existing file modified (check for conflicts) |
+| `_Removes: path_` | File or module being removed (deletion task) |
+| `_Migrates: from → to_` | Migration path (old behavior → new behavior) |
 | `_Tests: task-ref_` | Bidirectional link between implementation and test tasks |
 
 These fields enable:
@@ -82,6 +85,8 @@ These fields enable:
 - Scope constraints for subagents
 - Test traceability (implementation ↔ test bidirectional mapping)
 - File modification verification
+- Removal verification (check _Removes: files actually deleted)
+- Migration path documentation (traceable from spec to code)
 
 ## Section Organization
 
@@ -110,6 +115,35 @@ These fields enable:
 ## 1. Authentication (End-to-End)
 ## 2. Session Management (End-to-End)
 ## 3. Password Reset (End-to-End)
+```
+
+**Pattern 4: With Sunset & Migration** (for change_type: removal or rebuild)
+```markdown
+## 1. New Implementation
+<!-- For rebuild: the replacement code -->
+## 2. Migration Layer
+<!-- Adapter/shim layer that maps old behavior to new -->
+## 3. Testing
+<!-- Tests for new implementation + migration layer -->
+## N. Sunset & Migration
+_Meta: sequential, depends on: <all implementation groups>_
+
+- [ ] N.1 Remove deprecated <feature> endpoint
+  - _Requirements: <removed-req>_
+  - _Removes: src/api/legacy.ts_
+  - _Migrates: /api/v1/login → /api/v2/auth_
+- [ ] N.2 Remove dead code from <module>
+  - _Requirements: <removed-req>_
+  - _Removes: src/legacy/<module>_
+- [ ] N.3 Add deprecation notices for <feature>
+  - _Requirements: <removed-req>_
+  - _Modifies: src/api/middleware.ts_
+- [ ] N.4 Update downstream consumers
+  - _Requirements: <removed-req>_
+  - _Modifies: src/consumers/*_
+- [ ] N.5 Remove migration layer (if phased rollout)
+  - _Requirements: <removed-req>_
+  - _Removes: src/compat/<adapter>_
 ```
 
 ### Testing Group Requirements
@@ -336,6 +370,42 @@ _Meta: sequential, depends on: 2, 3_
   - _Requirements: documentation_
 ```
 
+### Sunset & Migration Tasks
+
+For `change_type: removal` or `change_type: rebuild`. Always placed as the last group.
+
+```markdown
+## 5. Sunset & Migration
+_Meta: sequential, depends on: 2, 3, 4_
+
+- [ ] 5.1 Remove deprecated legacy login endpoint
+  - Delete POST /auth/legacy-login route and handler
+  - _Requirements: legacy-auth-001 (REMOVED)_
+  - _Removes: src/api/routes/legacy-auth.ts_
+
+- [ ] 5.2 Remove legacy auth service
+  - Delete LegacyAuthService and all references
+  - _Requirements: legacy-auth-002 (REMOVED)_
+  - _Removes: src/auth/services/LegacyAuthService.ts_
+  - _Migrates: LegacyAuthService.login() → AuthService.login()_
+
+- [ ] 5.3 Update downstream consumers to use new auth API
+  - Replace legacy auth calls in all consumers
+  - _Requirements: legacy-auth-001 (REMOVED)_
+  - _Modifies: src/consumers/**_
+
+- [ ] 5.4 Add deprecation notices for transitional period
+  - Add console warnings when legacy code paths are hit
+  - _Requirements: legacy-auth-migration_
+  - _Modifies: src/auth/index.ts_
+
+- [ ] 5.5 Remove legacy auth tests
+  - Delete tests for removed functionality
+  - _Requirements: legacy-auth-001 (REMOVED)_
+  - _Removes: tests/auth/legacy/_
+  - _Tests: 5.1, 5.2_
+```
+
 ## Requirement Traceability
 
 Every task must reference at least one requirement:
@@ -373,6 +443,10 @@ Before finalizing tasks:
 - [ ] Test tasks have `_Tests:` references back to their implementation tasks
 - [ ] Error and edge case scenarios have dedicated test tasks
 - [ ] Multi-component changes have integration test tasks
+- [ ] If change_type is removal or rebuild: sunset & migration group exists
+- [ ] If change_type is removal or rebuild: every REMOVED requirement has a corresponding sunset task
+- [ ] If change_type is removal or rebuild: migration tasks have `_Migrates:` or `_Removes:` hints
+- [ ] Sunset group depends on all implementation groups
 
 ## Common Mistakes
 

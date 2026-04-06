@@ -81,6 +81,50 @@ This will:
 2. Create specs/auth/sso/spec.md with ADDED sections
 ```
 
+### Step 2.5: Pre-Archive Removal Check (for change_type: removal or rebuild)
+
+If the proposal's `change_type` is `removal` or `rebuild`:
+
+1. **Check for dangling references:**
+   - Search codebase for imports/references to removed modules, functions, or APIs
+   - Search `.specs/specs/` for other specs that reference the removed capability
+   - If found:
+     ```
+     ⚠ WARNING: Dangling references detected for removed capability '<name>'
+
+     Code references:
+       - src/admin/dashboard.ts imports LegacyAuthService
+       - src/api/middleware.ts calls legacyAuth()
+
+     Spec references:
+       - specs/admin/reporting/spec.md references legacy-auth capability
+
+     Options:
+     [1] Archive anyway (document known exceptions)
+     [2] Stop — add cleanup tasks first
+     ```
+
+2. **Verify sunset tasks completed:**
+   - Check that all tasks in the "Sunset & Migration" group are marked complete
+   - Verify `_Removes:` files actually no longer exist
+   - If incomplete:
+     ```
+     ⚠ WARNING: Sunset group has incomplete tasks
+
+     Incomplete:
+       - 5.3 Update downstream consumers
+       - 5.5 Remove migration layer
+
+     Options:
+     [1] Acknowledge gaps and archive
+     [2] Stop — complete sunset tasks first
+     ```
+
+3. **Verify migration paths documented:**
+   - Each REMOVED requirement MUST have a Migration field
+   - Each migration path SHOULD have corresponding test coverage
+   - If missing: warn but allow archive with documented exception
+
 ### Step 3: Merge Deltas into Main Specs
 
 For each delta spec in the change:
