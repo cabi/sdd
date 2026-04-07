@@ -6,7 +6,102 @@ This project provides a Spec-Driven Development (SDD) workflow implementation fo
 
 ---
 
-## SDD Workflow Rules
+## Available Agents
+
+This project includes specialized subagents for design document and task creation. These agents are configured per [OpenCode standards](https://opencode.ai/docs/agents/).
+
+### SDD Design Agent
+
+- **File:** `agents/sdd-design.md`
+- **Usage:** `@sdd-design`
+- **Purpose:** Design document creation and revision
+- **Mode:** Subagent
+- **Temperature:** 0.9
+- **Features:**
+  - Analyzes codebase to detect tech stack, patterns, and conventions
+  - Creates comprehensive design documents with Mermaid diagrams
+  - Documents decisions with alternatives and rationale
+  - Respects prior context (decisions, preferences, Q&A)
+  - Two modes: `create` (initial design) and `revise` (apply critique)
+  - Reads/writes design.md and review files autonomously
+
+**Invoke:** `@sdd-design` with CHANGE_DIR and MODE parameters
+
+**Note:** This agent does NOT run the review loop itself. The command orchestrator (`/sdd-artefact`) alternates between this agent and `sdd-design-analyst` for 5 iterations.
+
+### SDD Design Analyst
+
+- **File:** `agents/sdd-design-analyst.md`
+- **Usage:** `@sdd-design-analyst`
+- **Purpose:** Brutally honest design critic for logical flaws, structural issues, and coverage gaps
+- **Mode:** Subagent
+- **Temperature:** 1.0 (higher for critical thinking)
+- **Features:**
+  - Analyzes designs for logical consistency
+  - Checks structural completeness
+  - Verifies requirement coverage
+  - Identifies design anti-patterns
+  - Produces structured critique reports with severity levels
+  - Tracks issues across iterations
+
+**Invoke:** Automatically during design review loop (by `/sdd-artefact` command)
+
+**Note:** This agent is invoked by the command orchestrator during the 5-iteration design review loop.
+
+### SDD Task Agent
+
+- **File:** `agents/sdd-task.md`
+- **Usage:** `@sdd-task`
+- **Purpose:** Task breakdown creation and revision
+- **Mode:** Subagent
+- **Temperature:** 0.9
+- **Features:**
+  - Analyzes design and specs to extract components, decisions, and requirements
+  - Analyzes codebase to detect project structure and existing files
+  - Creates comprehensive task breakdowns with proper grouping and sizing
+  - Ensures 100% requirement and design element coverage
+  - Two modes: `create` (initial tasks) and `revise` (apply critique)
+  - Reads/writes tasks.md and review files autonomously
+
+**Invoke:** `@sdd-task` with CHANGE_DIR and MODE parameters
+
+**Note:** This agent does NOT run the review loop itself. The command orchestrator (`/sdd-artefact`) alternates between this agent and `sdd-task-analyst` for 3 iterations.
+
+### SDD Task Analyst
+
+- **File:** `agents/sdd-task-analyst.md`
+- **Usage:** `@sdd-task-analyst`
+- **Purpose:** Brutally honest task critic for actionability, sizing, dependency, and coverage issues
+- **Mode:** Subagent
+- **Temperature:** 1.0 (higher for critical thinking)
+- **Features:**
+  - Analyzes tasks for actionability and clarity
+  - Checks task sizing (2-4 hour chunks)
+  - Verifies dependency graph correctness (no cycles, accurate edges)
+  - Checks requirement coverage (every spec requirement has a task)
+  - Checks design coverage (every component/decision has a task)
+  - Identifies missing task types (testing, error handling, migration)
+  - Produces structured critique reports with severity levels
+  - Tracks issues across iterations
+
+**Invoke:** Automatically during task review loop (by `/sdd-artefact` command)
+
+**Note:** This agent is invoked by the command orchestrator during the 3-iteration task review loop.
+
+### Agent Configuration
+
+All agents have the following configuration:
+- **Mode:** `subagent` (invoked via `@` mention or Task tool)
+- **Tools:** Full access to glob, grep, read, write, edit, bash (creator agents); read + write (analyst agents)
+- **Permissions:** Full write/edit access, unrestricted bash (analyst agents are read-only except review files)
+- **Scope:** Constrained to project files (see scope constraints in agent files)
+- **Modes:** Creator agents support `create` (initial) and `revise` (apply critique) modes
+- **Review Loop:** Orchestrated by `/sdd-artefact` command — alternates between creator and analyst agents
+- **Interface:** Agents receive CHANGE_DIR, MODE, and ITERATION parameters; they read/write files autonomously
+
+---
+
+## SDD Workflow
 
 ### When to Use SDD
 
@@ -64,7 +159,8 @@ This project provides a Spec-Driven Development (SDD) workflow implementation fo
 
 ```
 # New feature
-/sdd-new
+/sdd-explore [name]     # Explore idea, create context-log
+/sdd-propose <name>     # Create proposal from context-log
 
 # Existing codebase (brownfield)
 /sdd-reverse src/<module>/
@@ -102,6 +198,24 @@ This project provides a Spec-Driven Development (SDD) workflow implementation fo
 1. **Check for existing specs** - Look in `.specs/specs/` for related capabilities
 2. **Ask about scope** - Is this a new capability or modifying existing?
 3. **Choose appropriate workflow** - Full spec, micro-spec, or skip
+
+### Change Types
+
+Every proposal has a `change_type` that affects downstream behavior:
+
+| Type | Meaning | Verification Mode |
+|------|---------|-------------------|
+| `addition` | New capabilities, no existing behavior changed | Standard |
+| `modification` | Extending existing capabilities | Standard |
+| `refactor` | Internal restructuring, same external behavior | Standard |
+| `removal` | Removing deprecated capabilities | Migration |
+| `rebuild` | Replacing existing behavior with fundamentally different approach | Migration |
+
+**Migration verification mode** (for `removal`/`rebuild`) replaces backward compatibility checks with:
+- Removal documented (every REMOVED requirement has Reason + Migration)
+- Migration path tested
+- Dead code removed
+- No dangling references in codebase or other specs
 
 ### During Spec Creation
 
@@ -166,9 +280,41 @@ When dispatching subagents for task groups:
 3. **Required completion signal** - Must output "GROUP N COMPLETE"
 4. **Stop conditions** - "DO NOT start next group"
 
+### Sunset & Migration Groups
+
+For `change_type: removal` or `change_type: rebuild`, the task breakdown MUST include a "Sunset & Migration" group as the last group:
+
+```markdown
+## N. Sunset & Migration
+_Meta: sequential, depends on: <all implementation groups>_
+
+- [ ] N.1 Remove deprecated <feature>
+  - _Requirements: <removed-req>_
+  - _Removes: src/legacy/<module>_
+  - _Migrates: /api/v1/old → /api/v2/new_
+```
+
+Additional task metadata for removal tasks:
+
+| Field | Purpose |
+|-------|---------|
+| `_Removes: path_` | File or module being deleted |
+| `_Migrates: from → to_` | Migration path for consumers |
+
 ---
 
 ## Spec Format Standards
+
+### Change Type
+
+```markdown
+## Change Type
+
+**Type:** addition | modification | refactor | removal | rebuild
+**Breaking:** yes | no
+**Migration Required:** yes | no
+**Migration Path:** <description or "N/A">
+```
 
 ### Requirements
 
@@ -201,6 +347,14 @@ _Meta: sequential, foundation_
 - [ ] 1.1 <Task description>
   - _Requirements: <ref>_
   - _Creates: <path>_
+
+## N. Sunset & Migration
+_Meta: sequential, depends on: <all implementation groups>_
+
+- [ ] N.1 Remove deprecated <feature>
+  - _Requirements: <removed-req>_
+  - _Removes: <path>_
+  - _Migrates: <from> → <to>_
 ```
 
 ---
@@ -214,6 +368,14 @@ Always verify:
 - [ ] All scenarios are handled
 - [ ] Tests exist for critical paths
 - [ ] No critical gaps remain
+
+**For change_type removal/rebuild, additionally verify:**
+- [ ] Every REMOVED requirement has Reason and Migration documented
+- [ ] Sunset group tasks are all complete
+- [ ] Dead code removed (_Removes: files no longer exist)
+- [ ] No dangling references to removed capabilities in codebase
+- [ ] No other specs reference removed capabilities
+- [ ] Migration paths have test coverage
 
 ### Critical vs Non-Critical Gaps
 
@@ -238,6 +400,14 @@ If implementation reveals spec gaps:
 2. **UPDATE** the spec with new understanding
 3. **DOCUMENT** why change was needed
 4. **CONTINUE** with implementation
+
+### Removal Divergence
+
+If during a removal/rebuild, downstream consumers are discovered that weren't in the spec:
+1. **DOCUMENT** each discovered consumer
+2. **DECIDE** per consumer: update now, add to sunset group, or document as known exception
+3. **UPDATE** tasks if new cleanup tasks needed
+4. **CONTINUE** with sunset group execution
 
 ### Verification Failures
 
@@ -275,9 +445,10 @@ mkdir -p .specs/specs .specs/changes .specs/archive
 
 ## Quick Reference
 
+**Standard SDD:**
 | Phase | Command | Output |
 |-------|---------|--------|
-| Start | `/sdd-new` | `.specs/changes/<name>/proposal.md` |
+| Start | `/sdd-reverse` | Baseline specs from code |
 | Develop | `/sdd-artefact` | specs, design, tasks |
 | Implement | `/sdd-apply` | Code + completed tasks |
 | Verify | `/sdd-verify` | Verification report |
@@ -301,3 +472,38 @@ mkdir -p .specs/specs .specs/changes .specs/archive
 
 > A spec not verified is just a wish.
 > Check implementation matches spec before claiming done.
+
+---
+
+## RFC2119 Compliance
+
+All SDD artifacts, commands, and skills use RFC2119 keywords:
+
+| Keyword | Meaning |
+|---------|---------|
+| **MUST** / **REQUIRED** / **SHALL** | Absolute requirement |
+| **MUST NOT** / **SHALL NOT** | Absolute prohibition |
+| **SHOULD** / **RECOMMENDED** | Recommended but exceptions may exist |
+| **SHOULD NOT** / **NOT RECOMMENDED** | Not recommended but exceptions may exist |
+| **MAY** / **OPTIONAL** | Truly optional |
+
+### When to Use Each Keyword
+
+- **MUST**: For requirements critical to correctness, traceability, memory integrity
+- **SHOULD**: For best practices that improve quality but have valid exceptions
+- **MAY**: For optional features or alternative approaches
+
+### Examples in Artifacts
+
+```markdown
+### Requirement: AUTH-001
+The system **MUST** hash passwords using bcrypt with cost factor >= 10.
+
+### Design Decision: DEC-002
+The system **SHOULD** use JWT for session management.
+Alternatives: Redis sessions, database sessions.
+
+### Task: 2.1
+The implementation **MAY** include additional password strength checks
+beyond the minimum requirements.
+```
