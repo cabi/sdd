@@ -112,6 +112,30 @@ Every requirement should have scenarios:
 | **Error Case** | Failure handling | Invalid input → Error message |
 | **Alternative** | Other valid paths | Different auth method |
 
+## Spec Level
+
+Specifications define the required behavior and boundaries of the system, not the internal design.
+
+Specs SHOULD contain:
+
+- externally observable behavior
+- invariants that must remain true
+- compatibility constraints
+- data constraints and preservation rules
+- migration expectations when behavior or interfaces change
+
+Specs SHOULD NOT contain:
+
+- class or module layout
+- helper extraction or decomposition
+- naming of internal abstractions
+- pattern choices unless they are true architectural constraints
+- implementation steps or task-level execution details
+
+Rule of thumb:
+If a statement describes what users, callers, operators, or downstream systems can observe or rely on, it belongs in the spec.
+If a statement describes how the code should be organized internally, it belongs in `design.md`.
+
 ## Writing Good Requirements
 
 ### DO ✓
@@ -129,6 +153,9 @@ Every requirement should have scenarios:
 - Leave error cases unspecified
 - Use SHOULD or MAY (too ambiguous)
 - Include implementation details
+- Specify internal module or class structure
+- Require helper extraction strategy
+- Encode design patterns unless they are externally mandated
 
 ## Requirement Structure
 
